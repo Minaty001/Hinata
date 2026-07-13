@@ -56,9 +56,11 @@
 # Current Task
 
 ```
-Admin system, rate limiting, input validation, backup service,
-and all user-facing commands implemented.
-Next: Testing, deployment, and performance optimization.
+Bot is running in production on Termux.
+Environment: Python 3.14, aarch64, pydantic v1.
+Fixed: Markdown crash path in _send_reply.
+All transient network errors handled by PTB's retry loop.
+Next: Testing or deployment (Dockerfile).
 ```
 
 ---
@@ -454,6 +456,7 @@ Completed
 - Database backup/restore service
 - Maintenance mode toggle
 - All handlers registered in bot.py
+- Tokens configured, pydantic v1 migration, Markdown crash fix in _send_reply
 
 ---
 

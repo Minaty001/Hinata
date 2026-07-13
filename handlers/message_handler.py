@@ -19,6 +19,8 @@ from __future__ import annotations
 
 import logging
 
+import telegram
+
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -178,13 +180,20 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 
 async def _send_reply(update: Update, text: str) -> None:
-    """Send a reply, splitting into multiple messages if needed."""
+    """Send a reply, splitting into multiple messages if needed.
+
+    Falls back to plain text if Markdown parsing fails.
+    """
     chunks = split_long_message(text)
-    for i, chunk in enumerate(chunks):
-        if i == 0:
+    for chunk in chunks:
+        try:
             await update.message.reply_text(chunk, parse_mode="Markdown")
-        else:
-            await update.message.reply_text(chunk, parse_mode="Markdown")
+        except telegram.error.BadRequest:
+            # Malformed Markdown — retry without parsing
+            try:
+                await update.message.reply_text(chunk)
+            except Exception as exc:
+                logger.warning("Failed to send reply: %s", exc)
 
 
 def _format_preferences(prefs) -> str:

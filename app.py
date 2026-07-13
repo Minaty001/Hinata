@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import signal
 import sys
 from pathlib import Path
 
@@ -54,13 +55,40 @@ async def main() -> None:
 
     application = create_application()
 
+    # Use start_polling + manual idle for reliable background operation
+    await application.initialize()
+    await application.updater.start_polling(
+        allowed_updates=["message", "callback_query"],
+        drop_pending_updates=True,
+    )
+    await application.start()
+
     logger.info("Hinata is now running.")
+
+    # Idle loop — keeps running until signalled
+    stop_event = asyncio.Event()
+
+    def _signal_handler() -> None:
+        logger.info("Shutdown signal received.")
+        stop_event.set()
+
+    loop = asyncio.get_running_loop()
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        try:
+            loop.add_signal_handler(sig, _signal_handler)
+        except NotImplementedError:
+            # Windows or restricted environment — fall back to polling
+            pass
+
     try:
-        await application.run_polling(
-            allowed_updates=["message", "callback_query"],
-            drop_pending_updates=True,
-        )
+        await stop_event.wait()
+    except KeyboardInterrupt:
+        pass
     finally:
+        logger.info("Shutting down...")
+        await application.stop()
+        await application.updater.stop()
+        await application.shutdown()
         await close_database()
         logger.info("Hinata stopped.")
 
