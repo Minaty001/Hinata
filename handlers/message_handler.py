@@ -34,7 +34,12 @@ from memory.memory_manager import get_memories_summary
 from services.chat_service import save_message
 from services.user_service import get_or_create_user, get_user_preferences
 
+from utils.rate_limit import rate_limiter
+from utils.validators import sanitise_input
+
 logger = logging.getLogger(__name__)
+
+_MAINTENANCE_MODE_KEY = "maintenance_mode"
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -46,6 +51,25 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         return
 
     logger.info("Message from %s: %.50s...", user_tg.id, message_text)
+
+    # ── Maintenance mode check ────────────────────────────────────
+    if context.bot_data.get(_MAINTENANCE_MODE_KEY, False):
+        from config import settings
+        if user_tg.id != settings.OWNER_ID:
+            await update.message.reply_text(
+                "🌸 Hinata is taking a short break for maintenance. "
+                "I'll be back soon!",
+            )
+            return
+
+    # ── Rate limiter ──────────────────────────────────────────────
+    limiter = context.bot_data.get("rate_limiter", rate_limiter)
+    if limiter.is_limited(user_tg.id):
+        logger.info("Rate-limited user %s.", user_tg.id)
+        return  # Silent drop to avoid spamming
+
+    # ── Sanitise input ────────────────────────────────────────────
+    message_text = sanitise_input(message_text)
 
     # Show typing indicator immediately
     await context.bot.send_chat_action(
