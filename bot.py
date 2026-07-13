@@ -17,7 +17,11 @@ from telegram.ext import (
     filters,
 )
 
+from ai.mood_engine import MoodEngine
+from ai.personality_engine import PersonalityEngine
+from ai.relationship_engine import RelationshipEngine
 from config import settings
+from database.database import async_session_factory
 from handlers.command_handler import (
     about_command,
     help_command,
@@ -33,6 +37,10 @@ logger = logging.getLogger(__name__)
 def create_application() -> Application:
     """Create and configure the Telegram bot application.
 
+    Injects shared resources (DB session factory, engines) into
+    ``bot_data`` so handlers can access them without creating
+    new instances on every request.
+
     Returns:
         Fully configured Application instance with all handlers registered.
     """
@@ -41,6 +49,12 @@ def create_application() -> Application:
         .token(settings.BOT_TOKEN)
         .build()
     )
+
+    # ── Shared Resources ───────────────────────────────────────────
+    application.bot_data["session_factory"] = async_session_factory
+    application.bot_data["personality_engine"] = PersonalityEngine()
+    application.bot_data["mood_engine"] = MoodEngine()
+    application.bot_data["relationship_engine"] = RelationshipEngine()
 
     # ── Command Handlers ──────────────────────────────────────────
     application.add_handler(CommandHandler("start", start_command))

@@ -1,0 +1,130 @@
+"""
+Hinata - User Service
+
+Handles all user profile operations: creation, retrieval, updates,
+and preference management.
+"""
+
+from __future__ import annotations
+
+import logging
+from datetime import datetime, timezone
+from typing import Optional
+
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from database.models import Preference, User
+
+logger = logging.getLogger(__name__)
+
+
+async def get_or_create_user(
+    session: AsyncSession,
+    telegram_id: int,
+    username: Optional[str] = None,
+    display_name: Optional[str] = None,
+) -> User:
+    """Retrieve a user by Telegram ID, creating them if they don't exist.
+
+    Args:
+        session: Active database session.
+        telegram_id: The user's Telegram ID.
+        username: Optional Telegram username.
+        display_name: Optional display name.
+
+    Returns:
+        The User instance.
+    """
+    stmt = select(User).where(User.telegram_id == telegram_id)
+    result = await session.execute(stmt)
+    user: User | None = result.scalar_one_or_none()
+
+    if user is None:
+        user = User(
+            telegram_id=telegram_id,
+            username=username,
+            display_name=display_name,
+        )
+        session.add(user)
+        await session.commit()
+        await session.refresh(user)
+
+        # Create default preferences
+        pref = Preference(user_id=user.id)
+        session.add(pref)
+        await session.commit()
+
+        logger.info("Created new user: %s (tg_id=%d)", username, telegram_id)
+    else:
+        # Update last interaction
+        user.last_interaction = datetime.now(timezone.utc)
+        if username:
+            user.username = username
+        if display_name:
+            user.display_name = display_name
+        await session.commit()
+
+    return user
+
+
+async def get_user_by_id(
+    session: AsyncSession,
+    user_id: int,
+) -> User | None:
+    """Retrieve a user by internal user ID."""
+    return await session.get(User, user_id)
+
+
+async def get_user_by_telegram_id(
+    session: AsyncSession,
+    telegram_id: int,
+) -> User | None:
+    """Retrieve a user by Telegram ID."""
+    stmt = select(User).where(User.telegram_id == telegram_id)
+    result = await session.execute(stmt)
+    return result.scalar_one_or_none()
+
+
+async def update_user_preferences(
+    session: AsyncSession,
+    user_id: int,
+    **kwargs,
+) -> Preference | None:
+    """Update a user's preferences.
+
+    Acceptable keyword args: ``emoji_level``, ``reply_length``,
+    ``default_personality``, ``language``, ``memory_enabled``.
+
+    Args:
+        session: Active database session.
+        user_id: Internal user ID.
+        **kwargs: Preference fields to update.
+
+    Returns:
+        The updated Preference, or None if not found.
+    """
+    stmt = select(Preference).where(Preference.user_id == user_id)
+    result = await session.execute(stmt)
+    pref: Preference | None = result.scalar_one_or_none()
+
+    if pref is None:
+        return None
+
+    for key, value in kwargs.items():
+        if hasattr(pref, key):
+            setattr(pref, key, value)
+
+    await session.commit()
+    await session.refresh(pref)
+    return pref
+
+
+async def get_user_preferences(
+    session: AsyncSession,
+    user_id: int,
+) -> Preference | None:
+    """Retrieve a user's preferences."""
+    stmt = select(Preference).where(Preference.user_id == user_id)
+    result = await session.execute(stmt)
+    return result.scalar_one_or_none()
