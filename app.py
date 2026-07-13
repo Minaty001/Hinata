@@ -40,7 +40,8 @@ async def main() -> None:
     setup_logging()
     logger = logging.getLogger(__name__)
 
-    logger.info("Starting Hinata v%s...", "0.1.0")
+    from constants import BOT_VERSION
+    logger.info("Starting Hinata v%s...", BOT_VERSION)
     logger.info("Log level: %s", settings.LOG_LEVEL)
 
     # Initialize database

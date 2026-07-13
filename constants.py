@@ -22,7 +22,7 @@ PROMPTS_DIR: Final[Path] = PROJECT_ROOT / "prompts"
 # ── Bot Info ───────────────────────────────────────────────────────────────
 
 BOT_NAME: Final[str] = "Hinata"
-BOT_VERSION: Final[str] = "0.1.0"
+BOT_VERSION: Final[str] = "0.3.0"
 BOT_DESCRIPTION: Final[str] = "Your Intelligent AI Companion"
 BOT_TAGLINE: Final[str] = "A warm, intelligent AI companion for Telegram."
 

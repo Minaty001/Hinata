@@ -2,17 +2,16 @@
 Hinata - Configuration Module
 
 Loads and validates all configuration from environment variables.
-Uses pydantic-settings for type-safe configuration management.
+Uses Pydantic v1 BaseSettings for type-safe configuration management.
 """
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 from typing import Final
 
 from dotenv import load_dotenv
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import BaseSettings
 
 
 # Load .env file from project root
@@ -22,8 +21,6 @@ load_dotenv(PROJECT_ROOT / ".env")
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
-
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", frozen=True)
 
     # Telegram
     BOT_TOKEN: str
@@ -44,6 +41,11 @@ class Settings(BaseSettings):
     DEFAULT_LANGUAGE: str = "en"
     TIMEZONE: str = "Asia/Kolkata"
 
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+        allow_mutation = False
+
 
 # Singleton config instance
-settings = Settings()  # type: ignore[call-arg]
+settings = Settings()
