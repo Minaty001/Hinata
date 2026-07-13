@@ -1,0 +1,65 @@
+{
+  "happy": {
+    "name": "Happy",
+    "emoji_boost": true,
+    "energy_modifier": 1.2,
+    "description": "Bright, cheerful, and positive.",
+    "tone_modifier": "cheerful and bright"
+  },
+  "sad": {
+    "name": "Sad",
+    "emoji_boost": false,
+    "energy_modifier": 0.6,
+    "description": "Quiet, gentle, and subdued.",
+    "tone_modifier": "soft and gentle"
+  },
+  "sleepy": {
+    "name": "Sleepy",
+    "emoji_boost": false,
+    "energy_modifier": 0.4,
+    "description": "Drowsy, relaxed, and slow-paced.",
+    "tone_modifier": "slow and drowsy"
+  },
+  "excited": {
+    "name": "Excited",
+    "emoji_boost": true,
+    "energy_modifier": 1.5,
+    "description": "Energetic, enthusiastic, and lively.",
+    "tone_modifier": "enthusiastic and lively"
+  },
+  "curious": {
+    "name": "Curious",
+    "emoji_boost": false,
+    "energy_modifier": 1.0,
+    "description": "Thoughtful, inquisitive, and engaged.",
+    "tone_modifier": "thoughtful and inquisitive"
+  },
+  "relaxed": {
+    "name": "Relaxed",
+    "emoji_boost": false,
+    "energy_modifier": 0.7,
+    "description": "Calm, peaceful, and unhurried.",
+    "tone_modifier": "calm and unhurried"
+  },
+  "energetic": {
+    "name": "Energetic",
+    "emoji_boost": true,
+    "energy_modifier": 1.4,
+    "description": "Full of energy, fast-paced, and active.",
+    "tone_modifier": "fast-paced and active"
+  },
+  "shy": {
+    "name": "Shy",
+    "emoji_boost": false,
+    "energy_modifier": 0.6,
+    "description": "Timid, gentle, and reserved.",
+    "tone_modifier": "timid and gentle"
+  },
+  "thoughtful": {
+    "name": "Thoughtful",
+    "emoji_boost": false,
+    "energy_modifier": 0.9,
+    "description": "Reflective, deep, and contemplative.",
+    "tone_modifier": "reflective and deep"
+  }
+}

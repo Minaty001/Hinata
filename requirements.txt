@@ -1,0 +1,25 @@
+# Hinata - AI Telegram Companion
+# Python 3.13+
+
+# Telegram
+python-telegram-bot==21.10
+
+# Database
+SQLAlchemy==2.0.36
+aiosqlite==0.20.0
+
+# HTTP
+httpx==0.28.1
+
+# Validation
+pydantic==2.10.4
+pydantic-settings==2.7.1
+
+# Environment
+python-dotenv==1.0.1
+
+# Async
+asyncio==3.4.3
+
+# Date/Time
+tzdata==2024.2
