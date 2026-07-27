@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Hinata Hyuga 🌸 AI Companion & Deep Search</title>
 
   <!-- Google Fonts -->
@@ -14,17 +14,25 @@
 </head>
 <body>
   <div class="app-container">
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
     <!-- Floating Cherry Blossom Petals Background -->
     <div class="petals-container" id="petals"></div>
 
     <!-- Sidebar Navigation -->
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-icon">🌸</div>
-        <div class="brand-text">
-          <h1>HINATA AI</h1>
-          <span>AI Girl Companion</span>
+    <aside class="sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <div class="brand-icon">🌸</div>
+          <div class="brand-text">
+            <h1>HINATA AI</h1>
+            <span>AI Companion & Deep Search</span>
+          </div>
         </div>
+        <button class="sidebar-close-btn" id="btnCloseMobileSidebar" aria-label="Close Mobile Sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
 
       <nav class="nav-menu">
@@ -38,7 +46,7 @@
           <span class="badge pulse">New</span>
         </button>
         <button class="nav-item" data-target="view-memories">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6v6l4 2"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           <span>Memories</span>
         </button>
         <button class="nav-item" data-target="view-personalities">
@@ -46,8 +54,8 @@
           <span>Personalities</span>
         </button>
         <button class="nav-item" data-target="view-providers">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          <span>AI Providers</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <span>AI Engine & Models</span>
         </button>
         <button class="nav-item" data-target="view-settings">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -58,73 +66,18 @@
       <div class="sidebar-footer">
         <div class="creator-badge">
           <span>Created by</span>
-          <a href="https://github.com/Minaty001/hinata" target="_blank" rel="noopener">Minaty001 💖</a>
+          <a href="https://github.com/Minaty001" target="_blank" rel="noopener">Minaty001 💖</a>
         </div>
       </div>
     </aside>
 
     <!-- Main Workspace -->
     <main class="main-content">
-      <!-- Profile Header Bar -->
-      <header class="top-bar glass-card">
-        <div class="companion-profile">
-          <div class="avatar-container">
-            <div class="avatar-ring"></div>
-            <div class="avatar-emoji">🌸</div>
-          </div>
-          <div class="companion-info">
-            <div class="name-row">
-              <h2>Hinata Hyuga</h2>
-              <span class="online-indicator"><span class="dot"></span> Online</span>
-            </div>
-            <p class="tagline">Sweet & Caring AI Girl Companion • Auto-trained on user data</p>
-          </div>
-        </div>
-
-        <div class="header-widgets">
-          <!-- Mood Indicator -->
-          <div class="widget-card mood-widget" id="moodBadge">
-            <span class="widget-label">Current Mood</span>
-            <div class="widget-value">
-              <span class="mood-icon">😊</span>
-              <span class="mood-text" id="currentMoodText">Happy & Warm</span>
-            </div>
-          </div>
-
-          <!-- Relationship Meter -->
-          <div class="widget-card rel-widget">
-            <div class="rel-label-row">
-              <span class="widget-label">Relationship</span>
-              <span class="rel-level-text" id="relLevelText">Friend (Score: 180)</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" id="relProgressFill" style="width: 45%;"></div>
-            </div>
-          </div>
-
-          <!-- Active AI Model Badge -->
-          <div class="widget-card provider-widget">
-            <span class="widget-label">AI Engine</span>
-            <div class="widget-value">
-              <span class="provider-pill" id="activeProviderPill">OpenCode Zen</span>
-              <span class="model-name" id="activeModelText">opencode/big-pickle</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <!-- Main Views -->
       <div class="view-container">
         <!-- 1. CHAT VIEW -->
         <section class="view-panel active" id="view-chat">
           <div class="chat-wrapper glass-card">
-            <!-- Global Deep Search Bar inside Chat -->
-            <div class="inline-search-bar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input type="text" id="inlineSearchInput" placeholder="Deep Search conversations, memories, or models..." />
-              <button class="btn btn-sm btn-accent" id="btnInlineSearch">Search</button>
-            </div>
-
             <!-- Messages Stream -->
             <div class="messages-container" id="chatMessages">
               <div class="message assistant-message">
@@ -281,32 +234,238 @@
 
         <!-- 6. SETTINGS VIEW -->
         <section class="view-panel" id="view-settings">
-          <div class="glass-card panel-card">
+          <div class="glass-card panel-card settings-panel-card">
             <div class="panel-header">
-              <h2>⚙️ Companion Settings</h2>
+              <div>
+                <h2>⚙️ Hinata Companion Settings</h2>
+                <p class="panel-subtitle">Manage theme aesthetics, AI preferences, companion behavior & API configurations.</p>
+              </div>
             </div>
-            <div class="settings-form">
-              <div class="setting-item">
-                <label>Language</label>
-                <select id="settingLanguage">
-                  <option value="en">English</option>
-                  <option value="hi">Hindi</option>
-                  <option value="hi-en">Hinglish</option>
-                </select>
+
+            <div class="settings-grid-layout">
+              <!-- Section 0: Profile Identity & Custom Avatar -->
+              <div class="settings-group-card">
+                <div class="group-header">
+                  <span class="group-icon">👤</span>
+                  <h3>Profile Identity & Custom Avatar</h3>
+                </div>
+                <div class="group-body">
+                  <div class="setting-row">
+                    <div class="setting-info">
+                      <label for="settingCompanionName">Companion Name</label>
+                      <span class="setting-desc">Custom name for your AI companion displayed in app.</span>
+                    </div>
+                    <input type="text" id="settingCompanionName" value="Hinata Hyuga" placeholder="e.g. Hinata Hyuga" class="custom-input setting-input-md" />
+                  </div>
+
+                  <div class="setting-row">
+                    <div class="setting-info">
+                      <label for="settingUserName">User Name</label>
+                      <span class="setting-desc">Your display name used by Hinata in chat.</span>
+                    </div>
+                    <input type="text" id="settingUserName" value="User" placeholder="e.g. Saif" class="custom-input setting-input-md" />
+                  </div>
+
+                  <div class="setting-row">
+                    <div class="setting-info">
+                      <label for="settingCompanionTagline">Companion Tagline</label>
+                      <span class="setting-desc">Bio/subtitle shown under companion's header name.</span>
+                    </div>
+                    <input type="text" id="settingCompanionTagline" value="Sweet & Caring AI Girl Companion • Auto-trained on user data" class="custom-input" />
+                  </div>
+
+                  <div class="setting-row align-center">
+                    <div class="setting-info">
+                      <label>Companion Avatar Image</label>
+                      <span class="setting-desc">Upload a photo from your device or paste image URL below.</span>
+                    </div>
+                    <div class="avatar-upload-box">
+                      <div class="avatar-preview-mini" id="settingsAvatarPreviewMini">
+                        <span id="settingsAvatarMiniEmoji">🌸</span>
+                        <img id="settingsAvatarMiniImg" style="display: none;" alt="Preview" />
+                      </div>
+                      <label class="btn btn-sm btn-outline btn-upload-label">
+                        📁 Upload Photo
+                        <input type="file" id="settingAvatarFileInput" accept="image/*" style="display:none;" />
+                      </label>
+                      <button class="btn btn-sm btn-ghost" id="btnResetAvatarImage" title="Remove custom photo">Remove</button>
+                    </div>
+                  </div>
+
+                  <div class="setting-row">
+                    <div class="setting-info">
+                      <label for="settingAvatarUrlInput">Avatar Image URL</label>
+                      <span class="setting-desc">Or paste an online image web link (https://...).</span>
+                    </div>
+                    <input type="text" id="settingAvatarUrlInput" placeholder="https://example.com/avatar.png" class="custom-input" />
+                  </div>
+                </div>
               </div>
 
-              <div class="setting-item">
-                <label>Emoji Level</label>
-                <select id="settingEmoji">
-                  <option value="normal">Normal 😊</option>
-                  <option value="high">High 💖🌸✨</option>
-                  <option value="low">Low (Minimal)</option>
-                </select>
+              <!-- Section 1: Visual Theme & FX -->
+              <div class="settings-group-card">
+                <div class="group-header">
+                  <span class="group-icon">🎨</span>
+                  <h3>Theme & Visual Styling</h3>
+                </div>
+                <div class="group-body">
+                  <div class="setting-row">
+                    <div class="setting-info">
+                      <label>Color Theme</label>
+                      <span class="setting-desc">Choose your preferred visual aesthetic palette.</span>
+                    </div>
+                    <div class="theme-options-grid">
+                      <button class="theme-pill active" data-theme="sakura">🌸 Hinata Sakura</button>
+                      <button class="theme-pill" data-theme="violet">🌙 Midnight Violet</button>
+                      <button class="theme-pill" data-theme="cyber">⚡ Cyber Neon</button>
+                      <button class="theme-pill" data-theme="rose">🌹 Sunset Rose</button>
+                    </div>
+                  </div>
+
+                  <div class="setting-row align-center">
+                    <div class="setting-info">
+                      <label for="settingPetals">Floating Petal Particles</label>
+                      <span class="setting-desc">Toggle floating cherry blossom background animation.</span>
+                    </div>
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="settingPetals" checked />
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="setting-row align-center">
+                    <div class="setting-info">
+                      <label for="settingBlur">Glassmorphism Blur FX</label>
+                      <span class="setting-desc">Enable frosted glass blur effect on panels.</span>
+                    </div>
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="settingBlur" checked />
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
               </div>
 
-              <div class="setting-item">
-                <label>Auto-Training & Long-Term Memory</label>
-                <input type="checkbox" id="settingMemory" checked />
+              <!-- Section 2: Companion Persona & Behavior -->
+              <div class="settings-group-card">
+                <div class="group-header">
+                  <span class="group-icon">💖</span>
+                  <h3>Companion Persona & Speech</h3>
+                </div>
+                <div class="group-body">
+                  <div class="setting-row">
+                    <div class="setting-info">
+                      <label for="settingLanguage">Response Language</label>
+                      <span class="setting-desc">Language Hinata will speak in replies.</span>
+                    </div>
+                    <select id="settingLanguage" class="custom-select">
+                      <option value="en">English (US/UK) 🇺🇸</option>
+                      <option value="hi">Hindi (हिन्दी) 🇮🇳</option>
+                      <option value="hi-en">Hinglish (Mix) 🇮🇳</option>
+                      <option value="ja">Japanese Romaji 🇯🇵</option>
+                    </select>
+                  </div>
+
+                  <div class="setting-row">
+                    <div class="setting-info">
+                      <label for="settingEmoji">Emoji Expressiveness</label>
+                      <span class="setting-desc">Frequency of cute emojis and expressions.</span>
+                    </div>
+                    <select id="settingEmoji" class="custom-select">
+                      <option value="high">Ultra High 💖🌸✨</option>
+                      <option value="normal" selected>Balanced 😊</option>
+                      <option value="low">Minimal 💬</option>
+                    </select>
+                  </div>
+
+                  <div class="setting-row">
+                    <div class="setting-info">
+                      <label for="settingCreativity">Creativity & Temperature</label>
+                      <span class="setting-desc">Lower is more focused; higher is more creative.</span>
+                    </div>
+                    <div class="range-wrapper">
+                      <input type="range" id="settingCreativity" min="0.1" max="1.0" step="0.1" value="0.7" class="custom-range" />
+                      <span class="range-value-badge" id="creativityValueBadge">0.7</span>
+                    </div>
+                  </div>
+
+                  <div class="setting-row align-center">
+                    <div class="setting-info">
+                      <label for="settingSound">Sound & Audio Feedback</label>
+                      <span class="setting-desc">Enable subtle haptic/audio cues for messages.</span>
+                    </div>
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="settingSound" checked />
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 3: AI Engine & API Keys -->
+              <div class="settings-group-card">
+                <div class="group-header">
+                  <span class="group-icon">⚡</span>
+                  <h3>AI Engine & Storage</h3>
+                </div>
+                <div class="group-body">
+                  <div class="setting-row">
+                    <div class="setting-info">
+                      <label for="settingProvider">Default AI Provider</label>
+                      <span class="setting-desc">Primary backend engine used for completions.</span>
+                    </div>
+                    <select id="settingProvider" class="custom-select">
+                      <option value="opencode_zen">OpenCode Zen (Free Thinking Models)</option>
+                      <option value="groq">Groq LPU API (Ultra Fast)</option>
+                    </select>
+                  </div>
+
+                  <div class="setting-row">
+                    <div class="setting-info">
+                      <label for="settingGroqKey">Custom Groq API Key</label>
+                      <span class="setting-desc">Override default Groq API Key if needed.</span>
+                    </div>
+                    <div class="input-password-wrapper">
+                      <input type="password" id="settingGroqKey" placeholder="gsk_..." class="custom-input" />
+                      <button class="btn-input-icon" id="btnToggleGroqKey" title="Show/Hide Key">👁️</button>
+                    </div>
+                  </div>
+
+                  <div class="setting-row align-center">
+                    <div class="setting-info">
+                      <label for="settingMemory">Auto-Training & Long-Term Memory</label>
+                      <span class="setting-desc">Automatically learn facts and preferences from chat.</span>
+                    </div>
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="settingMemory" checked />
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 4: Actions & Danger Zone -->
+              <div class="settings-group-card actions-group-card">
+                <div class="group-header">
+                  <span class="group-icon">🛠️</span>
+                  <h3>Management Actions</h3>
+                </div>
+                <div class="group-body action-buttons-row">
+                  <button class="btn btn-primary btn-with-icon" id="btnSaveSettings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Save Settings
+                  </button>
+
+                  <button class="btn btn-default btn-with-icon" id="btnDefaultSettings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                    Restore Defaults
+                  </button>
+
+                  <button class="btn btn-danger btn-with-icon" id="btnClearChatHistory">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    Clear Chat History
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -314,6 +473,122 @@
       </div>
     </main>
   </div>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav">
+    <button class="mobile-nav-item active" data-target="view-chat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>Chat</span>
+    </button>
+    <button class="mobile-nav-item" data-target="view-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span>Search</span>
+    </button>
+    <button class="mobile-nav-item" data-target="view-memories">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span>Memories</span>
+    </button>
+    <button class="mobile-nav-item" data-target="view-providers">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      <span>Engine</span>
+    </button>
+    <button class="mobile-nav-item" id="btnMobileMore">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <span>Menu</span>
+    </button>
+  </nav>
+
+  <!-- Quick Edit Profile & Avatar Modal Dialog -->
+  <div class="modal-backdrop" id="profileEditModal">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h3>🖼️ Edit Companion Profile & Avatar</h3>
+        <button class="modal-close-btn" id="btnCloseProfileModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-field">
+          <label for="editModalCompanionName">Companion Name</label>
+          <input type="text" id="editModalCompanionName" value="Hinata Hyuga" class="custom-input" />
+        </div>
+        <div class="modal-field">
+          <label for="editModalUserName">User Name</label>
+          <input type="text" id="editModalUserName" value="User" class="custom-input" />
+        </div>
+        <div class="modal-field">
+          <label for="editModalTagline">Companion Tagline</label>
+          <input type="text" id="editModalTagline" value="Sweet & Caring AI Girl Companion • Auto-trained on user data" class="custom-input" />
+        </div>
+        <div class="modal-field">
+          <label>Avatar Photo</label>
+          <div class="modal-avatar-row">
+            <div class="avatar-preview-box" id="modalAvatarPreviewBox">
+              <span id="modalAvatarEmoji">🌸</span>
+              <img id="modalAvatarImg" style="display: none;" alt="Preview" />
+            </div>
+            <div class="modal-avatar-actions">
+              <label class="btn btn-sm btn-primary btn-upload-label">
+                📷 Choose Image File
+                <input type="file" id="modalAvatarFileInput" accept="image/*" style="display:none;" />
+              </label>
+              <button class="btn btn-sm btn-outline" id="btnModalRemovePhoto">Remove Custom Photo</button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-field">
+          <label for="modalAvatarUrlInput">Or Paste Avatar Image URL</label>
+          <input type="text" id="modalAvatarUrlInput" placeholder="https://..." class="custom-input" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="btnCancelEditProfile">Cancel</button>
+        <button class="btn btn-primary" id="btnSaveProfileModal">Save Profile</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Memory Glassmorphism Modal Dialog -->
+  <div class="modal-backdrop" id="memoryModal">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h3>🧠 Add New Memory</h3>
+        <button class="modal-close-btn" id="btnCloseMemoryModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-field">
+          <label for="memoryContentInput">Memory Details</label>
+          <textarea id="memoryContentInput" placeholder="Enter fact, preference, goal or detail to remember..." rows="3" class="custom-input"></textarea>
+        </div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <label for="memoryTypeSelect">Type</label>
+            <select id="memoryTypeSelect" class="custom-select">
+              <option value="fact">Fact 📌</option>
+              <option value="preference">Preference 💖</option>
+              <option value="goal">Goal 🎯</option>
+              <option value="nickname">Nickname 🏷️</option>
+            </select>
+          </div>
+          <div class="modal-field">
+            <label for="memoryImportanceSelect">Importance</label>
+            <select id="memoryImportanceSelect" class="custom-select">
+              <option value="5">⭐⭐⭐⭐⭐ (Critical)</option>
+              <option value="4">⭐⭐⭐⭐ (High)</option>
+              <option value="3" selected>⭐⭐⭐ (Medium)</option>
+              <option value="2">⭐⭐ (Low)</option>
+              <option value="1">⭐ (Minor)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="btnCancelAddMemory">Cancel</button>
+        <button class="btn btn-primary" id="btnSaveNewMemory">Save Memory</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
 
   <script src="app.js"></script>
 </body>

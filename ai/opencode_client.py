@@ -65,15 +65,16 @@ class OpenCodeZenClient:
 
     @staticmethod
     def _normalize_model_name(model_name: str) -> str:
-        """Resolve short model names/aliases to full model tags."""
+        """Resolve model names/aliases to exact OpenCode Zen API model IDs."""
         name = model_name.strip()
+        if name.startswith("opencode/"):
+            name = name[len("opencode/"):]
+        elif name.startswith("pencode/"):
+            name = name[len("pencode/"):]
+
         aliases = {
-            "big-pickle": "opencode/big-pickle",
-            "mimo-v2.5-free": "opencode/mimo-v2.5-free",
-            "deepseek-v4-flash-free": "opencode/deepseek-v4-flash-free",
-            "nemotron-3-ultra-free": "opencode/nemotron-3-ultra-free",
-            "ing-3.0-flash-free": "opencode/ing-3.0-flash-free",
-            "laguna-s-2.1-free": "opencode/laguna-s-2.1-free",
+            "opencode-zen-free": "big-pickle",
+            "ing-3.0-flash-free": "ling-3.0-flash-free",
         }
         return aliases.get(name, name)
 
@@ -121,7 +122,8 @@ class OpenCodeZenClient:
                     data = response.json()
                     choices = data.get("choices", [])
                     if choices and "message" in choices[0]:
-                        content: str = choices[0]["message"].get("content", "")
+                        msg = choices[0]["message"]
+                        content: str = msg.get("content") or msg.get("reasoning") or ""
                         logger.debug("OpenCode Zen response received (%d chars).", len(content))
                         return content
 

@@ -8,10 +8,16 @@ Uses Pydantic v1 BaseSettings for type-safe configuration management.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Final
+from typing import Any, Final
 
 from dotenv import load_dotenv
-from pydantic import BaseSettings
+try:
+    from pydantic_settings import BaseSettings
+    from pydantic import field_validator
+    _USE_V2 = True
+except ImportError:
+    from pydantic import BaseSettings, validator  # type: ignore
+    _USE_V2 = False
 
 
 # Load .env file from project root
@@ -37,8 +43,12 @@ def _resolve_db_url(url: str | None) -> str:
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
+    # Web Application
+    WEB_HOST: str = "0.0.0.0"
+    WEB_PORT: int = 2027
+
     # Telegram
-    BOT_TOKEN: str 
+    BOT_TOKEN: str = ""
 
     # Groq
     GROQ_API_KEY: str = ""
@@ -54,7 +64,29 @@ class Settings(BaseSettings):
     DATABASE_URL: str = ""
 
     # Owner
-    OWNER_ID: int
+    OWNER_ID: int = 0
+
+    if _USE_V2:
+        @field_validator("OWNER_ID", mode="before")
+        @classmethod
+        def _validate_owner_id_v2(cls, v: Any) -> int:
+            if isinstance(v, int):
+                return v
+            if isinstance(v, str):
+                v_clean = v.strip()
+                if v_clean.isdigit() or (v_clean.startswith("-") and v_clean[1:].isdigit()):
+                    return int(v_clean)
+            return 0
+    else:
+        @validator("OWNER_ID", pre=True)
+        def _validate_owner_id_v1(cls, v: Any) -> int:
+            if isinstance(v, int):
+                return v
+            if isinstance(v, str):
+                v_clean = v.strip()
+                if v_clean.isdigit() or (v_clean.startswith("-") and v_clean[1:].isdigit()):
+                    return int(v_clean)
+            return 0
 
     # Logging
     LOG_LEVEL: str = "INFO"
@@ -63,10 +95,14 @@ class Settings(BaseSettings):
     DEFAULT_LANGUAGE: str = "en"
     TIMEZONE: str = "Asia/Kolkata"
 
+    # Web Server Alias
+    HOST: str = "0.0.0.0"
+    PORT: int = 2027
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
-        allow_mutation = False
+        extra = "ignore"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

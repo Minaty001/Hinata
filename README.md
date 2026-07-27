@@ -10,7 +10,7 @@ Hinata Hyuga is a warm, gentle, and emotionally expressive AI girl companion bui
 
 ## 🌟 Key Highlights
 
-- 🌸 **Web Application UI & Deep Search Engine** — Interactive glassmorphism web dashboard with real-time deep search across chats, memories, personalities, and models (`http://localhost:8000`).
+- 🌸 **Web Application UI & Deep Search Engine** — Interactive glassmorphism web dashboard with real-time deep search across chats, memories, personalities, and models (`http://localhost:2027`).
 - 👧 **Talks Like a Sweet Girl** — Gentle, cute, polite, soft-spoken, and affectionate conversational tone.
 - ⚡ **Auto-Trained on User Data** — Automatically extracts and stores user preferences, facts, goals, and nicknames from chat interactions.
 - 🤖 **OpenCode Zen & Groq API Integration** — Powered by Groq API & **OpenCode Zen** (`https://opencode.ai/zen/v1`) featuring free thinking and deep reasoning models (`opencode/big-pickle`, `deepseek-v4-flash-free`, `mimo-v2.5-free`, `deepseek-r1`, `qwen2.5-72b-instruct`).
@@ -68,11 +68,20 @@ cp .env.example .env
 # Edit .env and enter your TELEGRAM_BOT_TOKEN & AI_PROVIDER settings
 ```
 
-### Run the Bot
+### Run Applications
 
 ```bash
+# 🌸 Run Web Application UI & Deep Search Engine
 python app.py
+
+# 🤖 Run Telegram Bot
+python bot.py
 ```
+
+#### 📱 Accessing from Android / Wi-Fi Network:
+1. Connect your Android phone to the same Wi-Fi network as your computer.
+2. Run `python app.py`.
+3. Open the Wi-Fi Network URL printed in the terminal (e.g. `http://192.168.1.X:2027`).
 
 ---
 

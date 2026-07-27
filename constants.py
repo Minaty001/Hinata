@@ -114,6 +114,11 @@ GROQ_RETRIES: Final[int] = 2
 GROQ_RETRY_DELAY: Final[float] = 1.0  # seconds
 
 
+# ── Web Application ────────────────────────────────────────────────────────
+
+DEFAULT_WEB_PORT: Final[int] = 2027
+
+
 # ── AI Providers ───────────────────────────────────────────────────────────
 
 AVAILABLE_AI_PROVIDERS: Final[list[str]] = ["groq", "opencode_zen"]
