@@ -95,11 +95,22 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("\nShutdown requested.")
-        sys.exit(0)
-    except Exception as exc:
-        print(f"Fatal error: {exc}", file=sys.stderr)
-        sys.exit(1)
+    if "--web" in sys.argv:
+        from web_server import run_web_server
+        port = 8000
+        for arg in sys.argv:
+            if arg.startswith("--port="):
+                try:
+                    port = int(arg.split("=")[1])
+                except ValueError:
+                    pass
+        run_web_server(port=port)
+    else:
+        try:
+            asyncio.run(main())
+        except KeyboardInterrupt:
+            print("\nShutdown requested.")
+            sys.exit(0)
+        except Exception as exc:
+            print(f"Fatal error: {exc}", file=sys.stderr)
+            sys.exit(1)

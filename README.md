@@ -10,9 +10,10 @@ Hinata Hyuga is a warm, gentle, and emotionally expressive AI girl companion bui
 
 ## 🌟 Key Highlights
 
+- 🌸 **Web Application UI & Deep Search Engine** — Interactive glassmorphism web dashboard with real-time deep search across chats, memories, personalities, and models (`http://localhost:8000`).
 - 👧 **Talks Like a Sweet Girl** — Gentle, cute, polite, soft-spoken, and affectionate conversational tone.
 - ⚡ **Auto-Trained on User Data** — Automatically extracts and stores user preferences, facts, goals, and nicknames from chat interactions.
-- 🤖 **OpenCode Zen & Groq API Integration** — Powered by Groq API & **OpenCode Zen** (`https://opencode.ai/zen/v1`) featuring free thinking and deep reasoning models (`opencode-zen-free`, `deepseek-r1`, `qwen2.5-72b-instruct`).
+- 🤖 **OpenCode Zen & Groq API Integration** — Powered by Groq API & **OpenCode Zen** (`https://opencode.ai/zen/v1`) featuring free thinking and deep reasoning models (`opencode/big-pickle`, `deepseek-v4-flash-free`, `mimo-v2.5-free`, `deepseek-r1`, `qwen2.5-72b-instruct`).
 - 🔄 **Multi-Provider Failover** — Zero-downtime automatic fallback between AI providers if rate-limiting or downtime occurs.
 - 👤 **Created by Minaty001** — Official open-source project by [Minaty001 on GitHub](https://github.com/Minaty001).
 - 🧠 **Long-Term Memory & Context** — Remembers past interactions and personalizes replies dynamically.

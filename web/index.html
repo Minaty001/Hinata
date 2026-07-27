@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hinata Hyuga 🌸 AI Companion & Deep Search</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Floating Cherry Blossom Petals Background -->
+    <div class="petals-container" id="petals"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">🌸</div>
+        <div class="brand-text">
+          <h1>HINATA AI</h1>
+          <span>AI Girl Companion</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-item active" data-target="view-chat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>Chat</span>
+        </button>
+        <button class="nav-item" data-target="view-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span>Deep Search</span>
+          <span class="badge pulse">New</span>
+        </button>
+        <button class="nav-item" data-target="view-memories">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6v6l4 2"/></svg>
+          <span>Memories</span>
+        </button>
+        <button class="nav-item" data-target="view-personalities">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>Personalities</span>
+        </button>
+        <button class="nav-item" data-target="view-providers">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          <span>AI Providers</span>
+        </button>
+        <button class="nav-item" data-target="view-settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Settings</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="creator-badge">
+          <span>Created by</span>
+          <a href="https://github.com/Minaty001/hinata" target="_blank" rel="noopener">Minaty001 💖</a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+      <!-- Profile Header Bar -->
+      <header class="top-bar glass-card">
+        <div class="companion-profile">
+          <div class="avatar-container">
+            <div class="avatar-ring"></div>
+            <div class="avatar-emoji">🌸</div>
+          </div>
+          <div class="companion-info">
+            <div class="name-row">
+              <h2>Hinata Hyuga</h2>
+              <span class="online-indicator"><span class="dot"></span> Online</span>
+            </div>
+            <p class="tagline">Sweet & Caring AI Girl Companion • Auto-trained on user data</p>
+          </div>
+        </div>
+
+        <div class="header-widgets">
+          <!-- Mood Indicator -->
+          <div class="widget-card mood-widget" id="moodBadge">
+            <span class="widget-label">Current Mood</span>
+            <div class="widget-value">
+              <span class="mood-icon">😊</span>
+              <span class="mood-text" id="currentMoodText">Happy & Warm</span>
+            </div>
+          </div>
+
+          <!-- Relationship Meter -->
+          <div class="widget-card rel-widget">
+            <div class="rel-label-row">
+              <span class="widget-label">Relationship</span>
+              <span class="rel-level-text" id="relLevelText">Friend (Score: 180)</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="relProgressFill" style="width: 45%;"></div>
+            </div>
+          </div>
+
+          <!-- Active AI Model Badge -->
+          <div class="widget-card provider-widget">
+            <span class="widget-label">AI Engine</span>
+            <div class="widget-value">
+              <span class="provider-pill" id="activeProviderPill">OpenCode Zen</span>
+              <span class="model-name" id="activeModelText">opencode/big-pickle</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Views -->
+      <div class="view-container">
+        <!-- 1. CHAT VIEW -->
+        <section class="view-panel active" id="view-chat">
+          <div class="chat-wrapper glass-card">
+            <!-- Global Deep Search Bar inside Chat -->
+            <div class="inline-search-bar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="inlineSearchInput" placeholder="Deep Search conversations, memories, or models..." />
+              <button class="btn btn-sm btn-accent" id="btnInlineSearch">Search</button>
+            </div>
+
+            <!-- Messages Stream -->
+            <div class="messages-container" id="chatMessages">
+              <div class="message assistant-message">
+                <div class="message-avatar">🌸</div>
+                <div class="message-content">
+                  <div class="message-sender">Hinata Hyuga</div>
+                  <div class="message-text">Hello! I'm Hinata Hyuga, your sweet AI girl companion! How can I help or keep you company today? 💖</div>
+                  <div class="message-time">Just now</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Action Chips -->
+            <div class="quick-prompts">
+              <button class="chip" data-prompt="How are you feeling right now, Hinata?">💖 How are you feeling?</button>
+              <button class="chip" data-prompt="What memories do you have saved about me?">🧠 What do you remember?</button>
+              <button class="chip" data-prompt="Can you switch to OpenCode Zen thinking mode?">⚡ Switch to OpenCode Zen</button>
+              <button class="chip" data-prompt="Tell me something sweet!">🌸 Say something sweet</button>
+            </div>
+
+            <!-- Message Input Bar -->
+            <div class="input-container">
+              <textarea id="messageInput" placeholder="Message Hinata Hyuga..." rows="1"></textarea>
+              <button class="btn-send" id="btnSendMessage" title="Send message">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. DEEP SEARCH VIEW -->
+        <section class="view-panel" id="view-search">
+          <div class="glass-card search-card-panel">
+            <div class="search-header">
+              <h2>🔍 Deep Search Engine</h2>
+              <p>Instantly search across chat history, memories, personalities, and AI models.</p>
+            </div>
+
+            <div class="search-input-group">
+              <div class="search-input-field">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="deepSearchInput" placeholder="Type to deep search anything..." autofocus />
+              </div>
+              <button class="btn btn-primary" id="btnExecuteSearch">Deep Search</button>
+            </div>
+
+            <!-- Search Filter Chips -->
+            <div class="filter-chips">
+              <button class="filter-chip active" data-filter="all">All (18)</button>
+              <button class="filter-chip" data-filter="chat">Chat Logs</button>
+              <button class="filter-chip" data-filter="memory">Memories</button>
+              <button class="filter-chip" data-filter="personality">Personalities</button>
+              <button class="filter-chip" data-filter="models">AI Models</button>
+            </div>
+
+            <!-- Search Results Output Container -->
+            <div class="search-results-grid" id="searchResultsGrid">
+              <!-- Dynamically populated by JS -->
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. MEMORIES VIEW -->
+        <section class="view-panel" id="view-memories">
+          <div class="glass-card panel-card">
+            <div class="panel-header">
+              <div>
+                <h2>🧠 Auto-Trained Memories</h2>
+                <p>Facts, preferences, and details Hinata has auto-learned from user conversations.</p>
+              </div>
+              <button class="btn btn-secondary" id="btnAddMemoryModal">+ Add Memory</button>
+            </div>
+
+            <div class="memories-grid" id="memoriesGrid">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. PERSONALITIES VIEW -->
+        <section class="view-panel" id="view-personalities">
+          <div class="glass-card panel-card">
+            <div class="panel-header">
+              <div>
+                <h2>🎭 Character Personalities</h2>
+                <p>Select Hinata's active personality persona.</p>
+              </div>
+            </div>
+
+            <div class="personalities-grid" id="personalitiesGrid">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. AI PROVIDERS VIEW -->
+        <section class="view-panel" id="view-providers">
+          <div class="glass-card panel-card">
+            <div class="panel-header">
+              <div>
+                <h2>⚡ AI Provider & Thinking Models</h2>
+                <p>Switch between Groq API and OpenCode Zen (<code>https://opencode.ai/zen/v1</code>) free thinking models.</p>
+              </div>
+            </div>
+
+            <div class="providers-container">
+              <!-- Groq Provider Card -->
+              <div class="provider-card" id="cardProviderGroq">
+                <div class="card-header">
+                  <div class="provider-title">
+                    <span class="logo-icon">🚀</span>
+                    <div>
+                      <h3>Groq API</h3>
+                      <span class="url-text">api.groq.com</span>
+                    </div>
+                  </div>
+                  <button class="btn btn-outline" id="btnSelectGroq">Select Groq</button>
+                </div>
+                <p class="provider-desc">Ultra-fast inference powered by Groq LPU technology.</p>
+                <div class="model-tags">
+                  <span class="tag">llama-3.3-70b-versatile</span>
+                </div>
+              </div>
+
+              <!-- OpenCode Zen Provider Card -->
+              <div class="provider-card active" id="cardProviderZen">
+                <div class="card-header">
+                  <div class="provider-title">
+                    <span class="logo-icon">⚡</span>
+                    <div>
+                      <h3>OpenCode Zen</h3>
+                      <span class="url-text">https://opencode.ai/zen/v1</span>
+                    </div>
+                  </div>
+                  <button class="btn btn-accent" id="btnSelectZen">Select OpenCode Zen</button>
+                </div>
+                <p class="provider-desc">Free reasoning and thinking models for complex conversations.</p>
+
+                <h4 class="model-group-title">Free Available Thinking Models:</h4>
+                <div class="models-grid-selector" id="opencodeModelsList">
+                  <button class="model-option active" data-model="opencode/big-pickle">opencode/big-pickle</button>
+                  <button class="model-option" data-model="opencode/deepseek-v4-flash-free">opencode/deepseek-v4-flash-free</button>
+                  <button class="model-option" data-model="opencode/mimo-v2.5-free">opencode/mimo-v2.5-free</button>
+                  <button class="model-option" data-model="opencode/nemotron-3-ultra-free">opencode/nemotron-3-ultra-free</button>
+                  <button class="model-option" data-model="opencode/ing-3.0-flash-free">opencode/ing-3.0-flash-free</button>
+                  <button class="model-option" data-model="opencode/laguna-s-2.1-free">opencode/laguna-s-2.1-free</button>
+                  <button class="model-option" data-model="deepseek-r1">deepseek-r1</button>
+                  <button class="model-option" data-model="qwen2.5-72b-instruct">qwen2.5-72b-instruct</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. SETTINGS VIEW -->
+        <section class="view-panel" id="view-settings">
+          <div class="glass-card panel-card">
+            <div class="panel-header">
+              <h2>⚙️ Companion Settings</h2>
+            </div>
+            <div class="settings-form">
+              <div class="setting-item">
+                <label>Language</label>
+                <select id="settingLanguage">
+                  <option value="en">English</option>
+                  <option value="hi">Hindi</option>
+                  <option value="hi-en">Hinglish</option>
+                </select>
+              </div>
+
+              <div class="setting-item">
+                <label>Emoji Level</label>
+                <select id="settingEmoji">
+                  <option value="normal">Normal 😊</option>
+                  <option value="high">High 💖🌸✨</option>
+                  <option value="low">Low (Minimal)</option>
+                </select>
+              </div>
+
+              <div class="setting-item">
+                <label>Auto-Training & Long-Term Memory</label>
+                <input type="checkbox" id="settingMemory" checked />
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
