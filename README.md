@@ -44,7 +44,7 @@ Hinata is a warm, emotionally expressive AI companion built for Telegram. She fe
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/hinata.git
+git clone https://github.com/Minaty001/hinata.git
 cd hinata
 
 # Create virtual environment
