@@ -85,7 +85,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     mood_engine: MoodEngine = context.bot_data["mood_engine"]
     relationship_engine: RelationshipEngine = context.bot_data["relationship_engine"]
     prompt_builder: PromptBuilder = context.bot_data["prompt_builder"]
-    groq_client: GroqClient = context.bot_data["groq_client"]
+    ai_client = context.bot_data.get("ai_client", context.bot_data.get("groq_client"))
 
     async with session_factory() as session:
         try:
@@ -141,14 +141,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 mood_instructions=mood_instructions,
             )
 
-            # 10. Build messages & call Groq
+            # 10. Build messages & call AI completion engine
             messages = prompt_builder.build_messages(
                 system_prompt,
                 conversation_context,
                 message_text,
             )
 
-            ai_response = await groq_client.chat_completion(messages)
+            ai_response = await ai_client.chat_completion(messages)
 
             # 11. Clean response
             cleaned = clean_response(ai_response)

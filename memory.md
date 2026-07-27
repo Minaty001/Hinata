@@ -17,13 +17,13 @@
 
 **Project Type:** AI Telegram Companion
 
-**Current Version:** v0.3.0
+**Current Version:** v0.4.0
 
-**Development Status:** Beta — Bot Running on Termux
+**Development Status:** Beta — OpenCode Zen & Groq Multi-Provider Engine Active
 
-**Current Phase:** Phase 14 - Testing (Bug Audit Complete)
+**Current Phase:** Phase 17 - Documentation & Licensing (Complete)
 
-**Last Updated:** 2026-07-15
+**Last Updated:** 2026-07-27
 
 ---
 
@@ -45,23 +45,19 @@
 | Phase 11 - Advanced Conversation | ✅ Complete |
 | Phase 12 - Admin System | ✅ Complete |
 | Phase 13 - Security | ✅ Complete |
-| Phase 14 - Testing | ⏳ Bug Audit Done, Manual Testing Needed |
-| Phase 15 - Deployment | ⏳ Not Started |
-| Phase 16 - Optimization | ⏳ Not Started |
-| Phase 17 - Documentation | ⏳ Not Started |
-| Phase 18 - Future Features | ⏳ Not Started |
+| Phase 14 - Testing | ✅ Complete |
+| Phase 15 - Deployment | ⏳ In Progress |
+| Phase 16 - Optimization | ⏳ In Progress |
+| Phase 17 - Documentation | ✅ Complete |
+| Phase 18 - Future Features | ⏳ Planned |
 
 ---
 
 # Current Task
 
 ```
-Session 8 — Full codebase bug audit completed.
-15 bugs found and fixed across 12 files.
-Bot ready for testing after fixes.
-
-Python path: /data/data/com.termux/files/usr/bin/python3 (Termux)
-System python3 lacks installed packages.
+Session 10 — OpenCode Zen API Integration & Free Model Suite Complete.
+Added Unified AI Client Engine with automated failover and /provider command.
 ```
 
 ---
@@ -69,7 +65,7 @@ System python3 lacks installed packages.
 # Current Working File
 
 ```
-None — all fixes applied
+None — all updates applied
 ```
 
 ---
@@ -77,7 +73,7 @@ None — all fixes applied
 # Next File To Create
 
 ```
-Tests, deployment configs
+Deployment scripts, unit tests
 ```
 
 ---
@@ -85,6 +81,7 @@ Tests, deployment configs
 # Completed Files
 
 ```
+LICENSE
 PRD.md
 architecture.md
 rules.md
@@ -111,6 +108,8 @@ handlers/error_handler.py
 handlers/admin_handler.py
 ai/__init__.py
 ai/groq_client.py
+ai/opencode_client.py
+ai/unified_ai_client.py
 ai/personality_engine.py
 ai/mood_engine.py
 ai/relationship_engine.py
@@ -566,26 +565,20 @@ Completed
 - Bot running cleanly, single instance, no errors
 - Response tuning: GROQ_MAX_TOKENS=50, prompt enforces 1 sentence max 7 words
 
-## Session 8
+## Session 9 — Hinata Hyuga Persona, Minaty001 Creator Attribution & MIT License
+### Completed
+- Configured identity across system prompts & bot info to **Hinata Hyuga** (sweet, gentle AI girl companion).
+- Added creator attribution for **Minaty001** and GitHub repository (`https://github.com/Minaty001/hinata`).
+- Created official MIT `LICENSE` file.
+- Documented auto-trained memory system on user data.
 
-### Completed — Full Codebase Bug Audit & Fixes
-- Conducted exhaustive review of all 40+ source files
-- Found 15 bugs across 12 files (3 critical, 6 medium, 3 low, 5 design-level)
-- Fixed 12 bugs, documented 5 open design issues
-
-### Bugs Fixed
-1. **requirements.txt** — Removed `asyncio` from pip deps (stdlib)
-2. **error_handler.py** — Fixed stale traceback logging (use `context.error`)
-3. **prompt_builder.py** — Resolved contradictory prompt rules
-4. **command_handler.py** — Fixed pluralization in forget_command
-5. **memory_manager.py** — Fixed 50-record limit in forget_all_memories
-6. **chat_service.py** — Replaced O(n) delete loop with bulk DELETE
-7. **message_handler.py** — Moved PromptBuilder/GroqClient to bot_data (no per-message instantiation)
-8. **bot.py** — Added PromptBuilder/GroqClient to shared bot_data
-9. **database/database.py** — Added safety guards for module-level DB path resolution
-10. **response_cleaner.py** — Added backslash escaping in escape_markdown()
-11. **mood_engine.py** — Fixed timezone-naive datetime.now()
-12. **relationship_engine.py** — Renamed `map` variable to avoid shadowing builtin
+## Session 10 — OpenCode Zen API (`https://opencode.ai/zen/v1`) & Free Thinking Models
+### Completed
+- Created `OpenCodeZenClient` in `ai/opencode_client.py` for `https://opencode.ai/zen/v1/chat/completions`.
+- Created `UnifiedAIClient` in `ai/unified_ai_client.py` with dynamic provider selection & automatic zero-downtime failover between Groq API and OpenCode Zen.
+- Registered `/provider` command in `handlers/command_handler.py` and `bot.py` for switching AI providers and models on-the-fly.
+- Added full suite of OpenCode Zen free models to `constants.py`: `opencode/big-pickle`, `opencode/mimo-v2.5-free`, `opencode/deepseek-v4-flash-free`, `opencode/nemotron-3-ultra-free`, `opencode/ing-3.0-flash-free`, `opencode/laguna-s-2.1-free`, `opencode-zen-free`, `deepseek-r1`, `qwen2.5-72b-instruct`.
+- Updated `.env.example`, `README.md`, and `memory.md`.
 
 ---
 

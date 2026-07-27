@@ -16,7 +16,9 @@ from telegram.ext import ContextTypes
 from constants import (
     AVAILABLE_MOODS,
     AVAILABLE_PERSONALITIES,
+    BOT_CREATOR,
     BOT_DESCRIPTION,
+    BOT_GITHUB,
     BOT_NAME,
     BOT_VERSION,
 )
@@ -41,9 +43,10 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     await update.message.reply_text(
         f"🌸 Hello, {user.first_name}!\n\n"
-        f"I'm {BOT_NAME}, your intelligent AI companion. "
-        "I'm here to chat, help, and keep you company.\n\n"
-        "Try /help to see what I can do.",
+        f"I'm **{BOT_NAME}**, a sweet and caring AI girl companion created by **{BOT_CREATOR}**!\n\n"
+        "✨ I talk like a warm girl and auto-train on your data, remembering your facts and preferences to grow closer to you over time.\n\n"
+        "Try /help to see what I can do! 💖",
+        parse_mode="Markdown",
     )
 
 
@@ -52,15 +55,16 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     help_text = (
         f"🌸 **{BOT_NAME} Help**\n\n"
         "**Chat**\n"
-        "Just send me a message! I'll remember our conversations.\n\n"
+        "Just send me a message! I auto-train on our conversations to remember your facts and preferences.\n\n"
         "**Commands**\n"
         "/start - Start the bot\n"
         "/help - Show this help\n"
-        "/about - About me\n"
+        "/about - About me & my creator\n"
         "/ping - Check if I'm alive\n"
         "/settings - View your settings\n"
         "/personality - Change my personality\n"
         "/mood - Change my mood\n"
+        "/provider - View or change AI provider & thinking models\n"
         "/memory - View saved memories\n"
         "/forget - Forget memories\n"
         "/reset - Reset conversation\n"
@@ -72,17 +76,26 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 async def about_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle /about — show bot information."""
+    ai_client = context.bot_data.get("ai_client")
+    provider_name = ai_client.get_active_provider() if ai_client else "groq"
+
     about_text = (
         f"🌸 **About {BOT_NAME}**\n\n"
         f"{BOT_DESCRIPTION}\n\n"
+        "👤 **Creator**: Minaty001\n"
+        f"🔗 **GitHub**: [github.com/Minaty001/hinata]({BOT_GITHUB})\n"
+        "👩 **Identity**: Sweet & Caring AI Girl Companion (Hinata Hyuga)\n"
+        "⚡ **Learning System**: Auto-trained & dynamically learns from user chat data\n"
+        f"🤖 **AI Engine**: Groq API & OpenCode Zen (`https://opencode.ai/zen/v1`) (Active: `{provider_name}`)\n\n"
         "**Features**\n"
-        "✨ Natural conversations\n"
-        "🧠 Long-term memory\n"
-        "🎭 8 personalities\n"
-        "💖 Mood & relationship engine\n"
-        "📚 Remembers your preferences\n\n"
+        "💬 Natural conversations (sweet girl tone)\n"
+        "🧠 Auto-training & long-term memory\n"
+        "🧠 Free thinking & reasoning models (DeepSeek-R1, OpenCode-Zen)\n"
+        "🎭 8 personalities & 9 dynamic moods\n"
+        "💖 Progressive relationship engine\n"
+        "📚 Adaptive preference tracking\n\n"
         f"Version: {BOT_VERSION}\n\n"
-        "Built with ❤️ using Python & Groq AI"
+        "Built with ❤️ by Minaty001 using Python, Telegram & AI"
     )
     await update.message.reply_text(about_text, parse_mode="Markdown")
 
@@ -97,16 +110,71 @@ async def version_command(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     import sys
     from config import settings
 
+    ai_client = context.bot_data.get("ai_client")
+    provider_name = ai_client.get_active_provider() if ai_client else settings.AI_PROVIDER
+
     lines = [
         f"🤖 **{BOT_NAME}** v{BOT_VERSION}",
         "",
         f"Python: {sys.version.split()[0]}",
         f"Database: SQLite",
-        f"AI: Groq API",
+        f"Active AI Provider: {provider_name.upper()}",
+        f"OpenCode Zen Endpoint: https://opencode.ai/zen/v1",
         f"Language: {settings.DEFAULT_LANGUAGE}",
         f"Timezone: {settings.TIMEZONE}",
     ]
     await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
+
+
+async def provider_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle /provider — view or change AI provider and free thinking models.
+
+    Usage:
+        /provider -> show current provider, base URL & models
+        /provider <groq|opencode_zen> [model_name] -> set provider/model
+    """
+    from constants import AVAILABLE_AI_PROVIDERS, OPENCODE_ZEN_FREE_MODELS
+    ai_client = context.bot_data.get("ai_client")
+
+    if not context.args:
+        active = ai_client.get_active_provider() if ai_client else "groq"
+        model_name = ai_client.opencode_model if active == "opencode_zen" else ai_client.groq_model
+        formatted_models = "\n".join(f"• `{m}`" for m in OPENCODE_ZEN_FREE_MODELS)
+        lines = [
+            "⚡ **AI Provider Settings**",
+            "",
+            f"**Current Provider:** `{active}`",
+            f"**Current Model:** `{model_name}`",
+            "**OpenCode Zen Endpoint:** `https://opencode.ai/zen/v1`",
+            "",
+            "**Free OpenCode Zen Models for Thinking & Complex Chat:**",
+            formatted_models,
+            "",
+            "**Usage Examples:**",
+            "`/provider opencode_zen opencode/big-pickle`",
+            "`/provider opencode_zen deepseek-v4-flash-free`",
+            "`/provider opencode_zen opencode/mimo-v2.5-free`",
+            "`/provider groq` — Switch back to Groq API",
+        ]
+        await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
+        return
+
+    requested = context.args[0].lower()
+    target_model = context.args[1] if len(context.args) > 1 else None
+
+    if requested in ("groq", "opencode", "opencode_zen", "zen"):
+        clean_name = "opencode_zen" if requested in ("opencode", "zen") else requested
+        if ai_client:
+            ai_client.set_active_provider(clean_name, target_model)
+        await update.message.reply_text(
+            f"✨ Switched AI Provider to **{clean_name.upper()}**!"
+            + (f"\nModel: `{target_model}`" if target_model else ""),
+            parse_mode="Markdown",
+        )
+    else:
+        await update.message.reply_text(
+            f"Provider '{requested}' not recognised. Available: {', '.join(AVAILABLE_AI_PROVIDERS)}",
+        )
 
 
 # ── Settings ─────────────────────────────────────────────────────────────

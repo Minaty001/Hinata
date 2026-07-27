@@ -38,10 +38,17 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     # Telegram
-    BOT_TOKEN: str
+    BOT_TOKEN: str 
 
     # Groq
-    GROQ_API_KEY: str
+    GROQ_API_KEY: str = ""
+
+    # AI Provider & OpenCode Zen (https://opencode.ai/zen/v1)
+    AI_PROVIDER: str = "groq"
+    OPENCODE_ZEN_BASE_URL: str = "https://opencode.ai/zen/v1"
+    OPENCODE_ZEN_API_KEY: str = ""
+    OPENCODE_ZEN_MODEL: str = "opencode-zen-free"
+    ENABLE_AI_FALLBACK: bool = True
 
     # Database
     DATABASE_URL: str = ""

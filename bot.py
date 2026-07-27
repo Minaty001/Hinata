@@ -17,7 +17,7 @@ from telegram.ext import (
     filters,
 )
 
-from ai.groq_client import GroqClient
+from ai.unified_ai_client import UnifiedAIClient
 from ai.mood_engine import MoodEngine
 from ai.personality_engine import PersonalityEngine
 from ai.prompt_builder import PromptBuilder
@@ -33,6 +33,7 @@ from handlers.command_handler import (
     mood_command,
     personality_command,
     ping_command,
+    provider_command,
     reset_command,
     settings_command,
     start_command,
@@ -68,7 +69,10 @@ def create_application() -> Application:
     application.bot_data["relationship_engine"] = RelationshipEngine()
     application.bot_data["rate_limiter"] = rate_limiter
     application.bot_data["prompt_builder"] = PromptBuilder()
-    application.bot_data["groq_client"] = GroqClient()
+
+    ai_client = UnifiedAIClient()
+    application.bot_data["ai_client"] = ai_client
+    application.bot_data["groq_client"] = ai_client  # Backward compatibility
 
     # ── Command Handlers ──────────────────────────────────────────
     # User commands
@@ -83,6 +87,7 @@ def create_application() -> Application:
     application.add_handler(CommandHandler("memory", memory_command))
     application.add_handler(CommandHandler("forget", forget_command))
     application.add_handler(CommandHandler("reset", reset_command))
+    application.add_handler(CommandHandler("provider", provider_command))
 
     # Admin commands
     application.add_handler(CommandHandler("admin", admin_command))
