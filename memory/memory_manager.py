@@ -84,6 +84,26 @@ async def get_memories(
     return list(result.scalars().all())
 
 
+async def get_memories_list(
+    session: AsyncSession,
+    user_id: int,
+    *,
+    limit: int = 50,
+) -> list[dict]:
+    """Retrieve memories as dictionary objects for JSON response."""
+    memories = await get_memories(session, user_id, limit=limit)
+    return [
+        {
+            "id": mem.id,
+            "type": mem.type,
+            "content": mem.content,
+            "importance": mem.importance,
+            "created_at": mem.created_at.isoformat() if mem.created_at else None,
+        }
+        for mem in memories
+    ]
+
+
 async def get_memories_summary(
     session: AsyncSession,
     user_id: int,

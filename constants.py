@@ -49,6 +49,7 @@ AVAILABLE_PERSONALITIES: Final[list[str]] = [
 ]
 
 DEFAULT_PERSONALITY: Final[str] = "sweet"
+DEFAULT_LANGUAGE: Final[str] = "hinglish"
 
 
 # ── Moods ──────────────────────────────────────────────────────────────────
@@ -121,36 +122,97 @@ DEFAULT_WEB_PORT: Final[int] = 2027
 
 # ── AI Providers ───────────────────────────────────────────────────────────
 
-AVAILABLE_AI_PROVIDERS: Final[list[str]] = ["groq", "opencode_zen"]
+# ── AI Providers Catalog ───────────────────────────────────────────────────
+
+AVAILABLE_AI_PROVIDERS: Final[list[str]] = [
+    "groq",
+    "opencode_zen",
+    "openai",
+    "gemini",
+    "openrouter",
+    "bytez",
+]
 DEFAULT_AI_PROVIDER: Final[str] = "groq"
 
-# ── Groq ───────────────────────────────────────────────────────────────────
+PROVIDER_CATALOG: Final[dict[str, dict]] = {
+    "groq": {
+        "name": "Groq Cloud API",
+        "default_base_url": "https://api.groq.com/openai/v1",
+        "default_model": "llama-3.3-70b-versatile",
+        "models": [
+            "llama-3.3-70b-versatile",
+            "llama-3.1-8b-instant",
+            "mixtral-8x7b-32768",
+            "gemma2-9b-it",
+        ],
+    },
+    "opencode_zen": {
+        "name": "OpenCode Zen API",
+        "default_base_url": "https://opencode.ai/zen/v1",
+        "default_model": "opencode-zen-free",
+        "models": [
+            "opencode-zen-free",
+            "opencode/big-pickle",
+            "opencode/deepseek-v4-flash-free",
+            "opencode/nemotron-3-ultra-free",
+            "opencode/mimo-v2.5-free",
+            "deepseek-r1",
+            "qwen2.5-72b-instruct",
+        ],
+    },
+    "openai": {
+        "name": "OpenAI API",
+        "default_base_url": "https://api.openai.com/v1",
+        "default_model": "gpt-4o-mini",
+        "models": [
+            "gpt-4o-mini",
+            "gpt-4o",
+            "o3-mini",
+            "gpt-4-turbo",
+        ],
+    },
+    "gemini": {
+        "name": "Google Gemini API",
+        "default_base_url": "https://generativelanguage.googleapis.com/v1beta/openai",
+        "default_model": "gemini-2.0-flash",
+        "models": [
+            "gemini-2.0-flash",
+            "gemini-1.5-pro",
+            "gemini-1.5-flash",
+        ],
+    },
+    "openrouter": {
+        "name": "OpenRouter API",
+        "default_base_url": "https://openrouter.ai/api/v1",
+        "default_model": "meta-llama/llama-3.3-70b-instruct",
+        "models": [
+            "meta-llama/llama-3.3-70b-instruct",
+            "deepseek/deepseek-r1",
+            "anthropic/claude-3.5-sonnet",
+            "google/gemini-2.0-flash-001",
+            "qwen/qwen-2.5-72b-instruct",
+        ],
+    },
+    "bytez": {
+        "name": "Bytez API",
+        "default_base_url": "https://api.bytez.com/v1",
+        "default_model": "bytez-default",
+        "models": [
+            "bytez-default",
+            "Qwen/Qwen2.5-72B-Instruct",
+            "meta-llama/Llama-3.3-70B-Instruct",
+        ],
+    },
+}
 
 GROQ_MODEL: Final[str] = "llama-3.3-70b-versatile"
 GROQ_MAX_TOKENS: Final[int] = 50
 GROQ_TEMPERATURE: Final[float] = 0.8
 
-
-# ── OpenCode Zen (https://opencode.ai/zen/v1) ──────────────────────────────
-
 OPENCODE_ZEN_DEFAULT_BASE_URL: Final[str] = "https://opencode.ai/zen/v1"
 OPENCODE_ZEN_DEFAULT_MODEL: Final[str] = "opencode-zen-free"
-OPENCODE_ZEN_FREE_MODELS: Final[list[str]] = [
-    "opencode-zen-free",
-    "opencode/big-pickle",
-    "opencode/mimo-v2.5-free",
-    "pencode/mimo-v2.5-free",
-    "opencode/deepseek-v4-flash-free",
-    "opencode/nemotron-3-ultra-free",
-    "opencode/ing-3.0-flash-free",
-    "ing-3.0-flash-free",
-    "opencode/laguna-s-2.1-free",
-    "laguna-s-2.1-free",
-    "deepseek-r1",
-    "qwen2.5-72b-instruct",
-    "llama-3.3-70b-versatile",
-]
-OPENCODE_ZEN_TIMEOUT: Final[int] = 35  # seconds
+OPENCODE_ZEN_FREE_MODELS: Final[list[str]] = PROVIDER_CATALOG["opencode_zen"]["models"]
+OPENCODE_ZEN_TIMEOUT: Final[int] = 35
 OPENCODE_ZEN_RETRIES: Final[int] = 2
-OPENCODE_ZEN_RETRY_DELAY: Final[float] = 1.0  # seconds
+OPENCODE_ZEN_RETRY_DELAY: Final[float] = 1.0
 

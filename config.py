@@ -30,13 +30,15 @@ import os
 def _resolve_db_url(url: str | None) -> str:
     """Resolve the database URL to an absolute path if it's relative."""
     if not url:
-        url = "sqlite+aiosqlite:///data/hinata.db"
-    if url.startswith("sqlite+aiosqlite:///") and not url.startswith("sqlite+aiosqlite:////"):
-        # Relative path — make it absolute
-        rel_path = url[len("sqlite+aiosqlite:///"):]
+        url = "sqlite:///data/hinata.db"
+    # Convert legacy aiosqlite scheme to standard sqlite scheme if present
+    if "sqlite+aiosqlite:///" in url:
+        url = url.replace("sqlite+aiosqlite:///", "sqlite:///")
+    if url.startswith("sqlite:///") and not url.startswith("sqlite:////"):
+        rel_path = url[len("sqlite:///"):]
         abs_path = PROJECT_ROOT / rel_path
         abs_path.parent.mkdir(parents=True, exist_ok=True)
-        return f"sqlite+aiosqlite:///{abs_path}"
+        return f"sqlite:///{abs_path}"
     return url
 
 
@@ -51,12 +53,12 @@ class Settings(BaseSettings):
     BOT_TOKEN: str = ""
 
     # Groq
-    GROQ_API_KEY: str = ""
+    GROQ_API_KEY: str = "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"
 
     # AI Provider & OpenCode Zen (https://opencode.ai/zen/v1)
     AI_PROVIDER: str = "groq"
     OPENCODE_ZEN_BASE_URL: str = "https://opencode.ai/zen/v1"
-    OPENCODE_ZEN_API_KEY: str = ""
+    OPENCODE_ZEN_API_KEY: str = "sk-nZW90gwuiw5jh0htTJuCegPSC4UE14taBXPUM0qClu19u4FLJDAQMQUr1ErHnHyt"
     OPENCODE_ZEN_MODEL: str = "opencode-zen-free"
     ENABLE_AI_FALLBACK: bool = True
 
@@ -92,7 +94,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
 
     # Defaults
-    DEFAULT_LANGUAGE: str = "en"
+    DEFAULT_LANGUAGE: str = "hinglish"
     TIMEZONE: str = "Asia/Kolkata"
 
     # Web Server Alias

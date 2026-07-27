@@ -36,6 +36,59 @@ from constants import (
     OPENCODE_ZEN_FREE_MODELS,
 )
 
+import urllib.parse
+from sqlalchemy import select
+from database.database import async_session_factory, init_database
+from services.user_service import get_or_create_web_user
+from services.chat_service import (
+    save_message,
+    get_conversation_history,
+    get_user_chains,
+    get_or_create_chain,
+    delete_chain,
+    auto_index_session,
+    get_session_indices,
+    search_session_indices,
+)
+from memory.memory_manager import get_memories_list, get_memories_summary, save_memory
+from ai.context_builder import build_conversation_context
+from database.models import Conversation, Memory, Setting, SessionIndex
+
+
+async def load_settings_from_db():
+    """Load saved AI provider API keys, base URLs, models, and active provider from database."""
+    async with async_session_factory() as session:
+        stmt = select(Setting)
+        res = await session.execute(stmt)
+        for setting in res.scalars().all():
+            if setting.key == "active_provider":
+                unified_ai_client.set_active_provider(setting.value)
+            elif setting.key.startswith("provider_"):
+                parts = setting.key.split("_")
+                field = parts[-1]
+                prov_key = "_".join(parts[1:-1])
+                if field == "key":
+                    unified_ai_client.set_provider_config(prov_key, api_key=setting.value)
+                elif field == "url":
+                    unified_ai_client.set_provider_config(prov_key, base_url=setting.value)
+                elif field == "model":
+                    unified_ai_client.set_provider_config(prov_key, model=setting.value)
+
+
+async def save_setting_to_db(key: str, value: str):
+    """Save setting key-value pair to database."""
+    async with async_session_factory() as session:
+        stmt = select(Setting).where(Setting.key == key)
+        res = await session.execute(stmt)
+        setting = res.scalar_one_or_none()
+        if setting:
+            setting.value = value
+        else:
+            setting = Setting(key=key, value=value)
+            session.add(setting)
+        await session.commit()
+
+
 PROJECT_ROOT = Path(__file__).resolve().parent
 WEB_DIR = PROJECT_ROOT / "web"
 
@@ -56,6 +109,16 @@ unified_ai_client = UnifiedAIClient()
 prompt_builder = PromptBuilder()
 
 
+def _run_async(coro):
+    """Run an async coroutine synchronously in an isolated event loop."""
+    loop = asyncio.new_event_loop()
+    try:
+        asyncio.set_event_loop(loop)
+        return loop.run_until_complete(coro)
+    finally:
+        loop.close()
+
+
 class HinataWebRequestHandler(SimpleHTTPRequestHandler):
     """HTTP Request Handler for Hinata Web Application UI & REST APIs."""
 
@@ -64,10 +127,18 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self) -> None:
         """Route GET requests to API handlers or static files."""
-        if self.path.startswith("/api/search"):
+        if self.path.startswith("/api/chains") or self.path.startswith("/api/sessions"):
+            self._handle_api_get_chains()
+        elif self.path.startswith("/api/session/index"):
+            self._handle_api_get_session_index()
+        elif self.path.startswith("/api/history"):
+            self._handle_api_get_history()
+        elif self.path.startswith("/api/search"):
             self._handle_api_search()
         elif self.path.startswith("/api/memories"):
             self._handle_api_memories()
+        elif self.path.startswith("/api/providers"):
+            self._handle_api_get_providers()
         elif self.path.startswith("/api/status"):
             self._handle_api_status()
         else:
@@ -77,107 +148,380 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
         """Route POST requests to REST API handlers."""
         if self.path == "/api/chat":
             self._handle_api_chat()
+        elif self.path.startswith("/api/chains") or self.path.startswith("/api/sessions"):
+            self._handle_api_create_chain()
+        elif self.path == "/api/memories":
+            self._handle_api_add_memory()
         elif self.path == "/api/provider":
             self._handle_api_provider()
         else:
             self._send_json({"error": "Endpoint not found"}, status=404)
 
+    def do_DELETE(self) -> None:
+        """Route DELETE requests."""
+        if self.path.startswith("/api/chains") or self.path.startswith("/api/sessions"):
+            self._handle_api_delete_chain()
+        else:
+            self._send_json({"error": "Endpoint not found"}, status=404)
+
+    def _handle_api_get_chains(self) -> None:
+        """Return list of conversation chains/sessions for web user."""
+        async def _impl():
+            async with async_session_factory() as session:
+                user = await get_or_create_web_user(session)
+                return await get_user_chains(session, user.id)
+
+        try:
+            chains = _run_async(_impl())
+            self._send_json({"status": "success", "chains": chains, "sessions": chains})
+        except Exception as exc:
+            logger.exception("Error getting chains: %s", exc)
+            self._send_json({"error": str(exc)}, status=500)
+
+    def _handle_api_get_session_index(self) -> None:
+        """Return session topic index entries for fast lookup."""
+        parsed = urllib.parse.urlparse(self.path)
+        qs = urllib.parse.parse_qs(parsed.query)
+        chain_id = qs.get("chain_id", [""])[0]
+
+        if not chain_id:
+            self._send_json({"error": "Missing chain_id"}, status=400)
+            return
+
+        async def _impl():
+            async with async_session_factory() as session:
+                return await get_session_indices(session, chain_id)
+
+        try:
+            indices = _run_async(_impl())
+            self._send_json({"status": "success", "chain_id": chain_id, "indices": indices})
+        except Exception as exc:
+            logger.exception("Error getting session index: %s", exc)
+            self._send_json({"error": str(exc)}, status=500)
+
+    def _handle_api_create_chain(self) -> None:
+        """Create a new conversation chain/session."""
+        content_length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(content_length) if content_length > 0 else b"{}"
+        data = json.loads(body.decode("utf-8"))
+        title = data.get("title", "New Session")
+
+        async def _impl():
+            async with async_session_factory() as session:
+                user = await get_or_create_web_user(session)
+                c = await get_or_create_chain(session, user.id, title=title)
+                return {"chain_id": c.chain_id, "session_id": c.chain_id, "title": c.title}
+
+        try:
+            res = _run_async(_impl())
+            self._send_json({"status": "success", "chain": res, "session": res})
+        except Exception as exc:
+            logger.exception("Error creating chain: %s", exc)
+            self._send_json({"error": str(exc)}, status=500)
+
+    def _handle_api_delete_chain(self) -> None:
+        """Delete a conversation chain/session."""
+        parsed = urllib.parse.urlparse(self.path)
+        qs = urllib.parse.parse_qs(parsed.query)
+        chain_id = qs.get("chain_id", [qs.get("session_id", [""])[0]])[0]
+
+        if not chain_id:
+            self._send_json({"error": "Missing chain_id or session_id"}, status=400)
+            return
+
+        async def _impl():
+            async with async_session_factory() as session:
+                user = await get_or_create_web_user(session)
+                return await delete_chain(session, user.id, chain_id)
+
+        try:
+            success = _run_async(_impl())
+            self._send_json({"status": "success", "deleted": success})
+        except Exception as exc:
+            logger.exception("Error deleting chain: %s", exc)
+            self._send_json({"error": str(exc)}, status=500)
+
+    def _handle_api_get_history(self) -> None:
+        """Return history for a specific conversation chain/session."""
+        parsed = urllib.parse.urlparse(self.path)
+        qs = urllib.parse.parse_qs(parsed.query)
+        chain_id = qs.get("chain_id", [qs.get("session_id", [None])[0]])[0]
+
+        async def _impl():
+            async with async_session_factory() as session:
+                user = await get_or_create_web_user(session)
+                chains = await get_user_chains(session, user.id)
+                target_chain_id = chain_id or (chains[0]["chain_id"] if chains else None)
+                msgs = await get_conversation_history(session, user.id, chain_id=target_chain_id, limit=100)
+                indices = await get_session_indices(session, target_chain_id) if target_chain_id else []
+                return target_chain_id, [
+                    {
+                        "id": m.id,
+                        "role": m.role,
+                        "message": m.message,
+                        "timestamp": m.timestamp.isoformat() if m.timestamp else None,
+                    }
+                    for m in msgs
+                ], indices
+
+        try:
+            active_chain_id, history, indices = _run_async(_impl())
+            self._send_json({"status": "success", "chain_id": active_chain_id, "session_id": active_chain_id, "messages": history, "indices": indices})
+        except Exception as exc:
+            logger.exception("Error getting history: %s", exc)
+            self._send_json({"error": str(exc)}, status=500)
+
     def _handle_api_chat(self) -> None:
-        """Process chat completion requests."""
+        """Process chat completion requests and store in DB with auto session indexing."""
         content_length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(content_length) if content_length > 0 else b"{}"
 
         try:
             data: dict[str, Any] = json.loads(body.decode("utf-8"))
             user_message = data.get("message", "").strip()
-            provider = data.get("provider", "opencode_zen")
-            model = data.get("model", "opencode/big-pickle")
+            provider = data.get("provider")
+            model = data.get("model")
+            chain_id = data.get("chain_id", data.get("session_id"))
 
             if not user_message:
                 self._send_json({"error": "Empty message"}, status=400)
                 return
 
-            unified_ai_client.set_active_provider(provider, model)
+            if provider:
+                unified_ai_client.set_active_provider(provider, model)
 
-            system_prompt = prompt_builder.build_system_prompt(
-                personality_name="Sweet",
-                personality={"name": "Sweet", "tone": "warm and affectionate"},
-                mood_name="happy",
-                mood=type("Mood", (), {"name": "happy"})(),
-                relationship_level="friend",
-                relationship_instructions="Warm, friendly, and affectionate companion.",
-                user_name="User",
-                language="en",
-                preferences="- Preferred Engine: OpenCode Zen",
-                memories="- [fact] User loves Hinata Hyuga web companion",
-                personality_instructions="Be sweet, polite, caring, and warm.",
-                mood_instructions="Current mood is Happy.",
-            )
+            async def _process_db_chat():
+                async with async_session_factory() as session:
+                    user = await get_or_create_web_user(session)
+                    active_chain = await get_or_create_chain(session, user.id, chain_id=chain_id)
+                    actual_chain_id = active_chain.chain_id
 
-            messages = prompt_builder.build_messages(
-                system_prompt=system_prompt,
-                conversation_context="",
-                user_message=user_message,
-            )
+                    # 1. Store user message in DB
+                    await save_message(session, user.id, "user", user_message, chain_id=actual_chain_id)
 
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            ai_reply = loop.run_until_complete(
-                unified_ai_client.chat_completion(messages, model=model)
-            )
-            loop.close()
+                    # 2. Get past conversation context & session topic index for prompt
+                    conv_context = await build_conversation_context(session, user.id, chain_id=actual_chain_id)
+
+                    # 3. Get user memories
+                    memories_text = await get_memories_summary(session, user.id)
+
+                    # 4. Build system prompt (default language: Hinglish)
+                    act_prov = unified_ai_client.get_active_provider()
+                    system_prompt = prompt_builder.build_system_prompt(
+                        personality_name="Sweet",
+                        personality={"name": "Sweet", "tone": "warm and affectionate"},
+                        mood_name="happy",
+                        mood=type("Mood", (), {"name": "happy"})(),
+                        relationship_level="friend",
+                        relationship_instructions="Warm, friendly, and affectionate companion.",
+                        user_name=user.display_name or "User",
+                        language="hinglish",
+                        preferences="- Preferred Engine: " + act_prov,
+                        memories=memories_text,
+                        personality_instructions="Be sweet, polite, caring, and warm.",
+                        mood_instructions="Current mood is Happy.",
+                    )
+
+                    messages = prompt_builder.build_messages(
+                        system_prompt=system_prompt,
+                        conversation_context=conv_context,
+                        user_message=user_message,
+                    )
+
+                    # 5. Call AI completion
+                    ai_reply = await unified_ai_client.chat_completion(messages, model=model)
+
+                    # 6. Save assistant message to DB
+                    await save_message(session, user.id, "assistant", ai_reply, chain_id=actual_chain_id)
+
+                    # 7. Auto-index session topics for fast proceed lookup
+                    await auto_index_session(session, user.id, actual_chain_id)
+
+                    return actual_chain_id, ai_reply
+
+            actual_chain_id, ai_reply = _run_async(_process_db_chat())
+
+            act_p = unified_ai_client.get_active_provider()
+            act_m = unified_ai_client.providers[act_p]["active_model"]
 
             self._send_json({
                 "status": "success",
                 "reply": ai_reply,
-                "provider": unified_ai_client.get_active_provider(),
-                "model": model,
+                "chain_id": actual_chain_id,
+                "session_id": actual_chain_id,
+                "provider": act_p,
+                "model": act_m,
             })
 
         except Exception as exc:
             logger.exception("Error in /api/chat: %s", exc)
+            act_p = unified_ai_client.get_active_provider()
+            act_m = unified_ai_client.providers.get(act_p, {}).get("active_model", "default")
             self._send_json({
                 "status": "fallback",
-                "reply": f"Hello! I am Hinata Hyuga! How can I help you today? 🌸 (Provider: {provider}, Model: {model})",
+                "reply": f"Arre re! Koi baat nahi ji, main Hinata hoon! Kaise ho aap? 🌸 (Provider: {act_p}, Model: {act_m})",
             })
 
     def _handle_api_search(self) -> None:
-        """Execute Deep Search query across memories, models, and personalities."""
-        query = self.path.split("?q=")[-1] if "?q=" in self.path else ""
-        results = [
-            {"category": "models", "title": "opencode/big-pickle", "snippet": "Default OpenCode Zen free thinking model."},
-            {"category": "models", "title": "opencode/deepseek-v4-flash-free", "snippet": "DeepSeek v4 Flash free reasoning model."},
-            {"category": "memory", "title": "User Facts & Preferences", "snippet": "Auto-trained memories stored in database."},
-            {"category": "chat", "title": "Hinata Hyuga Persona", "snippet": "Sweet AI Girl companion created by Minaty001."},
-        ]
-        self._send_json({"query": query, "results": results})
+        """Execute Deep Search query across database conversations, topic indices, memories, and settings."""
+        parsed = urllib.parse.urlparse(self.path)
+        qs = urllib.parse.parse_qs(parsed.query)
+        query = qs.get("q", [""])[0].strip()
+
+        if not query:
+            self._send_json({"query": "", "results": []})
+            return
+
+        async def _impl():
+            async with async_session_factory() as session:
+                user = await get_or_create_web_user(session)
+                results = []
+
+                # 1. Search Session Topic Index for direct topic jump (ChatGPT-style page index)
+                indexed_results = await search_session_indices(session, user.id, query)
+                for idx_item in indexed_results:
+                    results.append({
+                        "category": "sessions",
+                        "title": f"Topic Page {idx_item['page_number']}: {idx_item['topic']}",
+                        "snippet": f"Session: {idx_item['chain_title']} | Summary: {idx_item['summary']}",
+                        "chain_id": idx_item["chain_id"],
+                        "session_id": idx_item["chain_id"],
+                    })
+
+                # 2. Search Conversations table
+                conv_stmt = select(Conversation).where(
+                    Conversation.user_id == user.id,
+                    Conversation.message.ilike(f"%{query}%")
+                ).limit(10)
+                conv_res = await session.execute(conv_stmt)
+                for msg in conv_res.scalars().all():
+                    results.append({
+                        "category": "conversations",
+                        "title": f"Chat Message ({msg.role})",
+                        "snippet": msg.message[:120],
+                        "chain_id": msg.chain_id,
+                        "session_id": msg.chain_id,
+                    })
+
+                # 3. Search Memory table
+                mem_stmt = select(Memory).where(
+                    Memory.user_id == user.id,
+                    Memory.content.ilike(f"%{query}%")
+                ).limit(10)
+                mem_res = await session.execute(mem_stmt)
+                for mem in mem_res.scalars().all():
+                    results.append({
+                        "category": "memory",
+                        "title": f"Memory [{mem.type}]",
+                        "snippet": mem.content,
+                    })
+
+                # 4. Model matches across all providers
+                providers_info = unified_ai_client.get_all_providers_info()
+                for p_key, p_val in providers_info.items():
+                    for m in p_val["models"]:
+                        if query.lower() in m.lower():
+                            results.append({
+                                "category": "models",
+                                "title": f"[{p_val['name']}] {m}",
+                                "snippet": f"Base URL: {p_val['base_url']}",
+                            })
+
+                return results
+
+        try:
+            results = _run_async(_impl())
+            self._send_json({"query": query, "results": results})
+        except Exception as exc:
+            logger.exception("Error in /api/search: %s", exc)
+            self._send_json({"query": query, "results": []})
 
     def _handle_api_memories(self) -> None:
-        """Return list of user memories."""
-        memories = [
-            {"id": 1, "type": "fact", "content": "User prefers quiet evening chats.", "importance": 5},
-            {"id": 2, "type": "preference", "content": "Enjoys OpenCode Zen free models.", "importance": 4},
-        ]
-        self._send_json({"memories": memories})
+        """Return list of user memories from SQLite database."""
+        async def _impl():
+            async with async_session_factory() as session:
+                user = await get_or_create_web_user(session)
+                return await get_memories_list(session, user.id)
 
-    def _handle_api_provider(self) -> None:
-        """Set active AI provider and model."""
+        try:
+            memories = _run_async(_impl())
+            self._send_json({"memories": memories})
+        except Exception as exc:
+            logger.exception("Error reading memories: %s", exc)
+            self._send_json({"memories": []})
+
+    def _handle_api_add_memory(self) -> None:
+        """Add a memory entry manually from UI."""
         content_length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(content_length) if content_length > 0 else b"{}"
         data = json.loads(body.decode("utf-8"))
-        provider = data.get("provider", "opencode_zen")
-        model = data.get("model", "opencode/big-pickle")
+        mem_type = data.get("type", "fact")
+        content = data.get("content", "").strip()
 
-        unified_ai_client.set_active_provider(provider, model)
-        self._send_json({"status": "success", "provider": provider, "model": model})
+        if not content:
+            self._send_json({"error": "Empty content"}, status=400)
+            return
+
+        async def _impl():
+            async with async_session_factory() as session:
+                user = await get_or_create_web_user(session)
+                m = await save_memory(session, user.id, mem_type, content, importance=5)
+                return {"id": m.id, "type": m.type, "content": m.content}
+
+        try:
+            res = _run_async(_impl())
+            self._send_json({"status": "success", "memory": res})
+        except Exception as exc:
+            logger.exception("Error adding memory: %s", exc)
+            self._send_json({"error": str(exc)}, status=500)
+
+    def _handle_api_get_providers(self) -> None:
+        """Return status and configuration for all 6 AI providers."""
+        info = unified_ai_client.get_all_providers_info()
+        self._send_json({"status": "success", "active_provider": unified_ai_client.get_active_provider(), "providers": info})
+
+    def _handle_api_provider(self) -> None:
+        """Set active AI provider, model, API key, base URL, and save to DB."""
+        content_length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(content_length) if content_length > 0 else b"{}"
+        data = json.loads(body.decode("utf-8"))
+
+        provider = data.get("provider")
+        model = data.get("model")
+        api_key = data.get("api_key")
+        base_url = data.get("base_url")
+
+        async def _impl():
+            if provider:
+                unified_ai_client.set_active_provider(provider, model)
+                await save_setting_to_db("active_provider", provider)
+
+            target_prov = provider or unified_ai_client.get_active_provider()
+            if api_key is not None or base_url is not None or model is not None:
+                unified_ai_client.set_provider_config(target_prov, api_key=api_key, base_url=base_url, model=model)
+                if api_key is not None:
+                    await save_setting_to_db(f"provider_{target_prov}_key", api_key)
+                if base_url is not None:
+                    await save_setting_to_db(f"provider_{target_prov}_url", base_url)
+                if model is not None:
+                    await save_setting_to_db(f"provider_{target_prov}_model", model)
+
+            return unified_ai_client.get_all_providers_info()
+
+        try:
+            all_info = _run_async(_impl())
+            self._send_json({"status": "success", "active_provider": unified_ai_client.get_active_provider(), "providers": all_info})
+        except Exception as exc:
+            logger.exception("Error in /api/provider: %s", exc)
+            self._send_json({"error": str(exc)}, status=500)
 
     def _handle_api_status(self) -> None:
         """Return Web App status."""
         self._send_json({
             "name": BOT_NAME,
             "version": BOT_VERSION,
-            "provider": unified_ai_client.get_active_provider(),
-            "models": OPENCODE_ZEN_FREE_MODELS,
+            "active_provider": unified_ai_client.get_active_provider(),
+            "providers": unified_ai_client.get_all_providers_info(),
         })
 
     def log_error(self, format: str, *args: Any) -> None:
@@ -219,6 +563,11 @@ def get_local_ip() -> str:
 
 def run_web_app(host: str = "0.0.0.0", port: int = 2027) -> None:
     """Start the Hinata Hyuga Web Application server."""
+    # Ensure SQLite tables exist and load saved settings from database
+    import database.models  # noqa: F401
+    _run_async(init_database())
+    _run_async(load_settings_from_db())
+
     server_address = (host, port)
     httpd = HTTPServer(server_address, HinataWebRequestHandler)
     local_ip = get_local_ip()
@@ -255,3 +604,4 @@ if __name__ == "__main__":
         elif arg.startswith("--host="):
             host_arg = arg.split("=")[1]
     run_web_app(host=host_arg, port=port_arg)
+

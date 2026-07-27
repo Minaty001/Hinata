@@ -87,7 +87,6 @@ def create_application() -> Application:
 
     ai_client = UnifiedAIClient()
     application.bot_data["ai_client"] = ai_client
-    application.bot_data["groq_client"] = ai_client  # Backward compatibility
 
     # Command Handlers
     application.add_handler(CommandHandler("start", start_command))

@@ -1,20 +1,21 @@
 """
-Hinata - Database Engine & Session Management
+Hinata - Database Engine & Session Management (Greenlet-Free)
 
-Configures SQLAlchemy async engine, session factory, and base model.
-Handles database initialization and connection lifecycle.
+Configures SQLAlchemy engine, session factory, and base model using standard
+Python sqlite3 driver + thread execution to guarantee 100% compatibility across
+all platforms (including Termux / Android Linux and Python 3.14) without greenlet.
 """
 
 from __future__ import annotations
 
+import asyncio
 import logging
-import os
 from collections.abc import AsyncGenerator
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy import create_engine, inspect
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from config import settings
 
@@ -27,62 +28,101 @@ class Base(DeclarativeBase):
     __allow_unmapped__ = False
 
 
-# Resolve database file path from URL
+# Resolve database URL (using standard sqlite:///)
 _db_url = settings.DATABASE_URL
-_db_path_str = _db_url.split("sqlite+aiosqlite:///", 1)[1] if "sqlite+aiosqlite:///" in _db_url else ""
-_db_path = Path(_db_path_str)
+if "sqlite+aiosqlite:///" in _db_url:
+    _db_url = _db_url.replace("sqlite+aiosqlite:///", "sqlite:///")
 
-# Remove stale 0-byte database file
-if _db_path_str and _db_path.is_file() and _db_path.stat().st_size == 0:
+_db_path_str = _db_url.split("sqlite:///", 1)[1] if "sqlite:///" in _db_url else ""
+_db_path = Path(_db_path_str) if _db_path_str else None
+
+if _db_path and _db_path.is_file() and _db_path.stat().st_size == 0:
     _db_path.unlink()
     logger.warning("Removed stale 0-byte database file: %s", _db_path)
 
-# Create async engine
-engine = create_async_engine(
+# Create synchronous engine (built-in sqlite3 driver, no greenlet required)
+engine = create_engine(
     _db_url,
     echo=False,
-    pool_pre_ping=True,
+    connect_args={"check_same_thread": False},
 )
 
-# Session factory
-async_session_factory = async_sessionmaker(
-    engine,
-    class_=AsyncSession,
+# Sync session factory
+_SyncSessionFactory = sessionmaker(
+    bind=engine,
+    class_=Session,
     expire_on_commit=False,
 )
 
 
+class AsyncSessionWrapper:
+    """Greenlet-free AsyncSession adapter wrapping standard SQLAlchemy Session."""
+
+    def __init__(self, sync_session: Session) -> None:
+        self._sync = sync_session
+
+    def add(self, instance: Any) -> None:
+        self._sync.add(instance)
+
+    async def commit(self) -> None:
+        await asyncio.to_thread(self._sync.commit)
+
+    async def refresh(self, instance: Any) -> None:
+        await asyncio.to_thread(self._sync.refresh, instance)
+
+    async def execute(self, statement: Any, *args: Any, **kwargs: Any) -> Any:
+        return await asyncio.to_thread(self._sync.execute, statement, *args, **kwargs)
+
+    async def scalar(self, statement: Any, *args: Any, **kwargs: Any) -> Any:
+        return await asyncio.to_thread(self._sync.scalar, statement, *args, **kwargs)
+
+    async def get(self, entity: Any, ident: Any, *args: Any, **kwargs: Any) -> Any:
+        return await asyncio.to_thread(self._sync.get, entity, ident, *args, **kwargs)
+
+    async def close(self) -> None:
+        await asyncio.to_thread(self._sync.close)
+
+    async def __aenter__(self) -> AsyncSessionWrapper:
+        return self
+
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        if exc_type:
+            await asyncio.to_thread(self._sync.rollback)
+        await self.close()
+
+
+class AsyncSessionFactory:
+    """Session factory producing greenlet-free AsyncSessionWrapper instances."""
+
+    def __call__(self) -> AsyncSessionWrapper:
+        sync_sess = _SyncSessionFactory()
+        return AsyncSessionWrapper(sync_sess)
+
+
+async_session_factory = AsyncSessionFactory()
+
+
 async def init_database() -> None:
-    """Create all tables if they don't exist.
+    """Create all tables if they don't exist."""
+    def _create_all():
+        Base.metadata.create_all(engine)
+        inspector = inspect(engine)
+        return inspector.get_table_names()
 
-    Should be called once at application startup.
-    Verifies tables exist and retries creation once if they don't.
-    """
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-    # Verify tables exist
-    async with engine.begin() as conn:
-        tables = await conn.run_sync(lambda sync_conn: sync_conn.dialect.get_table_names(sync_conn))
+    tables = await asyncio.to_thread(_create_all)
     logger.info("Database tables created/verified successfully. Tables: %s", tables)
 
 
-async def get_session() -> AsyncGenerator[AsyncSession, Any]:
-    """Provide an async database session.
-
-    Yields a session that automatically closes after use.
-    """
-    async with async_session_factory() as session:
-        try:
-            yield session
-        finally:
-            await session.close()
+async def get_session() -> AsyncGenerator[AsyncSessionWrapper, Any]:
+    """Provide an async database session."""
+    session = async_session_factory()
+    try:
+        yield session
+    finally:
+        await session.close()
 
 
 async def close_database() -> None:
-    """Dispose of the engine connection pool.
-
-    Should be called once at application shutdown.
-    """
-    await engine.dispose()
+    """Dispose of the engine connection pool."""
+    await asyncio.to_thread(engine.dispose)
     logger.info("Database engine disposed.")

@@ -438,11 +438,154 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
   }
 
-  // 2. Chat Controller
+  // 2. Chain Conversations & Chat Controller
   const chatMessages = document.getElementById('chatMessages');
   const messageInput = document.getElementById('messageInput');
   const btnSendMessage = document.getElementById('btnSendMessage');
   const quickPrompts = document.querySelectorAll('.quick-prompts .chip');
+  const chainList = document.getElementById('chainList');
+  const btnNewChain = document.getElementById('btnNewChain');
+
+  state.activeChainId = localStorage.getItem('hinata_active_chain_id') || null;
+
+  async function loadChains() {
+    try {
+      const res = await fetch('/api/chains');
+      const data = await res.json();
+      if (data.status === 'success' && Array.isArray(data.chains)) {
+        renderChains(data.chains);
+        if (!state.activeChainId || !data.chains.some(c => c.chain_id === state.activeChainId)) {
+          if (data.chains.length > 0) {
+            selectChain(data.chains[0].chain_id);
+          }
+        } else {
+          loadHistory(state.activeChainId);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load chains', e);
+    }
+  }
+
+  function renderChains(chains) {
+    if (!chainList) return;
+    chainList.innerHTML = '';
+    chains.forEach(c => {
+      const isSelected = c.chain_id === state.activeChainId;
+      const item = document.createElement('div');
+      item.className = `chain-item ${isSelected ? 'active' : ''}`;
+      item.style.cssText = `
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; cursor: pointer;
+        background: ${isSelected ? 'rgba(255, 105, 180, 0.2)' : 'rgba(255, 255, 255, 0.05)'};
+        color: ${isSelected ? '#fff' : 'var(--text-muted)'}; border: 1px solid ${isSelected ? 'var(--pink-accent)' : 'transparent'};
+        transition: all 0.2s ease;
+      `;
+      item.innerHTML = `
+        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">💬 ${escapeHtml(c.title || 'Conversation')}</span>
+        ${chains.length > 1 ? `<button class="btn-del-chain" style="background: none; border: none; color: #ff6b6b; font-size: 0.75rem; cursor: pointer; padding: 2px 4px;" title="Delete Conversation">✕</button>` : ''}
+      `;
+
+      item.addEventListener('click', (e) => {
+        if (e.target.classList.contains('btn-del-chain')) return;
+        selectChain(c.chain_id);
+        renderChains(chains);
+      });
+
+      const delBtn = item.querySelector('.btn-del-chain');
+      if (delBtn) {
+        delBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (confirm('Are you sure you want to delete this conversation chain?')) {
+            await deleteChain(c.chain_id);
+          }
+        });
+      }
+
+      chainList.appendChild(item);
+    });
+  }
+
+  function selectChain(chainId) {
+    state.activeChainId = chainId;
+    localStorage.setItem('hinata_active_chain_id', chainId);
+    loadHistory(chainId);
+  }
+
+  async function createChain() {
+    try {
+      const res = await fetch('/api/chains', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: 'New Conversation' })
+      });
+      const data = await res.json();
+      if (data.status === 'success' && data.chain) {
+        selectChain(data.chain.chain_id);
+        await loadChains();
+        showToast('Created new conversation chain 🌸', 'success');
+      }
+    } catch (e) {
+      showToast('Failed to create new conversation chain', 'error');
+    }
+  }
+
+  async function deleteChain(chainId) {
+    try {
+      const res = await fetch(`/api/chains?chain_id=${encodeURIComponent(chainId)}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.status === 'success') {
+        if (state.activeChainId === chainId) {
+          state.activeChainId = null;
+          localStorage.removeItem('hinata_active_chain_id');
+        }
+        await loadChains();
+        showToast('Deleted conversation chain', 'info');
+      }
+    } catch (e) {
+      showToast('Failed to delete chain', 'error');
+    }
+  }
+
+  if (btnNewChain) {
+    btnNewChain.addEventListener('click', createChain);
+  }
+
+  async function loadHistory(chainId) {
+    if (!chatMessages) return;
+    try {
+      const url = chainId ? `/api/history?chain_id=${encodeURIComponent(chainId)}` : '/api/history';
+      const res = await fetch(url);
+      const data = await res.json();
+      chatMessages.innerHTML = '';
+
+      // Render Session Topic Index Bar if indices exist for fast page jump
+      if (Array.isArray(data.indices) && data.indices.length > 0) {
+        const indexBar = document.createElement('div');
+        indexBar.className = 'session-index-bar';
+        indexBar.style.cssText = 'padding: 8px 12px; background: rgba(255, 105, 180, 0.08); border: 1px solid rgba(255, 105, 180, 0.2); border-radius: 12px; margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;';
+        
+        let pillsHtml = `<span style="font-size: 0.75rem; font-weight: 700; color: var(--pink-accent);">📌 TOPIC INDEX:</span>`;
+        data.indices.forEach(idx => {
+          pillsHtml += `<span class="chip" style="font-size: 0.75rem; padding: 3px 8px; background: rgba(255,255,255,0.1);" title="${escapeHtml(idx.summary)}">Page ${idx.page_number}: ${escapeHtml(idx.topic)}</span>`;
+        });
+        indexBar.innerHTML = pillsHtml;
+        chatMessages.appendChild(indexBar);
+      }
+
+      if (data.status === 'success' && Array.isArray(data.messages) && data.messages.length > 0) {
+        data.messages.forEach(m => {
+          const sender = m.role === 'user' ? (profile.userName || 'User') : (profile.companionName || 'Hinata Hyuga');
+          appendMessage(m.role, sender, m.message, m.timestamp);
+        });
+      } else {
+        const cName = profile.companionName || 'Hinata Hyuga';
+        appendMessage('assistant', cName, 'Arre waah! Main Hinata hoon, aapki sweet companion! Aaj main aapki kya madad kar sakti hoon? 🌸');
+      }
+    } catch (e) {
+      console.error('Failed to load history', e);
+    }
+  }
 
   async function sendMessage(text) {
     if (!text.trim()) return;
@@ -472,18 +615,29 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, provider: state.activeProvider, model: state.activeModel })
+        body: JSON.stringify({
+          message: text,
+          provider: state.activeProvider,
+          model: state.activeModel,
+          chain_id: state.activeChainId
+        })
       });
       const data = await res.json();
+      if (data.chain_id && data.chain_id !== state.activeChainId) {
+        state.activeChainId = data.chain_id;
+        localStorage.setItem('hinata_active_chain_id', data.chain_id);
+      }
       chatMessages.removeChild(typingElem);
       appendMessage('assistant', cName, data.reply || 'I am always here for you! 💖');
+      // Refresh chain title in list
+      loadChains();
     } catch (err) {
       chatMessages.removeChild(typingElem);
       appendMessage('assistant', cName, `I'm happy to chat with you! (Provider: ${state.activeProvider}, Model: ${state.activeModel}) 🌸`);
     }
   }
 
-  function appendMessage(role, sender, text) {
+  function appendMessage(role, sender, text, timestamp) {
     const msgDiv = document.createElement('div');
     msgDiv.className = `message ${role}-message`;
 
@@ -501,13 +655,15 @@ document.addEventListener('DOMContentLoaded', () => {
       avatarHtml = `<div class="message-avatar"><img src="${escapeHtml(profile.avatarData)}" class="message-avatar-img" alt="Avatar" /></div>`;
     }
 
+    const timeStr = timestamp ? new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
     msgDiv.innerHTML = `
       ${avatarHtml}
       <div class="message-content">
         <div class="message-sender">${escapeHtml(sender)}</div>
         <div class="message-text">${escapeHtml(text)}</div>
         ${actionsHtml}
-        <div class="message-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+        <div class="message-time">${timeStr}</div>
       </div>
     `;
 
@@ -545,6 +701,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Load initial chains and chat history
+  loadChains();
+
   // 3. DEEP SEARCH ENGINE
   const deepSearchInput = document.getElementById('deepSearchInput');
   const btnExecuteSearch = document.getElementById('btnExecuteSearch');
@@ -553,22 +712,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let currentSearchFilter = 'all';
 
-  function executeDeepSearch(query) {
+  async function executeDeepSearch(query) {
     if (!query) {
-      renderSearchResults(getAllSearchableItems());
+      renderSearchResults(await getAllSearchableItems());
       return;
     }
-    const cleanQuery = query.toLowerCase();
-    const items = getAllSearchableItems();
-    const filtered = items.filter(item => {
-      const matchesCategory = currentSearchFilter === 'all' || item.category === currentSearchFilter;
-      const matchesQuery = item.title.toLowerCase().includes(cleanQuery) || item.snippet.toLowerCase().includes(cleanQuery);
-      return matchesCategory && matchesQuery;
-    });
-    renderSearchResults(filtered, cleanQuery);
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      let items = (data.results || []).map(r => ({
+        category: r.category,
+        type: r.category === 'conversations' ? 'Chat Log' : (r.category === 'memory' ? 'Memory' : 'AI Model'),
+        title: r.title,
+        snippet: r.snippet
+      }));
+      if (currentSearchFilter !== 'all') {
+        items = items.filter(i => i.category === currentSearchFilter);
+      }
+      renderSearchResults(items, query);
+    } catch (e) {
+      console.error('Deep search failed', e);
+    }
   }
 
-  function getAllSearchableItems() {
+  async function getAllSearchableItems() {
     const items = [];
     state.memories.forEach(m => {
       items.push({ category: 'memory', type: `Memory (${m.type})`, title: m.content, snippet: `Importance: ${'⭐'.repeat(m.importance)}` });
@@ -579,11 +746,6 @@ document.addEventListener('DOMContentLoaded', () => {
     state.opencodeModels.forEach(m => {
       items.push({ category: 'models', type: 'OpenCode Zen Free Model', title: m, snippet: 'Endpoint: https://opencode.ai/zen/v1/chat/completions' });
     });
-    items.push(
-      { category: 'chat', type: 'Chat History', title: `${profile.companionName || 'Hinata Hyuga'} Persona`, snippet: 'Talks like a sweet, gentle, caring girl.' },
-      { category: 'chat', type: 'Chat History', title: 'OpenCode Zen Integration', snippet: 'Configured opencode/big-pickle as default free thinking model.' },
-      { category: 'chat', type: 'Chat History', title: 'Minaty001 GitHub', snippet: 'Created by Minaty001 on GitHub (github.com/Minaty001/hinata).' }
-    );
     return items;
   }
 
@@ -625,25 +787,40 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  renderSearchResults(getAllSearchableItems());
-
   // 4. Memory Manager Render & Modal Handler
+  async function loadMemoriesFromBackend() {
+    try {
+      const res = await fetch('/api/memories');
+      const data = await res.json();
+      if (Array.isArray(data.memories)) {
+        state.memories = data.memories;
+        renderMemories();
+      }
+    } catch (e) {
+      console.error('Failed to load memories from API', e);
+    }
+  }
+
   function renderMemories() {
     const grid = document.getElementById('memoriesGrid');
     if (!grid) return;
     grid.innerHTML = '';
+    if (state.memories.length === 0) {
+      grid.innerHTML = `<div style="color: var(--text-muted); font-size: 0.9rem;">No memories saved yet. Click "+ Add Memory" to store facts!</div>`;
+      return;
+    }
     state.memories.forEach(m => {
       const card = document.createElement('div');
       card.className = 'memory-card';
       card.innerHTML = `
         <span class="result-type">📌 [${m.type.toUpperCase()}]</span>
         <div class="result-title">${escapeHtml(m.content)}</div>
-        <div class="result-snippet">Importance: ${'⭐'.repeat(m.importance)}</div>
+        <div class="result-snippet">Importance: ${'⭐'.repeat(m.importance || 3)}</div>
       `;
       grid.appendChild(card);
     });
   }
-  renderMemories();
+  loadMemoriesFromBackend();
 
   const btnAddMemoryModal = document.getElementById('btnAddMemoryModal');
   const memoryModal = document.getElementById('memoryModal');
@@ -652,7 +829,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnSaveNewMemory = document.getElementById('btnSaveNewMemory');
   const memoryContentInput = document.getElementById('memoryContentInput');
   const memoryTypeSelect = document.getElementById('memoryTypeSelect');
-  const memoryImportanceSelect = document.getElementById('memoryImportanceSelect');
 
   function openMemoryModal() {
     if (memoryModal) memoryModal.classList.add('active');
@@ -677,21 +853,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (btnSaveNewMemory) {
-    btnSaveNewMemory.addEventListener('click', () => {
+    btnSaveNewMemory.addEventListener('click', async () => {
       const content = memoryContentInput ? memoryContentInput.value.trim() : '';
       if (!content) {
         showToast('Please enter memory content', 'error');
         return;
       }
       const type = memoryTypeSelect ? memoryTypeSelect.value : 'fact';
-      const importance = memoryImportanceSelect ? parseInt(memoryImportanceSelect.value, 10) : 3;
 
-      const newMem = { id: Date.now(), type, content, importance };
-      state.memories.unshift(newMem);
-      saveMemoriesToStorage();
-      renderMemories();
-      closeMemoryModal();
-      showToast('New memory saved successfully! 🧠', 'success');
+      try {
+        const res = await fetch('/api/memories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type, content })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          await loadMemoriesFromBackend();
+          closeMemoryModal();
+          showToast('New memory saved to database! 🧠', 'success');
+        }
+      } catch (e) {
+        showToast('Failed to save memory', 'error');
+      }
     });
   }
 
@@ -725,81 +909,167 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   renderPersonalities();
 
-  // 6. Provider Controller
-  const btnSelectGroq = document.getElementById('btnSelectGroq');
-  const btnSelectZen = document.getElementById('btnSelectZen');
-  const cardProviderGroq = document.getElementById('cardProviderGroq');
-  const cardProviderZen = document.getElementById('cardProviderZen');
-  const activeProviderPill = document.getElementById('activeProviderPill');
-  const activeModelText = document.getElementById('activeModelText');
+  // 6. Multi-Provider AI Controller (Groq, OpenCode Zen, OpenAI, Gemini, OpenRouter, Bytez)
+  async function loadProvidersFromBackend() {
+    const container = document.getElementById('providersListContainer');
+    if (!container) return;
 
-  function updateProviderUI(provider, model) {
-    state.activeProvider = provider;
-    if (model) state.activeModel = model;
-
-    if (provider === 'opencode_zen') {
-      if (cardProviderZen) cardProviderZen.classList.add('active');
-      if (cardProviderGroq) cardProviderGroq.classList.remove('active');
-
-      if (btnSelectZen) {
-        btnSelectZen.textContent = 'Active Engine ✓';
-        btnSelectZen.className = 'btn btn-primary';
+    try {
+      const res = await fetch('/api/providers');
+      const data = await res.json();
+      if (data.status === 'success' && data.providers) {
+        state.activeProvider = data.active_provider;
+        state.providers = data.providers;
+        renderProvidersUI(data.providers, data.active_provider);
       }
-      if (btnSelectGroq) {
-        btnSelectGroq.textContent = 'Select Groq API';
-        btnSelectGroq.className = 'btn btn-outline';
-      }
-
-      if (activeProviderPill) activeProviderPill.textContent = 'OpenCode Zen';
-      if (activeModelText) activeModelText.textContent = state.activeModel;
-    } else {
-      if (cardProviderGroq) cardProviderGroq.classList.add('active');
-      if (cardProviderZen) cardProviderZen.classList.remove('active');
-
-      if (btnSelectGroq) {
-        btnSelectGroq.textContent = 'Active Engine ✓';
-        btnSelectGroq.className = 'btn btn-primary';
-      }
-      if (btnSelectZen) {
-        btnSelectZen.textContent = 'Select OpenCode Zen';
-        btnSelectZen.className = 'btn btn-outline';
-      }
-
-      if (activeProviderPill) activeProviderPill.textContent = 'Groq API';
-      if (activeModelText) activeModelText.textContent = 'llama-3.3-70b-versatile';
+    } catch (e) {
+      console.error('Failed to load providers from API', e);
     }
-
-    document.querySelectorAll('#opencodeModelsList .model-option').forEach(btn => {
-      const mName = btn.getAttribute('data-model');
-      const isSelected = (mName === state.activeModel) && (state.activeProvider === 'opencode_zen');
-      btn.classList.toggle('active', isSelected);
-      btn.textContent = isSelected ? `✓ ${mName}` : mName;
-    });
-
-    saveSettings({ provider: state.activeProvider });
   }
 
-  if (btnSelectGroq) {
-    btnSelectGroq.addEventListener('click', () => {
-      updateProviderUI('groq', 'llama-3.3-70b-versatile');
-      showToast('AI Provider set to Groq API 🚀', 'info');
+  function renderProvidersUI(providers, activeProvKey) {
+    const container = document.getElementById('providersListContainer');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const providerIcons = {
+      groq: '🚀',
+      opencode_zen: '⚡',
+      openai: '🤖',
+      gemini: '✨',
+      openrouter: '🌐',
+      bytez: '🧬'
+    };
+
+    Object.keys(providers).forEach(provKey => {
+      const p = providers[provKey];
+      const isActive = provKey === activeProvKey;
+
+      const card = document.createElement('div');
+      card.className = `provider-card ${isActive ? 'active' : ''}`;
+      card.style.cssText = `
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid ${isActive ? 'var(--pink-accent)' : 'rgba(255, 255, 255, 0.1)'};
+        border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px;
+        position: relative; box-shadow: ${isActive ? '0 0 15px rgba(255, 105, 180, 0.2)' : 'none'};
+      `;
+
+      let modelOptionsHtml = (p.models || []).map(m =>
+        `<option value="${escapeHtml(m)}" ${m === p.active_model ? 'selected' : ''}>${escapeHtml(m)}</option>`
+      ).join('');
+
+      card.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.6rem;">${providerIcons[provKey] || '⚡'}</span>
+            <div>
+              <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700;">${escapeHtml(p.name)}</h3>
+              <span style="font-size: 0.75rem; color: var(--text-muted); text-decoration: none;">${escapeHtml(p.base_url)}</span>
+            </div>
+          </div>
+          <button class="btn btn-sm ${isActive ? 'btn-primary' : 'btn-outline'} btn-select-provider" data-provider="${provKey}">
+            ${isActive ? 'Active Engine ✓' : 'Select Provider'}
+          </button>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Active Thinking Model:</label>
+          <div style="display: flex; gap: 6px;">
+            <select class="custom-input select-model" data-provider="${provKey}" style="flex: 1; padding: 6px 10px; font-size: 0.85rem;">
+              ${modelOptionsHtml}
+            </select>
+            <button class="btn btn-sm btn-outline btn-save-model" data-provider="${provKey}">Save</button>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">API Key:</label>
+          <div style="display: flex; gap: 6px;">
+            <input type="password" class="custom-input input-api-key" data-provider="${provKey}" value="${escapeHtml(p.api_key || '')}" placeholder="Enter ${escapeHtml(p.name)} API Key..." style="flex: 1; padding: 6px 10px; font-size: 0.85rem;" />
+            <button class="btn btn-sm btn-outline btn-save-key" data-provider="${provKey}">Save</button>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Base Endpoint URL:</label>
+          <div style="display: flex; gap: 6px;">
+            <input type="text" class="custom-input input-base-url" data-provider="${provKey}" value="${escapeHtml(p.base_url || '')}" placeholder="Base URL..." style="flex: 1; padding: 6px 10px; font-size: 0.85rem;" />
+            <button class="btn btn-sm btn-outline btn-save-url" data-provider="${provKey}">Save</button>
+          </div>
+        </div>
+      `;
+
+      container.appendChild(card);
+    });
+
+    container.querySelectorAll('.btn-select-provider').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const provKey = btn.getAttribute('data-provider');
+        await updateProviderConfig(provKey);
+        showToast(`Switched active AI provider to ${providers[provKey].name}! ⚡`, 'success');
+      });
+    });
+
+    container.querySelectorAll('.btn-save-model').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const provKey = btn.getAttribute('data-provider');
+        const selectElem = container.querySelector(`.select-model[data-provider="${provKey}"]`);
+        if (selectElem) {
+          await updateProviderConfig(provKey, { model: selectElem.value });
+          showToast(`Saved active model for ${providers[provKey].name}! 🧠`, 'success');
+        }
+      });
+    });
+
+    container.querySelectorAll('.btn-save-key').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const provKey = btn.getAttribute('data-provider');
+        const inputElem = container.querySelector(`.input-api-key[data-provider="${provKey}"]`);
+        if (inputElem) {
+          await updateProviderConfig(provKey, { api_key: inputElem.value });
+          showToast(`Saved API key for ${providers[provKey].name}! 🔑`, 'success');
+        }
+      });
+    });
+
+    container.querySelectorAll('.btn-save-url').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const provKey = btn.getAttribute('data-provider');
+        const inputElem = container.querySelector(`.input-base-url[data-provider="${provKey}"]`);
+        if (inputElem) {
+          await updateProviderConfig(provKey, { base_url: inputElem.value });
+          showToast(`Saved Base URL for ${providers[provKey].name}! 🌐`, 'success');
+        }
+      });
     });
   }
 
-  if (btnSelectZen) {
-    btnSelectZen.addEventListener('click', () => {
-      updateProviderUI('opencode_zen', state.activeModel);
-      showToast('AI Provider set to OpenCode Zen ⚡', 'info');
-    });
+  async function updateProviderConfig(provKey, extra = {}) {
+    try {
+      const payload = { provider: provKey, ...extra };
+      const res = await fetch('/api/provider', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.status === 'success' && data.providers) {
+        state.activeProvider = data.active_provider;
+        state.providers = data.providers;
+        renderProvidersUI(data.providers, data.active_provider);
+
+        const activeProviderPill = document.getElementById('activeProviderPill');
+        const activeModelText = document.getElementById('activeModelText');
+        if (activeProviderPill) activeProviderPill.textContent = data.providers[data.active_provider]?.name || data.active_provider;
+        if (activeModelText) activeModelText.textContent = data.providers[data.active_provider]?.active_model || 'default';
+      }
+    } catch (e) {
+      showToast('Failed to update provider config', 'error');
+    }
   }
 
-  document.querySelectorAll('#opencodeModelsList .model-option').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const selectedModel = btn.getAttribute('data-model');
-      updateProviderUI('opencode_zen', selectedModel);
-      showToast(`Model set to ${selectedModel} ⚡`, 'info');
-    });
-  });
+  loadProvidersFromBackend();
 
   // 7. Settings Events Controller
   document.querySelectorAll('.theme-pill').forEach(pill => {

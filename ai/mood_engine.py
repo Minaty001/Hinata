@@ -29,7 +29,6 @@ class MoodState:
     """The current mood state and its modifiers."""
 
     name: str = "happy"
-    emoji_boost: bool = True
     energy_modifier: float = 1.0
     tone_modifier: str = "cheerful and bright"
     description: str = "Bright, cheerful, and positive."
@@ -100,7 +99,6 @@ class MoodEngine:
         raw = self._moods.get(name, self._moods.get("happy", {}))
         return MoodState(
             name=name,
-            emoji_boost=raw.get("emoji_boost", False),
             energy_modifier=raw.get("energy_modifier", 1.0),
             tone_modifier=raw.get("tone_modifier", "cheerful and bright"),
             description=raw.get("description", ""),
@@ -130,7 +128,6 @@ class MoodEngine:
             logger.error("Failed to load moods: %s", exc)
             self._moods = {
                 "happy": {
-                    "emoji_boost": True,
                     "energy_modifier": 1.2,
                     "description": "Bright, cheerful, and positive.",
                     "tone_modifier": "cheerful and bright",

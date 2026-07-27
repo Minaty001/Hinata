@@ -26,7 +26,6 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from ai.context_builder import build_conversation_context
-from ai.groq_client import GroqClient
 from ai.mood_engine import MoodEngine
 from ai.personality_engine import PersonalityEngine
 from ai.prompt_builder import PromptBuilder

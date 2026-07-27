@@ -9,12 +9,6 @@ from __future__ import annotations
 
 import time
 from collections import defaultdict
-from collections.abc import Callable
-from functools import wraps
-from typing import Any
-
-from telegram import Update
-from telegram.ext import ContextTypes
 
 from constants import RATE_LIMIT_MESSAGES, RATE_LIMIT_WINDOW
 
@@ -73,33 +67,3 @@ class RateLimiter:
 
 # Global rate limiter instance (cached in bot_data)
 rate_limiter = RateLimiter()
-
-
-def rate_limit_decorator(
-    max_messages: int = RATE_LIMIT_MESSAGES,
-    window: int = RATE_LIMIT_WINDOW,
-) -> Callable:
-    """Decorator that applies rate limiting to a handler function.
-
-    Usage::
-
-        @rate_limit_decorator()
-        async def my_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-            ...
-
-    If rate-limited, sends a friendly warning and does not call the handler.
-    """
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Any:
-            if update.effective_user:
-                limiter = context.bot_data.get("rate_limiter", rate_limiter)
-                if limiter.is_limited(update.effective_user.id):
-                    await update.message.reply_text(
-                        "Whoa, slow down! 😅 Give me a moment to breathe. "
-                        "Try again in a few seconds.",
-                    )
-                    return None
-            return await func(update, context)
-        return wrapper
-    return decorator

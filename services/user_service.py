@@ -63,9 +63,20 @@ async def get_or_create_user(
             user.username = username
         if display_name:
             user.display_name = display_name
-        await session.commit()
-
     return user
+
+
+WEB_USER_TELEGRAM_ID = 999999
+
+
+async def get_or_create_web_user(session: AsyncSession) -> User:
+    """Retrieve or create standard user record for the Web UI."""
+    return await get_or_create_user(
+        session,
+        telegram_id=WEB_USER_TELEGRAM_ID,
+        username="web_user",
+        display_name="Web User",
+    )
 
 
 async def get_user_by_id(

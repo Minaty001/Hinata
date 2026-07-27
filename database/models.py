@@ -30,7 +30,7 @@ class User(Base):
     telegram_id: Mapped[int] = mapped_column(Integer, unique=True, nullable=False, index=True)
     username: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
     display_name: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
-    language: Mapped[str] = mapped_column(String(16), default="en")
+    language: Mapped[str] = mapped_column(String(16), default="hinglish")
     timezone: Mapped[str] = mapped_column(String(64), default="Asia/Kolkata")
     relationship_score: Mapped[int] = mapped_column(Integer, default=0)
     current_mood: Mapped[str] = mapped_column(String(32), default="happy")
@@ -42,12 +42,54 @@ class User(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
 
     # Relationships
+    chains = relationship("Chain", back_populates="user", cascade="all, delete-orphan")
     conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
     memories = relationship("Memory", back_populates="user", cascade="all, delete-orphan")
     preferences = relationship("Preference", back_populates="user", uselist=False, cascade="all, delete-orphan")
 
     def __repr__(self) -> str:
         return f"<User(id={self.id}, telegram_id={self.telegram_id}, username={self.username})>"
+
+
+class Chain(Base):
+    """Represents a conversation chain / thread session."""
+
+    __tablename__ = "chains"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    chain_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    title: Mapped[str] = mapped_column(String(256), default="New Conversation")
+    is_archived: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+
+    # Relationships
+    user = relationship("User", back_populates="chains")
+    conversations = relationship("Conversation", back_populates="chain", cascade="all, delete-orphan")
+    indices = relationship("SessionIndex", back_populates="chain", cascade="all, delete-orphan")
+
+    def __repr__(self) -> str:
+        return f"<Chain(id={self.id}, chain_id={self.chain_id}, title={self.title})>"
+
+
+class SessionIndex(Base):
+    """Session Topic Index for fast query jump without loading full conversation logs."""
+
+    __tablename__ = "session_indices"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    chain_id: Mapped[str] = mapped_column(String(64), ForeignKey("chains.chain_id", ondelete="CASCADE"), nullable=False, index=True)
+    topic: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    summary: Mapped[str] = mapped_column(Text, nullable=False)
+    keywords: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
+    page_number: Mapped[int] = mapped_column(Integer, default=1)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+    chain = relationship("Chain", back_populates="indices")
+
+    def __repr__(self) -> str:
+        return f"<SessionIndex(id={self.id}, chain_id={self.chain_id}, topic={self.topic})>"
 
 
 class Conversation(Base):
@@ -57,15 +99,17 @@ class Conversation(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    chain_id: Mapped[Optional[str]] = mapped_column(String(64), ForeignKey("chains.chain_id", ondelete="CASCADE"), nullable=True, index=True)
     role: Mapped[str] = mapped_column(String(16), nullable=False)  # "user" or "assistant"
     message: Mapped[str] = mapped_column(Text, nullable=False)
     timestamp: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
 
     # Relationships
     user = relationship("User", back_populates="conversations")
+    chain = relationship("Chain", back_populates="conversations")
 
     def __repr__(self) -> str:
-        return f"<Conversation(id={self.id}, role={self.role}, user_id={self.user_id})>"
+        return f"<Conversation(id={self.id}, chain_id={self.chain_id}, role={self.role})>"
 
 
 class Memory(Base):
@@ -99,7 +143,7 @@ class Preference(Base):
     emoji_level: Mapped[str] = mapped_column(String(16), default="normal")  # none, low, normal, high
     reply_length: Mapped[str] = mapped_column(String(16), default="normal")  # short, normal, long
     default_personality: Mapped[str] = mapped_column(String(32), default="sweet")
-    language: Mapped[str] = mapped_column(String(16), default="en")
+    language: Mapped[str] = mapped_column(String(16), default="hinglish")
     memory_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)

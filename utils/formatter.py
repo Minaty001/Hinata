@@ -14,11 +14,6 @@ def bold(text: str) -> str:
     return f"*{text}*"
 
 
-def italic(text: str) -> str:
-    """Format text as Telegram Markdown italic."""
-    return f"_{text}_"
-
-
 def code(text: str) -> str:
     """Format text as inline code."""
     return f"`{text}`"
@@ -32,12 +27,6 @@ def code_block(text: str, language: str = "") -> str:
 def bullet_list(items: list[str]) -> str:
     """Format a list of strings as a Markdown bullet list."""
     return "\n".join(f"• {item}" for item in items)
-
-
-def header(text: str, level: int = 1) -> str:
-    """Format text as a Markdown header."""
-    prefix = "#" * level
-    return f"{prefix} {text}"
 
 
 def key_value(key: str, value: str, separator: str = ": ") -> str:
