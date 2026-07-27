@@ -1,0 +1,155 @@
+{
+  "batchIndex": 3,
+  "files": [
+    {
+      "path": "database/database.py",
+      "language": "python",
+      "sizeLines": 88,
+      "fileCategory": "code"
+    },
+    {
+      "path": "database/models.py",
+      "language": "python",
+      "sizeLines": 126,
+      "fileCategory": "code"
+    },
+    {
+      "path": "handlers/command_handler.py",
+      "language": "python",
+      "sizeLines": 347,
+      "fileCategory": "code"
+    },
+    {
+      "path": "memory/memory_manager.py",
+      "language": "python",
+      "sizeLines": 165,
+      "fileCategory": "code"
+    },
+    {
+      "path": "services/chat_service.py",
+      "language": "python",
+      "sizeLines": 108,
+      "fileCategory": "code"
+    },
+    {
+      "path": "services/user_service.py",
+      "language": "python",
+      "sizeLines": 130,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "database/database.py": [
+      "config.py"
+    ],
+    "database/models.py": [
+      "database/database.py"
+    ],
+    "handlers/command_handler.py": [
+      "constants.py",
+      "memory/memory_manager.py",
+      "services/chat_service.py",
+      "services/user_service.py"
+    ],
+    "memory/memory_manager.py": [
+      "database/models.py"
+    ],
+    "services/chat_service.py": [
+      "database/models.py"
+    ],
+    "services/user_service.py": [
+      "database/models.py"
+    ]
+  },
+  "neighborMap": {
+    "database/database.py": [
+      {
+        "path": "config.py",
+        "batchIndex": 2,
+        "symbols": [
+          "_resolve_db_url",
+          "Settings"
+        ]
+      },
+      {
+        "path": "bot.py",
+        "batchIndex": 1,
+        "symbols": [
+          "create_application"
+        ]
+      }
+    ],
+    "database/models.py": [
+      {
+        "path": "ai/context_builder.py",
+        "batchIndex": 1,
+        "symbols": [
+          "build_conversation_context",
+          "count_recent_messages"
+        ]
+      },
+      {
+        "path": "handlers/admin_handler.py",
+        "batchIndex": 2,
+        "symbols": [
+          "_require_owner",
+          "admin_stats",
+          "admin_broadcast",
+          "admin_maintenance",
+          "admin_logs",
+          "admin_backup",
+          "admin_users",
+          "admin_help",
+          "admin_command"
+        ]
+      }
+    ],
+    "handlers/command_handler.py": [
+      {
+        "path": "constants.py",
+        "batchIndex": 2,
+        "symbols": []
+      },
+      {
+        "path": "bot.py",
+        "batchIndex": 1,
+        "symbols": [
+          "create_application"
+        ]
+      }
+    ],
+    "memory/memory_manager.py": [
+      {
+        "path": "handlers/message_handler.py",
+        "batchIndex": 1,
+        "symbols": [
+          "handle_message",
+          "_send_reply",
+          "_format_preferences"
+        ]
+      }
+    ],
+    "services/chat_service.py": [
+      {
+        "path": "handlers/message_handler.py",
+        "batchIndex": 1,
+        "symbols": [
+          "handle_message",
+          "_send_reply",
+          "_format_preferences"
+        ]
+      }
+    ],
+    "services/user_service.py": [
+      {
+        "path": "handlers/message_handler.py",
+        "batchIndex": 1,
+        "symbols": [
+          "handle_message",
+          "_send_reply",
+          "_format_preferences"
+        ]
+      }
+    ]
+  }
+}

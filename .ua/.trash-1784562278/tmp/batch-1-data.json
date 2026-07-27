@@ -1,0 +1,211 @@
+{
+  "batchIndex": 2,
+  "files": [
+    {
+      "path": "ai/groq_client.py",
+      "language": "python",
+      "sizeLines": 159,
+      "fileCategory": "code"
+    },
+    {
+      "path": "app.py",
+      "language": "python",
+      "sizeLines": 105,
+      "fileCategory": "code"
+    },
+    {
+      "path": "config.py",
+      "language": "python",
+      "sizeLines": 71,
+      "fileCategory": "code"
+    },
+    {
+      "path": "constants.py",
+      "language": "python",
+      "sizeLines": 119,
+      "fileCategory": "code"
+    },
+    {
+      "path": "database/backup.py",
+      "language": "python",
+      "sizeLines": 108,
+      "fileCategory": "code"
+    },
+    {
+      "path": "handlers/admin_handler.py",
+      "language": "python",
+      "sizeLines": 270,
+      "fileCategory": "code"
+    },
+    {
+      "path": "utils/formatter.py",
+      "language": "python",
+      "sizeLines": 50,
+      "fileCategory": "code"
+    },
+    {
+      "path": "utils/validators.py",
+      "language": "python",
+      "sizeLines": 81,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "ai/groq_client.py": [
+      "config.py",
+      "constants.py"
+    ],
+    "app.py": [
+      "config.py",
+      "constants.py"
+    ],
+    "config.py": [],
+    "constants.py": [],
+    "database/backup.py": [
+      "config.py",
+      "constants.py"
+    ],
+    "handlers/admin_handler.py": [
+      "config.py",
+      "constants.py",
+      "database/models.py",
+      "utils/formatter.py",
+      "utils/validators.py"
+    ],
+    "utils/formatter.py": [],
+    "utils/validators.py": [
+      "constants.py"
+    ]
+  },
+  "neighborMap": {
+    "ai/groq_client.py": [
+      {
+        "path": "bot.py",
+        "batchIndex": 1,
+        "symbols": [
+          "create_application"
+        ]
+      },
+      {
+        "path": "handlers/message_handler.py",
+        "batchIndex": 1,
+        "symbols": [
+          "handle_message",
+          "_send_reply",
+          "_format_preferences"
+        ]
+      }
+    ],
+    "config.py": [
+      {
+        "path": "bot.py",
+        "batchIndex": 1,
+        "symbols": [
+          "create_application"
+        ]
+      },
+      {
+        "path": "database/database.py",
+        "batchIndex": 3,
+        "symbols": [
+          "Base",
+          "init_database",
+          "get_session",
+          "close_database"
+        ]
+      }
+    ],
+    "constants.py": [
+      {
+        "path": "ai/mood_engine.py",
+        "batchIndex": 1,
+        "symbols": [
+          "MoodState",
+          "MoodEngine"
+        ]
+      },
+      {
+        "path": "ai/personality_engine.py",
+        "batchIndex": 1,
+        "symbols": [
+          "PersonalityEngine"
+        ]
+      },
+      {
+        "path": "ai/relationship_engine.py",
+        "batchIndex": 1,
+        "symbols": [
+          "Relationship",
+          "RelationshipEngine"
+        ]
+      },
+      {
+        "path": "ai/response_cleaner.py",
+        "batchIndex": 1,
+        "symbols": [
+          "clean_response",
+          "split_long_message",
+          "escape_markdown",
+          "_truncate_at_sentence"
+        ]
+      },
+      {
+        "path": "handlers/command_handler.py",
+        "batchIndex": 3,
+        "symbols": [
+          "start_command",
+          "help_command",
+          "about_command",
+          "ping_command",
+          "version_command",
+          "settings_command",
+          "personality_command",
+          "mood_command",
+          "memory_command",
+          "forget_command",
+          "reset_command"
+        ]
+      },
+      {
+        "path": "utils/rate_limit.py",
+        "batchIndex": 1,
+        "symbols": [
+          "RateLimiter",
+          "rate_limit_decorator"
+        ]
+      }
+    ],
+    "handlers/admin_handler.py": [
+      {
+        "path": "database/models.py",
+        "batchIndex": 3,
+        "symbols": [
+          "_utcnow",
+          "User",
+          "Conversation",
+          "Memory",
+          "Preference",
+          "Setting"
+        ]
+      },
+      {
+        "path": "bot.py",
+        "batchIndex": 1,
+        "symbols": [
+          "create_application"
+        ]
+      }
+    ],
+    "utils/validators.py": [
+      {
+        "path": "handlers/message_handler.py",
+        "batchIndex": 1,
+        "symbols": [
+          "handle_message",
+          "_send_reply",
+          "_format_preferences"
+        ]
+      }
+    ]
+  }
+}

@@ -13,7 +13,7 @@ import json
 import logging
 import random
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -62,7 +62,7 @@ class MoodEngine:
             A MoodState with the selected mood details.
         """
         if hour is None:
-            hour = datetime.now().hour
+            hour = datetime.now(timezone.utc).hour
 
         # 70% chance to keep the existing mood
         if current_mood and current_mood in self._moods and random.random() < 0.7:

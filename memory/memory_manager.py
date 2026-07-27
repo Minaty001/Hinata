@@ -155,7 +155,7 @@ async def forget_all_memories(
     Returns:
         Number of memories deactivated.
     """
-    memories = await get_memories(session, user_id)
+    memories = await get_memories(session, user_id, limit=10000)
     count = 0
     for mem in memories:
         mem.is_active = False

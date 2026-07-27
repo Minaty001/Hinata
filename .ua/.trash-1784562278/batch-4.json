@@ -1,0 +1,77 @@
+{
+  "nodes": [
+    {
+      "id": "config:.env.example",
+      "type": "config",
+      "name": ".env.example",
+      "filePath": ".env.example",
+      "summary": "Example environment configuration template defining 7 runtime variables including bot token, Groq API key, SQLite database URL, owner Telegram ID, log level, default language, and timezone for the Hinata Telegram bot.",
+      "tags": ["configuration", "environment", "security", "setup"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "README.md",
+      "summary": "Project overview documentation with 12 sections covering features, tech stack, quick-start installation guide, 11 bot commands, project directory structure across 13 directories, deployment options, and license information for the Hinata AI Telegram companion.",
+      "tags": ["documentation", "entry-point", "overview", "getting-started"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:memory.md",
+      "type": "document",
+      "name": "memory.md",
+      "filePath": "memory.md",
+      "summary": "Comprehensive project memory and development progress tracker documenting 16 development phases, file completion status across all directories, database and API status, known issues categorized by severity, important architectural decisions, coding standards, and session logs across 8 development sessions for the Hinata project.",
+      "tags": ["documentation", "project-management", "development-log", "reference"],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:requirements.txt",
+      "type": "document",
+      "name": "requirements.txt",
+      "filePath": "requirements.txt",
+      "summary": "Python dependency specification listing 7 required packages including python-telegram-bot for Telegram integration, SQLAlchemy with aiosqlite for database, httpx for HTTP requests, Pydantic v1 for validation, python-dotenv for environment management, and tzdata for timezone support.",
+      "tags": ["documentation", "dependencies", "python", "requirements"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "document:README.md",
+      "target": "config:.env.example",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "document:requirements.txt",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:memory.md",
+      "target": "config:.env.example",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:memory.md",
+      "target": "document:requirements.txt",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:.env.example",
+      "target": "document:requirements.txt",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

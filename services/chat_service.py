@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models import Conversation
@@ -87,15 +87,10 @@ async def clear_conversation_history(
     Returns:
         Number of deleted records.
     """
-    stmt = select(Conversation).where(Conversation.user_id == user_id)
+    stmt = delete(Conversation).where(Conversation.user_id == user_id)
     result = await session.execute(stmt)
-    messages = result.scalars().all()
-
-    for msg in messages:
-        await session.delete(msg)
-
     await session.commit()
-    count = len(messages)
+    count = result.rowcount
     logger.info("Cleared %d messages for user_id=%d.", count, user_id)
     return count
 

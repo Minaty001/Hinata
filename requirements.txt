@@ -17,8 +17,5 @@ pydantic>=1.10.0,<2
 # Environment
 python-dotenv>=1.0.0
 
-# Async
-asyncio>=3.4.3
-
 # Date/Time
 tzdata>=2024.1

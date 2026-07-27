@@ -1,0 +1,37 @@
+{
+  "issues": [],
+  "warnings": [
+    "Node file:ai/__init__.py has no edges (orphan)",
+    "Node file:backups/.gitkeep has no edges (orphan)",
+    "Node file:data/cache/.gitkeep has no edges (orphan)",
+    "Node file:database/__init__.py has no edges (orphan)",
+    "Node file:handlers/__init__.py has no edges (orphan)",
+    "Node file:memory/__init__.py has no edges (orphan)",
+    "Node file:services/__init__.py has no edges (orphan)",
+    "Node file:tests/__init__.py has no edges (orphan)",
+    "Node file:utils/__init__.py has no edges (orphan)"
+  ],
+  "stats": {
+    "totalNodes": 122,
+    "totalEdges": 249,
+    "totalLayers": 7,
+    "tourSteps": 10,
+    "nodeTypes": {
+      "file": 36,
+      "function": 66,
+      "class": 13,
+      "config": 4,
+      "document": 3
+    },
+    "edgeTypes": {
+      "imports": 51,
+      "contains": 79,
+      "exports": 79,
+      "calls": 27,
+      "inherits": 5,
+      "documents": 4,
+      "related": 2,
+      "depends_on": 2
+    }
+  }
+}

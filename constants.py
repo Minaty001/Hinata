@@ -115,5 +115,5 @@ GROQ_RETRY_DELAY: Final[float] = 1.0  # seconds
 # ── Groq ───────────────────────────────────────────────────────────────────
 
 GROQ_MODEL: Final[str] = "llama-3.3-70b-versatile"
-GROQ_MAX_TOKENS: Final[int] = 1024
+GROQ_MAX_TOKENS: Final[int] = 50
 GROQ_TEMPERATURE: Final[float] = 0.8

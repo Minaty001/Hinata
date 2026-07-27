@@ -1,0 +1,54 @@
+{
+  "nodes": [
+    {
+      "id": "config:prompts/moods.json",
+      "type": "config",
+      "name": "moods.json",
+      "filePath": "prompts/moods.json",
+      "summary": "Defines mood configurations for the Hinata AI companion, with 9 emotional states (happy, sad, sleepy, excited, curious, relaxed, energetic, shy, thoughtful) each carrying energy modifiers, tone settings, and emoji preferences that influence conversational behavior.",
+      "tags": ["configuration", "prompts", "moods", "emotional-states", "chat-personality"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:prompts/personalities.json",
+      "type": "config",
+      "name": "personalities.json",
+      "filePath": "prompts/personalities.json",
+      "summary": "Defines personality profiles for the Hinata AI companion, with 8 distinct personas (Sweet, Calm, Smart, Gamer, Playful, Curious, Boss, Supportive) each specifying vocabulary, humor level, emoji frequency, greeting style, energy level, and reply length.",
+      "tags": ["configuration", "prompts", "personalities", "personas", "character-definitions"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:prompts/templates.json",
+      "type": "config",
+      "name": "templates.json",
+      "filePath": "prompts/templates.json",
+      "summary": "Defines message templates for the Hinata AI companion, including the core system prompt with dynamic personality/mood/relationship slot-filling placeholders, greeting variants, and fallback error responses.",
+      "tags": ["configuration", "prompts", "templates", "system-prompt", "message-templates"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:prompts/templates.json",
+      "target": "config:prompts/moods.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:prompts/templates.json",
+      "target": "config:prompts/personalities.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:prompts/moods.json",
+      "target": "config:prompts/personalities.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

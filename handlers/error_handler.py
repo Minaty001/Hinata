@@ -22,7 +22,13 @@ async def error_handler(update: Update | None, context: ContextTypes.DEFAULT_TYP
     Logs the full error traceback and notifies the user if possible.
     """
     logger.error("Exception while handling an update: %s", context.error)
-    logger.error(traceback.format_exc())
+    logger.error(
+        "".join(
+            traceback.format_exception(
+                type(context.error), context.error, context.error.__traceback__
+            )
+        )
+    )
 
     if update and update.effective_message:
         await update.effective_message.reply_text(

@@ -95,10 +95,9 @@ def rate_limit_decorator(
             if update.effective_user:
                 limiter = context.bot_data.get("rate_limiter", rate_limiter)
                 if limiter.is_limited(update.effective_user.id):
-                    remaining = limiter.remaining(update.effective_user.id)
                     await update.message.reply_text(
-                        f"Whoa, slow down! 😅 Give me a moment to breathe. "
-                        f"You can send {remaining} more messages in a bit.",
+                        "Whoa, slow down! 😅 Give me a moment to breathe. "
+                        "Try again in a few seconds.",
                     )
                     return None
             return await func(update, context)

@@ -1,0 +1,166 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 3,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 3,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 0,
+      "failed": 0,
+      "skipped": 3
+    }
+  },
+  "results": [
+    {
+      "path": "prompts/moods.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 65,
+      "nonEmptyLines": 65,
+      "sections": [
+        {
+          "heading": "happy",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "sad",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "sleepy",
+          "level": 1,
+          "line": 16
+        },
+        {
+          "heading": "excited",
+          "level": 1,
+          "line": 23
+        },
+        {
+          "heading": "curious",
+          "level": 1,
+          "line": 30
+        },
+        {
+          "heading": "relaxed",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "energetic",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "shy",
+          "level": 1,
+          "line": 51
+        },
+        {
+          "heading": "thoughtful",
+          "level": 1,
+          "line": 58
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 9
+      }
+    },
+    {
+      "path": "prompts/personalities.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 90,
+      "nonEmptyLines": 90,
+      "sections": [
+        {
+          "heading": "sweet",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "calm",
+          "level": 1,
+          "line": 13
+        },
+        {
+          "heading": "smart",
+          "level": 1,
+          "line": 24
+        },
+        {
+          "heading": "gamer",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "playful",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "curious",
+          "level": 1,
+          "line": 57
+        },
+        {
+          "heading": "boss",
+          "level": 1,
+          "line": 68
+        },
+        {
+          "heading": "supportive",
+          "level": 1,
+          "line": 79
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 8
+      }
+    },
+    {
+      "path": "prompts/templates.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 18,
+      "nonEmptyLines": 18,
+      "sections": [
+        {
+          "heading": "system_prompt_template",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "greeting_templates",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "error_templates",
+          "level": 1,
+          "line": 13
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 3
+      }
+    }
+  ]
+}

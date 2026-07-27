@@ -47,6 +47,7 @@ async def main() -> None:
 
     # Initialize database
     from database.database import init_database, close_database
+    import database.models  # noqa: F401 — registers models with Base.metadata
 
     await init_database()
 

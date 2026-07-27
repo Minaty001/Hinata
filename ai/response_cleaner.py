@@ -85,6 +85,7 @@ def escape_markdown(text: str) -> str:
     for i, part in enumerate(parts):
         if not part.startswith("`"):
             # Escape special markdown characters
+            part = part.replace("\\", "\\\\")
             part = part.replace("_", r"\_")
             part = part.replace("*", r"\*")
             part = part.replace("[", r"\[")

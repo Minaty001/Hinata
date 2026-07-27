@@ -17,8 +17,10 @@ from telegram.ext import (
     filters,
 )
 
+from ai.groq_client import GroqClient
 from ai.mood_engine import MoodEngine
 from ai.personality_engine import PersonalityEngine
+from ai.prompt_builder import PromptBuilder
 from ai.relationship_engine import RelationshipEngine
 from config import settings
 from database.database import async_session_factory
@@ -65,6 +67,8 @@ def create_application() -> Application:
     application.bot_data["mood_engine"] = MoodEngine()
     application.bot_data["relationship_engine"] = RelationshipEngine()
     application.bot_data["rate_limiter"] = rate_limiter
+    application.bot_data["prompt_builder"] = PromptBuilder()
+    application.bot_data["groq_client"] = GroqClient()
 
     # ── Command Handlers ──────────────────────────────────────────
     # User commands

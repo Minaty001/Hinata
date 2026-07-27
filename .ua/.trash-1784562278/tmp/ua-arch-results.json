@@ -1,0 +1,502 @@
+{
+  "scriptCompleted": true,
+  "directoryGroups": {
+    "ai": [
+      "file:ai/context_builder.py",
+      "file:ai/mood_engine.py",
+      "file:ai/personality_engine.py",
+      "file:ai/prompt_builder.py",
+      "file:ai/relationship_engine.py",
+      "file:ai/response_cleaner.py",
+      "file:ai/groq_client.py",
+      "file:ai/__init__.py",
+      "file:ai/language_detector.py"
+    ],
+    "root": [
+      "file:bot.py",
+      "file:app.py",
+      "file:config.py",
+      "file:constants.py",
+      "config:.env.example",
+      "document:README.md",
+      "document:memory.md",
+      "document:requirements.txt"
+    ],
+    "handlers": [
+      "file:handlers/error_handler.py",
+      "file:handlers/message_handler.py",
+      "file:handlers/admin_handler.py",
+      "file:handlers/command_handler.py",
+      "file:handlers/__init__.py"
+    ],
+    "utils": [
+      "file:utils/rate_limit.py",
+      "file:utils/formatter.py",
+      "file:utils/validators.py",
+      "file:utils/__init__.py",
+      "file:utils/helpers.py",
+      "file:utils/retry.py"
+    ],
+    "database": [
+      "file:database/backup.py",
+      "file:database/database.py",
+      "file:database/models.py",
+      "file:database/__init__.py"
+    ],
+    "memory": [
+      "file:memory/memory_manager.py",
+      "file:memory/__init__.py"
+    ],
+    "services": [
+      "file:services/chat_service.py",
+      "file:services/user_service.py",
+      "file:services/__init__.py"
+    ],
+    "backups": [
+      "file:backups/.gitkeep"
+    ],
+    "data": [
+      "file:data/cache/.gitkeep"
+    ],
+    "tests": [
+      "file:tests/__init__.py"
+    ],
+    "prompts": [
+      "config:prompts/moods.json",
+      "config:prompts/personalities.json",
+      "config:prompts/templates.json"
+    ]
+  },
+  "nodeTypeGroups": {
+    "file": [
+      "file:ai/context_builder.py",
+      "file:ai/mood_engine.py",
+      "file:ai/personality_engine.py",
+      "file:ai/prompt_builder.py",
+      "file:ai/relationship_engine.py",
+      "file:ai/response_cleaner.py",
+      "file:bot.py",
+      "file:handlers/error_handler.py",
+      "file:handlers/message_handler.py",
+      "file:utils/rate_limit.py",
+      "file:ai/groq_client.py",
+      "file:app.py",
+      "file:config.py",
+      "file:constants.py",
+      "file:database/backup.py",
+      "file:handlers/admin_handler.py",
+      "file:utils/formatter.py",
+      "file:utils/validators.py",
+      "file:database/database.py",
+      "file:database/models.py",
+      "file:handlers/command_handler.py",
+      "file:memory/memory_manager.py",
+      "file:services/chat_service.py",
+      "file:services/user_service.py",
+      "file:ai/__init__.py",
+      "file:ai/language_detector.py",
+      "file:backups/.gitkeep",
+      "file:data/cache/.gitkeep",
+      "file:database/__init__.py",
+      "file:handlers/__init__.py",
+      "file:memory/__init__.py",
+      "file:services/__init__.py",
+      "file:tests/__init__.py",
+      "file:utils/__init__.py",
+      "file:utils/helpers.py",
+      "file:utils/retry.py"
+    ],
+    "config": [
+      "config:.env.example",
+      "config:prompts/moods.json",
+      "config:prompts/personalities.json",
+      "config:prompts/templates.json"
+    ],
+    "document": [
+      "document:README.md",
+      "document:memory.md",
+      "document:requirements.txt"
+    ]
+  },
+  "crossCategoryEdges": [
+    {
+      "fromType": "document",
+      "toType": "config",
+      "edgeType": "documents",
+      "count": 2
+    },
+    {
+      "fromType": "config",
+      "toType": "document",
+      "edgeType": "related",
+      "count": 1
+    }
+  ],
+  "interGroupImports": [
+    {
+      "from": "handlers",
+      "to": "ai",
+      "count": 7
+    },
+    {
+      "from": "ai",
+      "to": "root",
+      "count": 6
+    },
+    {
+      "from": "root",
+      "to": "ai",
+      "count": 5
+    },
+    {
+      "from": "root",
+      "to": "handlers",
+      "count": 4
+    },
+    {
+      "from": "handlers",
+      "to": "services",
+      "count": 4
+    },
+    {
+      "from": "handlers",
+      "to": "utils",
+      "count": 4
+    },
+    {
+      "from": "database",
+      "to": "root",
+      "count": 3
+    },
+    {
+      "from": "handlers",
+      "to": "root",
+      "count": 3
+    },
+    {
+      "from": "utils",
+      "to": "root",
+      "count": 2
+    },
+    {
+      "from": "handlers",
+      "to": "memory",
+      "count": 2
+    },
+    {
+      "from": "services",
+      "to": "database",
+      "count": 2
+    },
+    {
+      "from": "ai",
+      "to": "database",
+      "count": 1
+    },
+    {
+      "from": "root",
+      "to": "database",
+      "count": 1
+    },
+    {
+      "from": "root",
+      "to": "utils",
+      "count": 1
+    },
+    {
+      "from": "handlers",
+      "to": "database",
+      "count": 1
+    },
+    {
+      "from": "memory",
+      "to": "database",
+      "count": 1
+    }
+  ],
+  "intraGroupDensity": {
+    "ai": {
+      "internalEdges": 0,
+      "totalEdges": 19,
+      "density": 0.0
+    },
+    "root": {
+      "internalEdges": 3,
+      "totalEdges": 28,
+      "density": 0.11
+    },
+    "handlers": {
+      "internalEdges": 0,
+      "totalEdges": 25,
+      "density": 0.0
+    },
+    "utils": {
+      "internalEdges": 0,
+      "totalEdges": 7,
+      "density": 0.0
+    },
+    "database": {
+      "internalEdges": 1,
+      "totalEdges": 10,
+      "density": 0.1
+    },
+    "memory": {
+      "internalEdges": 0,
+      "totalEdges": 3,
+      "density": 0.0
+    },
+    "services": {
+      "internalEdges": 0,
+      "totalEdges": 6,
+      "density": 0.0
+    },
+    "backups": {
+      "internalEdges": 0,
+      "totalEdges": 0,
+      "density": 0
+    },
+    "data": {
+      "internalEdges": 0,
+      "totalEdges": 0,
+      "density": 0
+    },
+    "tests": {
+      "internalEdges": 0,
+      "totalEdges": 0,
+      "density": 0
+    },
+    "prompts": {
+      "internalEdges": 0,
+      "totalEdges": 0,
+      "density": 0
+    }
+  },
+  "patternMatches": {
+    "ai": "service",
+    "root": "other",
+    "handlers": "api",
+    "utils": "utility",
+    "database": "data",
+    "memory": "data",
+    "services": "service",
+    "backups": "other",
+    "data": "data",
+    "tests": "test",
+    "prompts": "config"
+  },
+  "deploymentTopology": {
+    "hasDockerfile": false,
+    "hasCompose": false,
+    "hasK8s": false,
+    "hasTerraform": false,
+    "hasCI": false,
+    "infraFiles": []
+  },
+  "dataPipeline": {
+    "schemaFiles": [],
+    "migrationFiles": [],
+    "dataModelFiles": [
+      "file:database/models.py"
+    ],
+    "apiHandlerFiles": [
+      "file:handlers/error_handler.py",
+      "file:handlers/message_handler.py",
+      "file:handlers/admin_handler.py",
+      "file:handlers/command_handler.py"
+    ]
+  },
+  "docCoverage": {
+    "groupsWithDocs": 1,
+    "totalGroups": 11,
+    "coverageRatio": 0.09,
+    "undocumentedGroups": [
+      "ai",
+      "handlers",
+      "utils",
+      "database",
+      "memory",
+      "services",
+      "backups",
+      "data",
+      "tests",
+      "prompts"
+    ]
+  },
+  "dependencyDirection": [
+    {
+      "dependent": "handlers",
+      "dependsOn": "ai"
+    },
+    {
+      "dependent": "ai",
+      "dependsOn": "root"
+    },
+    {
+      "dependent": "ai",
+      "dependsOn": "root"
+    },
+    {
+      "dependent": "root",
+      "dependsOn": "handlers"
+    },
+    {
+      "dependent": "handlers",
+      "dependsOn": "services"
+    },
+    {
+      "dependent": "handlers",
+      "dependsOn": "utils"
+    },
+    {
+      "dependent": "database",
+      "dependsOn": "root"
+    },
+    {
+      "dependent": "root",
+      "dependsOn": "handlers"
+    },
+    {
+      "dependent": "utils",
+      "dependsOn": "root"
+    },
+    {
+      "dependent": "handlers",
+      "dependsOn": "memory"
+    },
+    {
+      "dependent": "services",
+      "dependsOn": "database"
+    },
+    {
+      "dependent": "ai",
+      "dependsOn": "database"
+    },
+    {
+      "dependent": "database",
+      "dependsOn": "root"
+    },
+    {
+      "dependent": "utils",
+      "dependsOn": "root"
+    },
+    {
+      "dependent": "handlers",
+      "dependsOn": "database"
+    },
+    {
+      "dependent": "memory",
+      "dependsOn": "database"
+    }
+  ],
+  "fileStats": {
+    "totalFileNodes": 43,
+    "filesPerGroup": {
+      "ai": 9,
+      "root": 8,
+      "handlers": 5,
+      "utils": 6,
+      "database": 4,
+      "memory": 2,
+      "services": 3,
+      "backups": 1,
+      "data": 1,
+      "tests": 1,
+      "prompts": 3
+    },
+    "nodeTypeCounts": {
+      "file": 36,
+      "config": 4,
+      "document": 3
+    }
+  },
+  "fileFanIn": {
+    "file:constants.py": 11,
+    "file:config.py": 6,
+    "file:database/models.py": 5,
+    "file:ai/mood_engine.py": 2,
+    "file:ai/personality_engine.py": 2,
+    "file:ai/prompt_builder.py": 2,
+    "file:ai/relationship_engine.py": 2,
+    "file:utils/rate_limit.py": 2,
+    "file:ai/groq_client.py": 2,
+    "file:utils/validators.py": 2,
+    "file:database/database.py": 2,
+    "file:memory/memory_manager.py": 2,
+    "file:services/chat_service.py": 2,
+    "file:services/user_service.py": 2,
+    "file:ai/context_builder.py": 1,
+    "file:ai/response_cleaner.py": 1,
+    "file:handlers/error_handler.py": 1,
+    "file:handlers/message_handler.py": 1,
+    "file:handlers/admin_handler.py": 1,
+    "file:utils/formatter.py": 1,
+    "file:handlers/command_handler.py": 1,
+    "file:bot.py": 0,
+    "file:app.py": 0,
+    "file:database/backup.py": 0,
+    "file:ai/__init__.py": 0,
+    "file:ai/language_detector.py": 0,
+    "file:backups/.gitkeep": 0,
+    "file:data/cache/.gitkeep": 0,
+    "file:database/__init__.py": 0,
+    "file:handlers/__init__.py": 0,
+    "file:memory/__init__.py": 0,
+    "file:services/__init__.py": 0,
+    "file:tests/__init__.py": 0,
+    "file:utils/__init__.py": 0,
+    "file:utils/helpers.py": 0,
+    "file:utils/retry.py": 0,
+    "config:.env.example": 0,
+    "config:prompts/moods.json": 0,
+    "config:prompts/personalities.json": 0,
+    "config:prompts/templates.json": 0,
+    "document:README.md": 0,
+    "document:memory.md": 0,
+    "document:requirements.txt": 0
+  },
+  "fileFanOut": {
+    "file:bot.py": 12,
+    "file:handlers/message_handler.py": 12,
+    "file:handlers/admin_handler.py": 5,
+    "file:handlers/command_handler.py": 4,
+    "file:ai/groq_client.py": 2,
+    "file:app.py": 2,
+    "file:database/backup.py": 2,
+    "file:ai/context_builder.py": 1,
+    "file:ai/mood_engine.py": 1,
+    "file:ai/personality_engine.py": 1,
+    "file:ai/relationship_engine.py": 1,
+    "file:ai/response_cleaner.py": 1,
+    "file:utils/rate_limit.py": 1,
+    "file:utils/validators.py": 1,
+    "file:database/database.py": 1,
+    "file:database/models.py": 1,
+    "file:memory/memory_manager.py": 1,
+    "file:services/chat_service.py": 1,
+    "file:services/user_service.py": 1,
+    "file:ai/prompt_builder.py": 0,
+    "file:handlers/error_handler.py": 0,
+    "file:config.py": 0,
+    "file:constants.py": 0,
+    "file:utils/formatter.py": 0,
+    "file:ai/__init__.py": 0,
+    "file:ai/language_detector.py": 0,
+    "file:backups/.gitkeep": 0,
+    "file:data/cache/.gitkeep": 0,
+    "file:database/__init__.py": 0,
+    "file:handlers/__init__.py": 0,
+    "file:memory/__init__.py": 0,
+    "file:services/__init__.py": 0,
+    "file:tests/__init__.py": 0,
+    "file:utils/__init__.py": 0,
+    "file:utils/helpers.py": 0,
+    "file:utils/retry.py": 0,
+    "config:.env.example": 0,
+    "config:prompts/moods.json": 0,
+    "config:prompts/personalities.json": 0,
+    "config:prompts/templates.json": 0,
+    "document:README.md": 0,
+    "document:memory.md": 0,
+    "document:requirements.txt": 0
+  }
+}

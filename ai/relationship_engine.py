@@ -105,11 +105,11 @@ class RelationshipEngine:
     def get_greeting_warmth(self, score: int) -> str:
         """Return a warmth level based on relationship score."""
         level = self.get_level(score)
-        map = {
+        warmth_map = {
             "stranger": "polite",
             "acquaintance": "friendly",
             "friend": "warm",
             "close_friend": "very warm",
             "best_friend": "affectionate",
         }
-        return map.get(level, "polite")
+        return warmth_map.get(level, "polite")

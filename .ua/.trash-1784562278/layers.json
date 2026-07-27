@@ -1,0 +1,94 @@
+[
+  {
+    "id": "layer:entry-point",
+    "name": "Entry Point & Configuration",
+    "description": "Application bootstrap, Pydantic settings, constants, and environment configuration for the Hinata Telegram bot",
+    "nodeIds": [
+      "file:app.py",
+      "file:bot.py",
+      "file:config.py",
+      "file:constants.py",
+      "config:.env.example"
+    ]
+  },
+  {
+    "id": "layer:handlers",
+    "name": "Telegram Handlers",
+    "description": "Telegram bot message, command, admin, and error handlers coordinating user interactions",
+    "nodeIds": [
+      "file:handlers/__init__.py",
+      "file:handlers/admin_handler.py",
+      "file:handlers/command_handler.py",
+      "file:handlers/error_handler.py",
+      "file:handlers/message_handler.py"
+    ]
+  },
+  {
+    "id": "layer:ai-engine",
+    "name": "AI Engine",
+    "description": "Groq API client, prompt building, personality, mood, relationship engines, response processing, and prompt templates",
+    "nodeIds": [
+      "file:ai/__init__.py",
+      "file:ai/context_builder.py",
+      "file:ai/groq_client.py",
+      "file:ai/language_detector.py",
+      "file:ai/mood_engine.py",
+      "file:ai/personality_engine.py",
+      "file:ai/prompt_builder.py",
+      "file:ai/relationship_engine.py",
+      "file:ai/response_cleaner.py",
+      "config:prompts/moods.json",
+      "config:prompts/personalities.json",
+      "config:prompts/templates.json"
+    ]
+  },
+  {
+    "id": "layer:data",
+    "name": "Data Layer",
+    "description": "SQLAlchemy ORM models, async database engine lifecycle, and SQLite backup management",
+    "nodeIds": [
+      "file:database/__init__.py",
+      "file:database/backup.py",
+      "file:database/database.py",
+      "file:database/models.py"
+    ]
+  },
+  {
+    "id": "layer:services",
+    "name": "Services",
+    "description": "Business logic services for chat persistence, user management, and memory CRUD operations",
+    "nodeIds": [
+      "file:services/__init__.py",
+      "file:services/chat_service.py",
+      "file:services/user_service.py",
+      "file:memory/__init__.py",
+      "file:memory/memory_manager.py"
+    ]
+  },
+  {
+    "id": "layer:utility",
+    "name": "Utility Layer",
+    "description": "Shared helpers, input validators, rate limiters, markdown formatters, and async retry utilities",
+    "nodeIds": [
+      "file:utils/__init__.py",
+      "file:utils/formatter.py",
+      "file:utils/helpers.py",
+      "file:utils/rate_limit.py",
+      "file:utils/retry.py",
+      "file:utils/validators.py"
+    ]
+  },
+  {
+    "id": "layer:project-support",
+    "name": "Project Support",
+    "description": "Project documentation, test scaffold, and runtime data directory placeholders",
+    "nodeIds": [
+      "document:README.md",
+      "document:memory.md",
+      "document:requirements.txt",
+      "file:tests/__init__.py",
+      "file:backups/.gitkeep",
+      "file:data/cache/.gitkeep"
+    ]
+  }
+]

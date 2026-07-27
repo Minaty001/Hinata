@@ -84,8 +84,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     personality_engine: PersonalityEngine = context.bot_data["personality_engine"]
     mood_engine: MoodEngine = context.bot_data["mood_engine"]
     relationship_engine: RelationshipEngine = context.bot_data["relationship_engine"]
-    prompt_builder = PromptBuilder()
-    groq_client = GroqClient()
+    prompt_builder: PromptBuilder = context.bot_data["prompt_builder"]
+    groq_client: GroqClient = context.bot_data["groq_client"]
 
     async with session_factory() as session:
         try:

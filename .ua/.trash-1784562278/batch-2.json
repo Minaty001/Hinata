@@ -1,0 +1,694 @@
+{
+  "nodes": [
+    {
+      "id": "file:ai/groq_client.py",
+      "type": "file",
+      "name": "groq_client.py",
+      "filePath": "ai/groq_client.py",
+      "summary": "Groq API client wrapper with retry logic, error handling, and async chat completion for the LLM backend.",
+      "tags": ["api-handler", "service", "async", "llm"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:ai/groq_client.py:GroqClient",
+      "type": "class",
+      "name": "GroqClient",
+      "filePath": "ai/groq_client.py",
+      "lineRange": [37, 150],
+      "summary": "Main API client class managing HTTP communication with the Groq API, including retry with exponential backoff and error classification.",
+      "tags": ["api-client", "llm", "retry"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:ai/groq_client.py:_parse_retry_after",
+      "type": "function",
+      "name": "_parse_retry_after",
+      "filePath": "ai/groq_client.py",
+      "lineRange": [153, 159],
+      "summary": "Extracts retry delay value from HTTP response headers for rate-limit backoff.",
+      "tags": ["utility", "error-handling", "retry", "parsing"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:app.py",
+      "type": "file",
+      "name": "app.py",
+      "filePath": "app.py",
+      "summary": "Application entry point that bootstraps logging, initializes the database, starts the bot, and manages graceful shutdown via signal handlers.",
+      "tags": ["entry-point", "async", "lifecycle"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app.py:setup_logging",
+      "type": "function",
+      "name": "setup_logging",
+      "filePath": "app.py",
+      "lineRange": [21, 34],
+      "summary": "Configures rotating file and console logging handlers with configurable log level.",
+      "tags": ["utility", "logging", "bootstrap", "configuration"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "app.py",
+      "lineRange": [39, 94],
+      "summary": "Async main entry point that initializes the database, starts the Telegram bot application, registers signal handlers for graceful shutdown, and manages cleanup.",
+      "tags": ["entry-point", "async", "lifecycle"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:config.py",
+      "type": "file",
+      "name": "config.py",
+      "filePath": "config.py",
+      "summary": "Pydantic-based application settings with environment variable loading, including DATABASE_URL resolution for SQLite paths.",
+      "tags": ["configuration", "pydantic", "settings"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:config.py:_resolve_db_url",
+      "type": "function",
+      "name": "_resolve_db_url",
+      "filePath": "config.py",
+      "lineRange": [24, 34],
+      "summary": "Resolves potentially relative SQLite database URLs to absolute paths, creating parent directories when needed.",
+      "tags": ["utility", "database", "path"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:config.py:Settings",
+      "type": "class",
+      "name": "Settings",
+      "filePath": "config.py",
+      "lineRange": [37, 67],
+      "summary": "Pydantic settings class reading bot token, GROQ API key, database URL, owner ID, and other runtime configuration from environment variables.",
+      "tags": ["configuration", "pydantic", "settings", "env-vars"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:constants.py",
+      "type": "file",
+      "name": "constants.py",
+      "filePath": "constants.py",
+      "summary": "Central constants module defining file paths, timeouts, personality traits, mood configuration, and other static values used across the project.",
+      "tags": ["configuration", "constants", "static-data"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:database/backup.py",
+      "type": "file",
+      "name": "backup.py",
+      "filePath": "database/backup.py",
+      "summary": "Database backup management utilities providing create, list, and restore operations for SQLite database files.",
+      "tags": ["utility", "database", "backup"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:database/backup.py:create_backup",
+      "type": "function",
+      "name": "create_backup",
+      "filePath": "database/backup.py",
+      "lineRange": [20, 57],
+      "summary": "Creates a timestamped copy of the SQLite database file in the backups directory, returning the backup path or raising on failure.",
+      "tags": ["utility", "database", "backup"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:database/backup.py:list_backups",
+      "type": "function",
+      "name": "list_backups",
+      "filePath": "database/backup.py",
+      "lineRange": [60, 79],
+      "summary": "Lists all available database backups sorted by modification time with formatted timestamps.",
+      "tags": ["utility", "database", "listing"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:database/backup.py:restore_backup",
+      "type": "function",
+      "name": "restore_backup",
+      "filePath": "database/backup.py",
+      "lineRange": [82, 108],
+      "summary": "Restores a database from a named backup file by overwriting the current database file, with path validation.",
+      "tags": ["utility", "database", "restore"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:handlers/admin_handler.py",
+      "type": "file",
+      "name": "admin_handler.py",
+      "filePath": "handlers/admin_handler.py",
+      "summary": "Telegram bot admin command handler providing stats, broadcast, maintenance mode, logs, backup, user listing, and help subcommands.",
+      "tags": ["handler", "admin", "telegram", "command"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:handlers/admin_handler.py:_require_owner",
+      "type": "function",
+      "name": "_require_owner",
+      "filePath": "handlers/admin_handler.py",
+      "lineRange": [35, 46],
+      "summary": "Guard function that restricts admin command access to the configured bot owner.",
+      "tags": ["auth", "guard", "admin"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:handlers/admin_handler.py:admin_stats",
+      "type": "function",
+      "name": "admin_stats",
+      "filePath": "handlers/admin_handler.py",
+      "lineRange": [52, 86],
+      "summary": "Displays bot statistics including user counts, conversation counts, active users, and system information.",
+      "tags": ["handler", "stats", "admin"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:handlers/admin_handler.py:admin_broadcast",
+      "type": "function",
+      "name": "admin_broadcast",
+      "filePath": "handlers/admin_handler.py",
+      "lineRange": [89, 112],
+      "summary": "Sends a broadcast message to all active users from the admin.",
+      "tags": ["handler", "broadcast", "admin"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:handlers/admin_handler.py:admin_maintenance",
+      "type": "function",
+      "name": "admin_maintenance",
+      "filePath": "handlers/admin_handler.py",
+      "lineRange": [115, 129],
+      "summary": "Toggles maintenance mode via bot_data to prevent non-owner access during updates.",
+      "tags": ["handler", "maintenance", "admin"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:handlers/admin_handler.py:admin_logs",
+      "type": "function",
+      "name": "admin_logs",
+      "filePath": "handlers/admin_handler.py",
+      "lineRange": [132, 166],
+      "summary": "Retrieves and displays recent log file contents with configurable line count, truncating for Telegram message limits.",
+      "tags": ["handler", "logs", "debugging"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:handlers/admin_handler.py:admin_backup",
+      "type": "function",
+      "name": "admin_backup",
+      "filePath": "handlers/admin_handler.py",
+      "lineRange": [169, 187],
+      "summary": "Triggers a database backup and reports the result to the admin user.",
+      "tags": ["handler", "backup", "admin"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:handlers/admin_handler.py:admin_users",
+      "type": "function",
+      "name": "admin_users",
+      "filePath": "handlers/admin_handler.py",
+      "lineRange": [190, 216],
+      "summary": "Lists active users with their Telegram IDs and last interaction timestamps.",
+      "tags": ["handler", "users", "admin"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:handlers/admin_handler.py:admin_help",
+      "type": "function",
+      "name": "admin_help",
+      "filePath": "handlers/admin_handler.py",
+      "lineRange": [219, 234],
+      "summary": "Displays available admin subcommands with brief descriptions.",
+      "tags": ["handler", "help", "admin"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:handlers/admin_handler.py:admin_command",
+      "type": "function",
+      "name": "admin_command",
+      "filePath": "handlers/admin_handler.py",
+      "lineRange": [240, 270],
+      "summary": "Main admin command router dispatching to subcommand handlers based on the first argument.",
+      "tags": ["handler", "router", "admin"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:utils/formatter.py",
+      "type": "file",
+      "name": "formatter.py",
+      "filePath": "utils/formatter.py",
+      "summary": "Telegram message formatting helpers providing MarkdownV2-compatible text styling functions for bold, italic, code blocks, lists, and key-value pairs.",
+      "tags": ["utility", "formatting", "telegram"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:utils/validators.py",
+      "type": "file",
+      "name": "validators.py",
+      "filePath": "utils/validators.py",
+      "summary": "Input validation and sanitization utilities for message length checking, input cleansing, prompt injection detection, and owner verification.",
+      "tags": ["utility", "validation", "security"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:utils/validators.py:validate_message_length",
+      "type": "function",
+      "name": "validate_message_length",
+      "filePath": "utils/validators.py",
+      "lineRange": [25, 36],
+      "summary": "Validates that message text falls within configured minimum and maximum length bounds, returning a tuple of (is_valid, error_message).",
+      "tags": ["validation", "input", "bound-check"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:utils/validators.py:sanitise_input",
+      "type": "function",
+      "name": "sanitise_input",
+      "filePath": "utils/validators.py",
+      "lineRange": [39, 61],
+      "summary": "Cleans user input by stripping HTML tags, normalizing whitespace, removing excessive punctuation, and applying regex-based sanitization.",
+      "tags": ["validation", "sanitization", "security"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:utils/validators.py:detect_prompt_injection",
+      "type": "function",
+      "name": "detect_prompt_injection",
+      "filePath": "utils/validators.py",
+      "lineRange": [64, 76],
+      "summary": "Scans input text for prompt injection patterns using configurable regex rules, returning True if a pattern is detected.",
+      "tags": ["validation", "security", "injection"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:ai/groq_client.py",
+      "target": "file:config.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ai/groq_client.py",
+      "target": "file:constants.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:app.py",
+      "target": "file:config.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:app.py",
+      "target": "file:constants.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:database/backup.py",
+      "target": "file:config.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:database/backup.py",
+      "target": "file:constants.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "file:config.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "file:constants.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "file:database/models.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "file:utils/formatter.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "file:utils/validators.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:utils/validators.py",
+      "target": "file:constants.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ai/groq_client.py",
+      "target": "class:ai/groq_client.py:GroqClient",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ai/groq_client.py",
+      "target": "function:ai/groq_client.py:_parse_retry_after",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app.py",
+      "target": "function:app.py:setup_logging",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app.py",
+      "target": "function:app.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:config.py",
+      "target": "function:config.py:_resolve_db_url",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:config.py",
+      "target": "class:config.py:Settings",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:database/backup.py",
+      "target": "function:database/backup.py:create_backup",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:database/backup.py",
+      "target": "function:database/backup.py:list_backups",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:database/backup.py",
+      "target": "function:database/backup.py:restore_backup",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "function:handlers/admin_handler.py:_require_owner",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "function:handlers/admin_handler.py:admin_stats",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "function:handlers/admin_handler.py:admin_broadcast",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "function:handlers/admin_handler.py:admin_maintenance",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "function:handlers/admin_handler.py:admin_logs",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "function:handlers/admin_handler.py:admin_backup",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "function:handlers/admin_handler.py:admin_users",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "function:handlers/admin_handler.py:admin_help",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "function:handlers/admin_handler.py:admin_command",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:utils/validators.py",
+      "target": "function:utils/validators.py:validate_message_length",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:utils/validators.py",
+      "target": "function:utils/validators.py:sanitise_input",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:utils/validators.py",
+      "target": "function:utils/validators.py:detect_prompt_injection",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ai/groq_client.py",
+      "target": "class:ai/groq_client.py:GroqClient",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ai/groq_client.py",
+      "target": "function:ai/groq_client.py:_parse_retry_after",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:app.py",
+      "target": "function:app.py:setup_logging",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:app.py",
+      "target": "function:app.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:config.py",
+      "target": "function:config.py:_resolve_db_url",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:config.py",
+      "target": "class:config.py:Settings",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:database/backup.py",
+      "target": "function:database/backup.py:create_backup",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:database/backup.py",
+      "target": "function:database/backup.py:list_backups",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:database/backup.py",
+      "target": "function:database/backup.py:restore_backup",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "function:handlers/admin_handler.py:_require_owner",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "function:handlers/admin_handler.py:admin_stats",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "function:handlers/admin_handler.py:admin_broadcast",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "function:handlers/admin_handler.py:admin_maintenance",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "function:handlers/admin_handler.py:admin_logs",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "function:handlers/admin_handler.py:admin_backup",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "function:handlers/admin_handler.py:admin_users",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "function:handlers/admin_handler.py:admin_help",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:handlers/admin_handler.py",
+      "target": "function:handlers/admin_handler.py:admin_command",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/validators.py",
+      "target": "function:utils/validators.py:validate_message_length",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/validators.py",
+      "target": "function:utils/validators.py:sanitise_input",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/validators.py",
+      "target": "function:utils/validators.py:detect_prompt_injection",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:handlers/admin_handler.py:admin_backup",
+      "target": "function:database/backup.py:create_backup",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:app.py:main",
+      "target": "function:bot.py:create_application",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:app.py:main",
+      "target": "function:database/database.py:init_database",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:app.py:main",
+      "target": "function:database/database.py:close_database",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

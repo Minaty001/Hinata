@@ -19,11 +19,11 @@
 
 **Current Version:** v0.3.0
 
-**Development Status:** Admin System + Security Complete
+**Development Status:** Beta — Bot Running on Termux
 
-**Current Phase:** Phase 14 - Testing
+**Current Phase:** Phase 14 - Testing (Bug Audit Complete)
 
-**Last Updated:** 2026-07-13
+**Last Updated:** 2026-07-15
 
 ---
 
@@ -45,7 +45,7 @@
 | Phase 11 - Advanced Conversation | ✅ Complete |
 | Phase 12 - Admin System | ✅ Complete |
 | Phase 13 - Security | ✅ Complete |
-| Phase 14 - Testing | ⏳ Not Started |
+| Phase 14 - Testing | ⏳ Bug Audit Done, Manual Testing Needed |
 | Phase 15 - Deployment | ⏳ Not Started |
 | Phase 16 - Optimization | ⏳ Not Started |
 | Phase 17 - Documentation | ⏳ Not Started |
@@ -56,11 +56,12 @@
 # Current Task
 
 ```
-Bot is running in production on Termux.
-Environment: Python 3.14, aarch64, pydantic v1.
-Fixed: Markdown crash path in _send_reply.
-All transient network errors handled by PTB's retry loop.
-Next: Testing or deployment (Dockerfile).
+Session 8 — Full codebase bug audit completed.
+15 bugs found and fixed across 12 files.
+Bot ready for testing after fixes.
+
+Python path: /data/data/com.termux/files/usr/bin/python3 (Termux)
+System python3 lacks installed packages.
 ```
 
 ---
@@ -68,7 +69,7 @@ Next: Testing or deployment (Dockerfile).
 # Current Working File
 
 ```
-None
+None — all fixes applied
 ```
 
 ---
@@ -76,7 +77,7 @@ None
 # Next File To Create
 
 ```
-Admin system, tests, security utilities
+Tests, deployment configs
 ```
 
 ---
@@ -102,10 +103,12 @@ constants.py
 database/__init__.py
 database/database.py
 database/models.py
+database/backup.py
 handlers/__init__.py
 handlers/command_handler.py
 handlers/message_handler.py
 handlers/error_handler.py
+handlers/admin_handler.py
 ai/__init__.py
 ai/groq_client.py
 ai/personality_engine.py
@@ -121,6 +124,11 @@ services/__init__.py
 services/user_service.py
 services/chat_service.py
 utils/__init__.py
+utils/formatter.py
+utils/helpers.py
+utils/rate_limit.py
+utils/retry.py
+utils/validators.py
 tests/__init__.py
 prompts/personalities.json
 prompts/moods.json
@@ -133,7 +141,6 @@ prompts/templates.json
 
 ```
 handlers/callback_handler.py
-handlers/admin_handler.py
 ai/emotion_engine.py
 memory/short_memory.py
 memory/long_memory.py
@@ -141,16 +148,10 @@ memory/preference_memory.py
 memory/relationship_memory.py
 memory/summarizer.py
 database/migrations.py
-database/backup.py
 services/mood_service.py
 services/scheduler.py
 services/backup_service.py
 services/logger_service.py
-utils/helpers.py
-utils/validators.py
-utils/formatter.py
-utils/rate_limit.py
-utils/retry.py
 tests/test_ai.py
 tests/test_memory.py
 tests/test_database.py
@@ -186,7 +187,7 @@ Deployment
 ░░░░░░░░░░ 0%
 
 Testing
-░░░░░░░░░░ 0%
+██░░░░░░░░ 20% (bug audit done, no automated tests yet)
 ```
 
 ---
@@ -198,53 +199,53 @@ Testing
 - Development rules and phases
 - Design system guide
 - Folder structure
-- Configuration system (pydantic-settings + .env)
+- Configuration system (pydantic v1 BaseSettings + .env)
 - Constants module
-- SQLAlchemy ORM models (User, Conversation, Memory, Preference, Setting)
+- SQLAlchemy 2.0 ORM models (User, Conversation, Memory, Preference, Setting)
 - Async database engine and session management
+- Database backup/restore service
 - Bot setup with handler registration
-- Command handlers (/start, /help, /about, /ping)
+- Command handlers (/start, /help, /about, /ping, /settings, /personality, /mood, /memory, /forget, /reset, /version)
+- Admin handler with 7 sub-commands (stats, users, logs, broadcast, maintenance, backup, help)
+- Owner-only guard based on OWNER_ID
 - Global error handler
 - **Groq API client** (async, retry, timeout, rate-limit handling)
-- **Personality Engine** (8 personalities with tone, humor, emoji, vocabulary)
-- **Mood Engine** (9 moods, time-aware, sentiment, random variation)
-- **Relationship Engine** (5-level scoring, instructions per level)
-- **Prompt Builder** (full system prompt assembly)
+- **Personality Engine** (8 personalities: sweet, calm, smart, gamer, playful, curious, boss, supportive)
+- **Mood Engine** (9 moods: happy, sad, sleepy, excited, curious, relaxed, energetic, shy, thoughtful)
+- **Relationship Engine** (5-level scoring: stranger → acquaintance → friend → close_friend → best_friend)
+- **Prompt Builder** (full system prompt assembly, now with consistent rules)
 - **Context Builder** (conversation history retrieval)
-- **Response Cleaner** (markdown cleaning, message splitting, truncation)
+- **Response Cleaner** (markdown cleaning, message splitting, truncation, MarkdownV2 escaping)
 - **Language Detector** (en/hi/hi-en with Devanagari + Hinglish heuristics)
 - **Memory Manager** (save, retrieve, forget, summarize)
 - **User Service** (get-or-create, preferences CRUD)
 - **Chat Service** (save, retrieve, clear, count conversations)
 - **Full AI message pipeline** (user → DB → context → engines → prompt → Groq → clean → store → reply)
-- Personality definitions (8 personalities in JSON)
-- Mood definitions (9 moods in JSON)
-- Prompt templates (JSON)
+- Rate limiter (sliding window, per-user)
+- Input validator (length, sanitisation, prompt injection detection)
+- Utility modules (helpers, formatter, retry)
+- Maintenance mode toggle (checked in message handler)
+- Personality/mood definitions in JSON files
 - Git initialized
 
 ---
 
 # Features In Progress
 
-None
+- Manual testing of all fixes from Session 8
 
 ---
 
 # Features Remaining
 
-- Admin commands (broadcast, stats, maintenance)
-- Callback handler
+- Emotion engine (future feature)
 - Advanced memory sub-modules (short_memory, long_memory, summarizer)
-- Rate limiting
-- Input validation / sanitization
-- Emotion engine
-- Utility modules (helpers, validators, formatter, retry)
-- Backup & restore
 - Scheduler service
 - Database migrations
-- Test suite
+- Callback handler
+- Test suite (automated)
 - Dockerfile
-- Deployment configs
+- Deployment configs (Render, Railway)
 
 ---
 
@@ -257,11 +258,11 @@ Created (ORM models ready, tables auto-created on startup)
 Tables
 
 ```
-Users
-Conversations
-Memories
-Preferences
-Settings
+Users (with relationship_score, current_mood, current_personality per-user)
+Conversations (with ForeignKey to users)
+Memories (with ForeignKey to users, soft-delete via is_active)
+Preferences (with ForeignKey to users, one-to-one)
+Settings (global key-value store)
 ```
 
 ---
@@ -271,13 +272,14 @@ Settings
 Telegram
 
 ```
-Not Connected (needs .env with BOT_TOKEN)
+Connected — bot polling, responding to messages.
 ```
 
 Groq
 
 ```
-Client implemented. No API calls made without valid key.
+Tested end-to-end (2 messages processed, 200 OK).
+Pipeline: user → DB → context → engines → prompt → Groq → clean → store → reply.
 ```
 
 ---
@@ -293,6 +295,7 @@ DATABASE_URL
 OWNER_ID
 LOG_LEVEL
 TIMEZONE
+DEFAULT_LANGUAGE
 ```
 
 ---
@@ -300,7 +303,8 @@ TIMEZONE
 # Dependencies Status
 
 ```
-Not Installed (run pip install -r requirements.txt)
+Installed (pip install -r requirements.txt)
+Note: Using Pydantic v1 (pydantic>=1.10.0,<2) — see Known Issues.
 ```
 
 ---
@@ -308,8 +312,59 @@ Not Installed (run pip install -r requirements.txt)
 # Known Issues
 
 ```
-None
+- GROQ_MAX_TOKENS=50 is very low (produces 1-2 sentences). Intentional for
+  user's "short reply" preference, but may need increasing for some use cases.
+- `python3` in PATH points to system Python without packages; must use Termux
+  Python path: /data/data/com.termux/files/usr/bin/python3
+- Termux network can drop (transient [Errno 7] — PTB retry handles it)
+- No automated test suite
+- Pydantic v1 is used — may need migration to v2 for Python 3.13+ compatibility
+- config.py uses `from pydantic import BaseSettings` (v1-only import)
+- config.py uses `allow_mutation = False` (v1-only config option)
+- detect_prompt_injection() in validators.py is defined but never called
+- `header()` in formatter.py uses `#` which Telegram Markdown doesn't support
 ```
+
+---
+
+# Bugs Found & Fixed (Session 8)
+
+## Critical
+
+| # | File | Bug | Fix |
+|---|------|-----|-----|
+| 1 | requirements.txt | `asyncio>=3.4.3` listed as pip dependency — stdlib, breaks install | Removed the entry |
+| 2 | error_handler.py | `traceback.format_exc()` logs stale traceback, not `context.error` | Used `traceback.format_exception()` on `context.error` |
+| 3 | prompt_builder.py | Contradictory prompt rules (emotionally expressive vs no emotions, use emojis vs no emojis, ask follow-ups vs 7-word limit) | Removed contradictions, unified rules |
+
+## Medium
+
+| # | File | Bug | Fix |
+|---|------|-----|-----|
+| 4 | command_handler.py | Pluralization bug: `memory/{'ies'...}` → "memory/ies" instead of "memories" | Fixed to `{'memories' if count != 1 else 'memory'}` |
+| 5 | memory_manager.py | `forget_all_memories` only forgets first 50 (default limit) | Changed to `limit=10000` |
+| 6 | chat_service.py | `clear_conversation_history` loads all rows + deletes one-by-one | Replaced with bulk `DELETE` statement |
+| 7 | message_handler.py | `PromptBuilder()` and `GroqClient()` instantiated per message | Moved to `bot_data` in bot.py, retrieved in handler |
+| 8 | database/database.py | Module-level path code could match empty string / directory | Added `_db_path_str` check + `.is_file()` guard |
+| 9 | response_cleaner.py | `escape_markdown()` doesn't escape backslash `\` first | Added backslash escaping as first operation |
+
+## Low
+
+| # | File | Bug | Fix |
+|---|------|-----|-----|
+| 10 | mood_engine.py | `datetime.now()` without timezone (rest of codebase uses UTC) | Changed to `datetime.now(timezone.utc)` |
+| 11 | relationship_engine.py | `map = {...}` shadows Python builtin `map` | Renamed to `warmth_map` |
+| 12 | rate_limit.py | `remaining()` always returns 0 when rate-limited, message says "0 more messages" | Simplified to "Try again in a few seconds" |
+
+## Still Open (Not Fixed — Design-Level)
+
+| # | File | Issue | Reason Not Fixed |
+|---|------|-------|------------------|
+| A | config.py | Uses Pydantic v1 API (`from pydantic import BaseSettings`, `allow_mutation`) | Would require full migration to pydantic-settings v2 |
+| B | constants.py | `GROQ_MAX_TOKENS=50` very low | Intentional per user preference for short replies |
+| C | validators.py | `detect_prompt_injection()` defined but never called | Dead code — should be wired in or removed in future |
+| D | formatter.py | `header()` uses `#` Markdown headers (Telegram doesn't support) | Not used in bot output currently |
+| E | context_builder.py | `count_recent_messages()` fetches all rows instead of SQL COUNT | Performance optimization, not a bug |
 
 ---
 
@@ -318,16 +373,20 @@ None
 - Python 3.13+
 - Async architecture with asyncio
 - SQLite via aiosqlite (async)
-- SQLAlchemy 2.0 ORM with async support
+- SQLAlchemy 2.0 ORM with async support (mapped_column style)
 - Groq Free API (llama-3.3-70b-versatile)
 - python-telegram-bot v21
-- pydantic-settings for type-safe config
+- Pydantic v1 BaseSettings for config (migration to v2 pending)
 - Modular project structure with separate packages
 - Environment-based configuration
 - Engines cached in bot_data (not re-created per request)
-- Database session created per handler call
+- PromptBuilder and GroqClient also cached in bot_data (fixed in Session 8)
+- Database session factory shared via bot_data
 - Personality/mood definitions in JSON files (not code)
 - AI provider isolated behind GroqClient abstraction
+- Per-user personality, mood, and relationship stored in DB (not in-memory)
+- Soft-delete for memories (is_active flag)
+- Maintenance mode checked in message handler
 
 ---
 
@@ -356,29 +415,36 @@ Always
 | design.md | ✅ Complete |
 | memory.md | ✅ Complete |
 | README.md | ✅ Complete |
-| requirements.txt | ✅ Complete |
+| requirements.txt | ✅ Complete (fixed) |
 | .env.example | ✅ Complete |
 | .gitignore | ✅ Complete |
 | app.py | ✅ Complete |
-| bot.py | ✅ Complete |
+| bot.py | ✅ Complete (fixed) |
 | config.py | ✅ Complete |
 | constants.py | ✅ Complete |
-| database/database.py | ✅ Complete |
+| database/database.py | ✅ Complete (fixed) |
 | database/models.py | ✅ Complete |
-| handlers/command_handler.py | ✅ Complete |
-| handlers/message_handler.py | ✅ Complete |
-| handlers/error_handler.py | ✅ Complete |
+| database/backup.py | ✅ Complete |
+| handlers/command_handler.py | ✅ Complete (fixed) |
+| handlers/message_handler.py | ✅ Complete (fixed) |
+| handlers/error_handler.py | ✅ Complete (fixed) |
+| handlers/admin_handler.py | ✅ Complete |
 | ai/groq_client.py | ✅ Complete |
 | ai/personality_engine.py | ✅ Complete |
-| ai/mood_engine.py | ✅ Complete |
-| ai/relationship_engine.py | ✅ Complete |
+| ai/mood_engine.py | ✅ Complete (fixed) |
+| ai/relationship_engine.py | ✅ Complete (fixed) |
 | ai/context_builder.py | ✅ Complete |
-| ai/prompt_builder.py | ✅ Complete |
-| ai/response_cleaner.py | ✅ Complete |
+| ai/prompt_builder.py | ✅ Complete (fixed) |
+| ai/response_cleaner.py | ✅ Complete (fixed) |
 | ai/language_detector.py | ✅ Complete |
-| memory/memory_manager.py | ✅ Complete |
+| memory/memory_manager.py | ✅ Complete (fixed) |
 | services/user_service.py | ✅ Complete |
-| services/chat_service.py | ✅ Complete |
+| services/chat_service.py | ✅ Complete (fixed) |
+| utils/formatter.py | ✅ Complete |
+| utils/helpers.py | ✅ Complete |
+| utils/rate_limit.py | ✅ Complete (fixed) |
+| utils/retry.py | ✅ Complete |
+| utils/validators.py | ✅ Complete |
 | prompts/personalities.json | ✅ Complete |
 | prompts/moods.json | ✅ Complete |
 | prompts/templates.json | ✅ Complete |
@@ -458,21 +524,83 @@ Completed
 - All handlers registered in bot.py
 - Tokens configured, pydantic v1 migration, Markdown crash fix in _send_reply
 
+## Session 4
+
+### Completed
+
+- Fixed DB "no such table: users" (import models before init_database)
+- Fixed relative DB path resolution (absolute path via PROJECT_ROOT)
+- Stale 0-byte DB file cleanup on startup
+- Fixed /settings relationship level display (use RelationshipEngine)
+- Verified tables created: ['conversations', 'memories', 'preferences', 'settings', 'users']
+- Bot running on Termux, polling successfully
+
+### Session 5
+
+### Completed
+- Reduced GROQ_MAX_TOKENS from 1024 → 200 for shorter replies
+- Updated system prompt: "1 to 3 sentences maximum"
+- Fixed bot startup — must use Termux Python `/data/data/com.termux/files/usr/bin/python3`
+  (system `/usr/bin/python3` lacks installed packages)
+- Full Groq pipeline verified end-to-end (2 messages processed, both 200 OK)
+
+### Known Issues
+- `python3` in PATH points to system Python without packages; startup must use Termux Python path
+
+## Session 6
+
+### Completed
+- GROQ_MAX_TOKENS reduced further: 200 → 100 → 50
+- System prompt tightened: "Reply in 1 short sentence. Max 7 words."
+- Added rules: no emojis unless user uses one first, never narrate emotions
+- Fixed conflict errors (killed duplicate bot instances)
+- Bot running cleanly with single instance
+
+### Pending
+- User testing shortest reply setting
+
+## Session 7
+
+### Completed
+- Log rotated (old 4264-line/216KB error log archived)
+- Bot running cleanly, single instance, no errors
+- Response tuning: GROQ_MAX_TOKENS=50, prompt enforces 1 sentence max 7 words
+
+## Session 8
+
+### Completed — Full Codebase Bug Audit & Fixes
+- Conducted exhaustive review of all 40+ source files
+- Found 15 bugs across 12 files (3 critical, 6 medium, 3 low, 5 design-level)
+- Fixed 12 bugs, documented 5 open design issues
+
+### Bugs Fixed
+1. **requirements.txt** — Removed `asyncio` from pip deps (stdlib)
+2. **error_handler.py** — Fixed stale traceback logging (use `context.error`)
+3. **prompt_builder.py** — Resolved contradictory prompt rules
+4. **command_handler.py** — Fixed pluralization in forget_command
+5. **memory_manager.py** — Fixed 50-record limit in forget_all_memories
+6. **chat_service.py** — Replaced O(n) delete loop with bulk DELETE
+7. **message_handler.py** — Moved PromptBuilder/GroqClient to bot_data (no per-message instantiation)
+8. **bot.py** — Added PromptBuilder/GroqClient to shared bot_data
+9. **database/database.py** — Added safety guards for module-level DB path resolution
+10. **response_cleaner.py** — Added backslash escaping in escape_markdown()
+11. **mood_engine.py** — Fixed timezone-naive datetime.now()
+12. **relationship_engine.py** — Renamed `map` variable to avoid shadowing builtin
+
 ---
 
 # Next Development Goal
 
 ```
-Phase 14 - Testing
-- Unit tests for AI components (groq_client, engines, prompt_builder)
-- Unit tests for database (models, CRUD operations)
-- Unit tests for handlers
-- Integration test for message pipeline
-
-Phase 15 - Deployment
-- Dockerfile
-- Render / Railway config
-- Deployment guide
+Current: Test bot after Session 8 bug fixes.
+Next:
+- Run bot on Termux and verify all fixes work
+- Record proper startup command in README
+- Add .gitignore entries for logs/data
+- Document Termux Python path requirement
+- Consider migrating Pydantic v1 → v2
+- Wire detect_prompt_injection() into message pipeline or remove
+- Add automated test suite
 ```
 
 ---

@@ -19,7 +19,6 @@ from constants import (
     BOT_DESCRIPTION,
     BOT_NAME,
     BOT_VERSION,
-    RELATIONSHIP_LEVELS,
 )
 from memory.memory_manager import (
     forget_all_memories,
@@ -125,12 +124,14 @@ async def settings_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         )
         prefs = await get_user_preferences(session, user.id)
 
+    rel_engine = context.bot_data["relationship_engine"]
+    rel_level = rel_engine.get_level(user.relationship_score)
     lines = [
         f"⚙️ **Your Settings**",
         "",
         f"**Personality:** {user.current_personality.capitalize()}",
         f"**Mood:** {user.current_mood.capitalize()}",
-        f"**Relationship:** {RELATIONSHIP_LEVELS[min(user.relationship_score // 200, 4)].replace('_', ' ').title()} "
+        f"**Relationship:** {rel_level.replace('_', ' ').title()} "
         f"(score: {user.relationship_score})",
         f"**Language:** {user.language}",
         "",
@@ -289,7 +290,7 @@ async def forget_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             if count:
                 await session.commit()
                 await update.message.reply_text(
-                    f"Forgot {count} memory/{'ies' if count != 1 else 'y'} "
+                    f"Forgot {count} {'memories' if count != 1 else 'memory'} "
                     f"of type '{forget_type}'. 🧹",
                 )
             else:

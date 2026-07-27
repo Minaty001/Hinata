@@ -1,0 +1,1542 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 6,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 6,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 6,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "database/database.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 88,
+      "nonEmptyLines": 64,
+      "functions": [
+        {
+          "name": "init_database",
+          "startLine": 55,
+          "endLine": 67,
+          "params": []
+        },
+        {
+          "name": "get_session",
+          "startLine": 70,
+          "endLine": 79,
+          "params": []
+        },
+        {
+          "name": "close_database",
+          "startLine": 82,
+          "endLine": 88,
+          "params": []
+        }
+      ],
+      "classes": [
+        {
+          "name": "Base",
+          "startLine": 24,
+          "endLine": 27,
+          "methods": [],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "Base",
+          "line": 24,
+          "isDefault": false
+        },
+        {
+          "name": "init_database",
+          "line": 55,
+          "isDefault": false
+        },
+        {
+          "name": "get_session",
+          "line": 70,
+          "isDefault": false
+        },
+        {
+          "name": "close_database",
+          "line": 82,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "init_database",
+          "callee": "engine.begin",
+          "lineNumber": 61
+        },
+        {
+          "caller": "init_database",
+          "callee": "conn.run_sync",
+          "lineNumber": 62
+        },
+        {
+          "caller": "init_database",
+          "callee": "engine.begin",
+          "lineNumber": 65
+        },
+        {
+          "caller": "init_database",
+          "callee": "conn.run_sync",
+          "lineNumber": 66
+        },
+        {
+          "caller": "init_database",
+          "callee": "sync_conn.dialect.get_table_names",
+          "lineNumber": 66
+        },
+        {
+          "caller": "init_database",
+          "callee": "logger.info",
+          "lineNumber": 67
+        },
+        {
+          "caller": "get_session",
+          "callee": "async_session_factory",
+          "lineNumber": 75
+        },
+        {
+          "caller": "get_session",
+          "callee": "session.close",
+          "lineNumber": 79
+        },
+        {
+          "caller": "close_database",
+          "callee": "engine.dispose",
+          "lineNumber": 87
+        },
+        {
+          "caller": "close_database",
+          "callee": "logger.info",
+          "lineNumber": 88
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 4,
+        "functionCount": 3,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "database/models.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 126,
+      "nonEmptyLines": 90,
+      "functions": [
+        {
+          "name": "_utcnow",
+          "startLine": 19,
+          "endLine": 21,
+          "params": []
+        }
+      ],
+      "classes": [
+        {
+          "name": "User",
+          "startLine": 24,
+          "endLine": 50,
+          "methods": [
+            "__repr__"
+          ],
+          "properties": [
+            "id",
+            "telegram_id",
+            "username",
+            "display_name",
+            "language",
+            "timezone",
+            "relationship_score",
+            "current_mood",
+            "current_personality",
+            "is_active",
+            "first_interaction",
+            "last_interaction",
+            "created_at",
+            "updated_at"
+          ]
+        },
+        {
+          "name": "Conversation",
+          "startLine": 53,
+          "endLine": 68,
+          "methods": [
+            "__repr__"
+          ],
+          "properties": [
+            "id",
+            "user_id",
+            "role",
+            "message",
+            "timestamp"
+          ]
+        },
+        {
+          "name": "Memory",
+          "startLine": 71,
+          "endLine": 89,
+          "methods": [
+            "__repr__"
+          ],
+          "properties": [
+            "id",
+            "user_id",
+            "type",
+            "content",
+            "importance",
+            "is_active",
+            "created_at",
+            "updated_at"
+          ]
+        },
+        {
+          "name": "Preference",
+          "startLine": 92,
+          "endLine": 111,
+          "methods": [
+            "__repr__"
+          ],
+          "properties": [
+            "id",
+            "user_id",
+            "emoji_level",
+            "reply_length",
+            "default_personality",
+            "language",
+            "memory_enabled",
+            "created_at",
+            "updated_at"
+          ]
+        },
+        {
+          "name": "Setting",
+          "startLine": 114,
+          "endLine": 126,
+          "methods": [
+            "__repr__"
+          ],
+          "properties": [
+            "id",
+            "key",
+            "value",
+            "created_at",
+            "updated_at"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "_utcnow",
+          "line": 19,
+          "isDefault": false
+        },
+        {
+          "name": "User",
+          "line": 24,
+          "isDefault": false
+        },
+        {
+          "name": "Conversation",
+          "line": 53,
+          "isDefault": false
+        },
+        {
+          "name": "Memory",
+          "line": 71,
+          "isDefault": false
+        },
+        {
+          "name": "Preference",
+          "line": 92,
+          "isDefault": false
+        },
+        {
+          "name": "Setting",
+          "line": 114,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "_utcnow",
+          "callee": "datetime.now",
+          "lineNumber": 21
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 6,
+        "functionCount": 1,
+        "classCount": 5
+      }
+    },
+    {
+      "path": "handlers/command_handler.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 347,
+      "nonEmptyLines": 286,
+      "functions": [
+        {
+          "name": "start_command",
+          "startLine": 37,
+          "endLine": 47,
+          "params": [
+            "update",
+            "context"
+          ]
+        },
+        {
+          "name": "help_command",
+          "startLine": 50,
+          "endLine": 70,
+          "params": [
+            "update",
+            "context"
+          ]
+        },
+        {
+          "name": "about_command",
+          "startLine": 73,
+          "endLine": 87,
+          "params": [
+            "update",
+            "context"
+          ]
+        },
+        {
+          "name": "ping_command",
+          "startLine": 90,
+          "endLine": 92,
+          "params": [
+            "update",
+            "context"
+          ]
+        },
+        {
+          "name": "version_command",
+          "startLine": 95,
+          "endLine": 109,
+          "params": [
+            "update",
+            "context"
+          ]
+        },
+        {
+          "name": "settings_command",
+          "startLine": 115,
+          "endLine": 149,
+          "params": [
+            "update",
+            "context"
+          ]
+        },
+        {
+          "name": "personality_command",
+          "startLine": 155,
+          "endLine": 191,
+          "params": [
+            "update",
+            "context"
+          ]
+        },
+        {
+          "name": "mood_command",
+          "startLine": 197,
+          "endLine": 233,
+          "params": [
+            "update",
+            "context"
+          ]
+        },
+        {
+          "name": "memory_command",
+          "startLine": 239,
+          "endLine": 265,
+          "params": [
+            "update",
+            "context"
+          ]
+        },
+        {
+          "name": "forget_command",
+          "startLine": 268,
+          "endLine": 307,
+          "params": [
+            "update",
+            "context"
+          ]
+        },
+        {
+          "name": "reset_command",
+          "startLine": 313,
+          "endLine": 347,
+          "params": [
+            "update",
+            "context"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "start_command",
+          "line": 37,
+          "isDefault": false
+        },
+        {
+          "name": "help_command",
+          "line": 50,
+          "isDefault": false
+        },
+        {
+          "name": "about_command",
+          "line": 73,
+          "isDefault": false
+        },
+        {
+          "name": "ping_command",
+          "line": 90,
+          "isDefault": false
+        },
+        {
+          "name": "version_command",
+          "line": 95,
+          "isDefault": false
+        },
+        {
+          "name": "settings_command",
+          "line": 115,
+          "isDefault": false
+        },
+        {
+          "name": "personality_command",
+          "line": 155,
+          "isDefault": false
+        },
+        {
+          "name": "mood_command",
+          "line": 197,
+          "isDefault": false
+        },
+        {
+          "name": "memory_command",
+          "line": 239,
+          "isDefault": false
+        },
+        {
+          "name": "forget_command",
+          "line": 268,
+          "isDefault": false
+        },
+        {
+          "name": "reset_command",
+          "line": 313,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "start_command",
+          "callee": "logger.info",
+          "lineNumber": 40
+        },
+        {
+          "caller": "start_command",
+          "callee": "update.message.reply_text",
+          "lineNumber": 42
+        },
+        {
+          "caller": "help_command",
+          "callee": "update.message.reply_text",
+          "lineNumber": 70
+        },
+        {
+          "caller": "about_command",
+          "callee": "update.message.reply_text",
+          "lineNumber": 87
+        },
+        {
+          "caller": "ping_command",
+          "callee": "update.message.reply_text",
+          "lineNumber": 92
+        },
+        {
+          "caller": "version_command",
+          "callee": "sys.version.split",
+          "lineNumber": 103
+        },
+        {
+          "caller": "version_command",
+          "callee": "update.message.reply_text",
+          "lineNumber": 109
+        },
+        {
+          "caller": "version_command",
+          "callee": "\"\\n\".join",
+          "lineNumber": 109
+        },
+        {
+          "caller": "settings_command",
+          "callee": "session_factory",
+          "lineNumber": 118
+        },
+        {
+          "caller": "settings_command",
+          "callee": "get_or_create_user",
+          "lineNumber": 119
+        },
+        {
+          "caller": "settings_command",
+          "callee": "get_user_preferences",
+          "lineNumber": 125
+        },
+        {
+          "caller": "settings_command",
+          "callee": "rel_engine.get_level",
+          "lineNumber": 128
+        },
+        {
+          "caller": "settings_command",
+          "callee": "user.current_personality.capitalize",
+          "lineNumber": 132
+        },
+        {
+          "caller": "settings_command",
+          "callee": "user.current_mood.capitalize",
+          "lineNumber": 133
+        },
+        {
+          "caller": "settings_command",
+          "callee": "rel_level.replace('_', ' ').title",
+          "lineNumber": 134
+        },
+        {
+          "caller": "settings_command",
+          "callee": "rel_level.replace",
+          "lineNumber": 134
+        },
+        {
+          "caller": "settings_command",
+          "callee": "lines.append",
+          "lineNumber": 141
+        },
+        {
+          "caller": "settings_command",
+          "callee": "lines.append",
+          "lineNumber": 142
+        },
+        {
+          "caller": "settings_command",
+          "callee": "lines.append",
+          "lineNumber": 143
+        },
+        {
+          "caller": "settings_command",
+          "callee": "prefs.default_personality.capitalize",
+          "lineNumber": 143
+        },
+        {
+          "caller": "settings_command",
+          "callee": "lines.append",
+          "lineNumber": 144
+        },
+        {
+          "caller": "settings_command",
+          "callee": "lines.append",
+          "lineNumber": 146
+        },
+        {
+          "caller": "settings_command",
+          "callee": "lines.append",
+          "lineNumber": 147
+        },
+        {
+          "caller": "settings_command",
+          "callee": "update.message.reply_text",
+          "lineNumber": 149
+        },
+        {
+          "caller": "settings_command",
+          "callee": "\"\\n\".join",
+          "lineNumber": 149
+        },
+        {
+          "caller": "personality_command",
+          "callee": "session_factory",
+          "lineNumber": 161
+        },
+        {
+          "caller": "personality_command",
+          "callee": "get_or_create_user",
+          "lineNumber": 162
+        },
+        {
+          "caller": "personality_command",
+          "callee": "context.args[0].lower",
+          "lineNumber": 170
+        },
+        {
+          "caller": "personality_command",
+          "callee": "session.commit",
+          "lineNumber": 173
+        },
+        {
+          "caller": "personality_command",
+          "callee": "update.message.reply_text",
+          "lineNumber": 174
+        },
+        {
+          "caller": "personality_command",
+          "callee": "requested.capitalize",
+          "lineNumber": 175
+        },
+        {
+          "caller": "personality_command",
+          "callee": "update.message.reply_text",
+          "lineNumber": 179
+        },
+        {
+          "caller": "personality_command",
+          "callee": "', '.join",
+          "lineNumber": 181
+        },
+        {
+          "caller": "personality_command",
+          "callee": "p.capitalize",
+          "lineNumber": 181
+        },
+        {
+          "caller": "personality_command",
+          "callee": "user.current_personality.capitalize",
+          "lineNumber": 184
+        },
+        {
+          "caller": "personality_command",
+          "callee": "update.message.reply_text",
+          "lineNumber": 185
+        },
+        {
+          "caller": "personality_command",
+          "callee": "', '.join",
+          "lineNumber": 189
+        },
+        {
+          "caller": "personality_command",
+          "callee": "p.capitalize",
+          "lineNumber": 189
+        },
+        {
+          "caller": "mood_command",
+          "callee": "session_factory",
+          "lineNumber": 203
+        },
+        {
+          "caller": "mood_command",
+          "callee": "get_or_create_user",
+          "lineNumber": 204
+        },
+        {
+          "caller": "mood_command",
+          "callee": "context.args[0].lower",
+          "lineNumber": 212
+        },
+        {
+          "caller": "mood_command",
+          "callee": "session.commit",
+          "lineNumber": 215
+        },
+        {
+          "caller": "mood_command",
+          "callee": "update.message.reply_text",
+          "lineNumber": 216
+        },
+        {
+          "caller": "mood_command",
+          "callee": "requested.capitalize",
+          "lineNumber": 217
+        },
+        {
+          "caller": "mood_command",
+          "callee": "update.message.reply_text",
+          "lineNumber": 221
+        },
+        {
+          "caller": "mood_command",
+          "callee": "', '.join",
+          "lineNumber": 223
+        },
+        {
+          "caller": "mood_command",
+          "callee": "m.capitalize",
+          "lineNumber": 223
+        },
+        {
+          "caller": "mood_command",
+          "callee": "update.message.reply_text",
+          "lineNumber": 226
+        },
+        {
+          "caller": "mood_command",
+          "callee": "user.current_mood.capitalize",
+          "lineNumber": 227
+        },
+        {
+          "caller": "mood_command",
+          "callee": "', '.join",
+          "lineNumber": 230
+        },
+        {
+          "caller": "mood_command",
+          "callee": "m.capitalize",
+          "lineNumber": 230
+        },
+        {
+          "caller": "memory_command",
+          "callee": "session_factory",
+          "lineNumber": 242
+        },
+        {
+          "caller": "memory_command",
+          "callee": "get_or_create_user",
+          "lineNumber": 243
+        },
+        {
+          "caller": "memory_command",
+          "callee": "get_memories",
+          "lineNumber": 249
+        },
+        {
+          "caller": "memory_command",
+          "callee": "update.message.reply_text",
+          "lineNumber": 252
+        },
+        {
+          "caller": "memory_command",
+          "callee": "{\"fact\": \"📌\", \"preference\": \"❤️\", \"goal\": \"🎯\", \"event\": \"📅\",\n                \"achievement\": \"🏆\", \"nickname\": \"💫\", \"session\": \"💭\"}.get",
+          "lineNumber": 260
+        },
+        {
+          "caller": "memory_command",
+          "callee": "lines.append",
+          "lineNumber": 263
+        },
+        {
+          "caller": "memory_command",
+          "callee": "update.message.reply_text",
+          "lineNumber": 265
+        },
+        {
+          "caller": "memory_command",
+          "callee": "\"\\n\".join",
+          "lineNumber": 265
+        },
+        {
+          "caller": "forget_command",
+          "callee": "session_factory",
+          "lineNumber": 274
+        },
+        {
+          "caller": "forget_command",
+          "callee": "get_or_create_user",
+          "lineNumber": 275
+        },
+        {
+          "caller": "forget_command",
+          "callee": "context.args[0].lower",
+          "lineNumber": 284
+        },
+        {
+          "caller": "forget_command",
+          "callee": "get_memories",
+          "lineNumber": 285
+        },
+        {
+          "caller": "forget_command",
+          "callee": "session.commit",
+          "lineNumber": 291
+        },
+        {
+          "caller": "forget_command",
+          "callee": "update.message.reply_text",
+          "lineNumber": 292
+        },
+        {
+          "caller": "forget_command",
+          "callee": "update.message.reply_text",
+          "lineNumber": 297
+        },
+        {
+          "caller": "forget_command",
+          "callee": "forget_all_memories",
+          "lineNumber": 302
+        },
+        {
+          "caller": "forget_command",
+          "callee": "update.message.reply_text",
+          "lineNumber": 303
+        },
+        {
+          "caller": "reset_command",
+          "callee": "session_factory",
+          "lineNumber": 320
+        },
+        {
+          "caller": "reset_command",
+          "callee": "get_or_create_user",
+          "lineNumber": 321
+        },
+        {
+          "caller": "reset_command",
+          "callee": "clear_conversation_history",
+          "lineNumber": 329
+        },
+        {
+          "caller": "reset_command",
+          "callee": "forget_all_memories",
+          "lineNumber": 336
+        },
+        {
+          "caller": "reset_command",
+          "callee": "session.commit",
+          "lineNumber": 338
+        },
+        {
+          "caller": "reset_command",
+          "callee": "update.message.reply_text",
+          "lineNumber": 340
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 11,
+        "functionCount": 11,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "memory/memory_manager.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 165,
+      "nonEmptyLines": 134,
+      "functions": [
+        {
+          "name": "save_memory",
+          "startLine": 22,
+          "endLine": 52,
+          "params": [
+            "session",
+            "user_id",
+            "type",
+            "content",
+            "importance"
+          ]
+        },
+        {
+          "name": "get_memories",
+          "startLine": 55,
+          "endLine": 84,
+          "params": [
+            "session",
+            "user_id",
+            "type",
+            "active_only",
+            "limit"
+          ]
+        },
+        {
+          "name": "get_memories_summary",
+          "startLine": 87,
+          "endLine": 111,
+          "params": [
+            "session",
+            "user_id",
+            "limit"
+          ]
+        },
+        {
+          "name": "forget_memory",
+          "startLine": 114,
+          "endLine": 142,
+          "params": [
+            "session",
+            "memory_id",
+            "user_id"
+          ]
+        },
+        {
+          "name": "forget_all_memories",
+          "startLine": 145,
+          "endLine": 165,
+          "params": [
+            "session",
+            "user_id"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "save_memory",
+          "line": 22,
+          "isDefault": false
+        },
+        {
+          "name": "get_memories",
+          "line": 55,
+          "isDefault": false
+        },
+        {
+          "name": "get_memories_summary",
+          "line": 87,
+          "isDefault": false
+        },
+        {
+          "name": "forget_memory",
+          "line": 114,
+          "isDefault": false
+        },
+        {
+          "name": "forget_all_memories",
+          "line": 145,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "save_memory",
+          "callee": "Memory",
+          "lineNumber": 42
+        },
+        {
+          "caller": "save_memory",
+          "callee": "min",
+          "lineNumber": 46
+        },
+        {
+          "caller": "save_memory",
+          "callee": "max",
+          "lineNumber": 46
+        },
+        {
+          "caller": "save_memory",
+          "callee": "session.add",
+          "lineNumber": 48
+        },
+        {
+          "caller": "save_memory",
+          "callee": "session.commit",
+          "lineNumber": 49
+        },
+        {
+          "caller": "save_memory",
+          "callee": "session.refresh",
+          "lineNumber": 50
+        },
+        {
+          "caller": "save_memory",
+          "callee": "logger.debug",
+          "lineNumber": 51
+        },
+        {
+          "caller": "get_memories",
+          "callee": "select(Memory).where",
+          "lineNumber": 75
+        },
+        {
+          "caller": "get_memories",
+          "callee": "select",
+          "lineNumber": 75
+        },
+        {
+          "caller": "get_memories",
+          "callee": "stmt.where",
+          "lineNumber": 78
+        },
+        {
+          "caller": "get_memories",
+          "callee": "stmt.where",
+          "lineNumber": 80
+        },
+        {
+          "caller": "get_memories",
+          "callee": "Memory.is_active.is_",
+          "lineNumber": 80
+        },
+        {
+          "caller": "get_memories",
+          "callee": "stmt.order_by(Memory.importance.desc(), Memory.created_at.desc()).limit",
+          "lineNumber": 82
+        },
+        {
+          "caller": "get_memories",
+          "callee": "stmt.order_by",
+          "lineNumber": 82
+        },
+        {
+          "caller": "get_memories",
+          "callee": "Memory.importance.desc",
+          "lineNumber": 82
+        },
+        {
+          "caller": "get_memories",
+          "callee": "Memory.created_at.desc",
+          "lineNumber": 82
+        },
+        {
+          "caller": "get_memories",
+          "callee": "session.execute",
+          "lineNumber": 83
+        },
+        {
+          "caller": "get_memories",
+          "callee": "list",
+          "lineNumber": 84
+        },
+        {
+          "caller": "get_memories",
+          "callee": "result.scalars().all",
+          "lineNumber": 84
+        },
+        {
+          "caller": "get_memories",
+          "callee": "result.scalars",
+          "lineNumber": 84
+        },
+        {
+          "caller": "get_memories_summary",
+          "callee": "get_memories",
+          "lineNumber": 104
+        },
+        {
+          "caller": "get_memories_summary",
+          "callee": "lines.append",
+          "lineNumber": 110
+        },
+        {
+          "caller": "get_memories_summary",
+          "callee": "\"\\n\".join",
+          "lineNumber": 111
+        },
+        {
+          "caller": "forget_memory",
+          "callee": "select(Memory).where",
+          "lineNumber": 129
+        },
+        {
+          "caller": "forget_memory",
+          "callee": "select",
+          "lineNumber": 129
+        },
+        {
+          "caller": "forget_memory",
+          "callee": "session.execute",
+          "lineNumber": 133
+        },
+        {
+          "caller": "forget_memory",
+          "callee": "result.scalar_one_or_none",
+          "lineNumber": 134
+        },
+        {
+          "caller": "forget_memory",
+          "callee": "session.commit",
+          "lineNumber": 140
+        },
+        {
+          "caller": "forget_memory",
+          "callee": "logger.info",
+          "lineNumber": 141
+        },
+        {
+          "caller": "forget_all_memories",
+          "callee": "get_memories",
+          "lineNumber": 158
+        },
+        {
+          "caller": "forget_all_memories",
+          "callee": "session.commit",
+          "lineNumber": 163
+        },
+        {
+          "caller": "forget_all_memories",
+          "callee": "logger.info",
+          "lineNumber": 164
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 5,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "services/chat_service.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 108,
+      "nonEmptyLines": 88,
+      "functions": [
+        {
+          "name": "save_message",
+          "startLine": 20,
+          "endLine": 46,
+          "params": [
+            "session",
+            "user_id",
+            "role",
+            "message"
+          ]
+        },
+        {
+          "name": "get_conversation_history",
+          "startLine": 49,
+          "endLine": 74,
+          "params": [
+            "session",
+            "user_id",
+            "limit"
+          ]
+        },
+        {
+          "name": "clear_conversation_history",
+          "startLine": 77,
+          "endLine": 95,
+          "params": [
+            "session",
+            "user_id"
+          ]
+        },
+        {
+          "name": "get_conversation_count",
+          "startLine": 98,
+          "endLine": 108,
+          "params": [
+            "session",
+            "user_id"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "save_message",
+          "line": 20,
+          "isDefault": false
+        },
+        {
+          "name": "get_conversation_history",
+          "line": 49,
+          "isDefault": false
+        },
+        {
+          "name": "clear_conversation_history",
+          "line": 77,
+          "isDefault": false
+        },
+        {
+          "name": "get_conversation_count",
+          "line": 98,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "save_message",
+          "callee": "Conversation",
+          "lineNumber": 37
+        },
+        {
+          "caller": "save_message",
+          "callee": "datetime.now",
+          "lineNumber": 41
+        },
+        {
+          "caller": "save_message",
+          "callee": "session.add",
+          "lineNumber": 43
+        },
+        {
+          "caller": "save_message",
+          "callee": "session.commit",
+          "lineNumber": 44
+        },
+        {
+          "caller": "save_message",
+          "callee": "session.refresh",
+          "lineNumber": 45
+        },
+        {
+          "caller": "get_conversation_history",
+          "callee": "select(Conversation)\n        .where(Conversation.user_id == user_id)\n        .order_by(Conversation.timestamp.desc())\n        .limit",
+          "lineNumber": 66
+        },
+        {
+          "caller": "get_conversation_history",
+          "callee": "select(Conversation)\n        .where(Conversation.user_id == user_id)\n        .order_by",
+          "lineNumber": 66
+        },
+        {
+          "caller": "get_conversation_history",
+          "callee": "select(Conversation)\n        .where",
+          "lineNumber": 66
+        },
+        {
+          "caller": "get_conversation_history",
+          "callee": "select",
+          "lineNumber": 66
+        },
+        {
+          "caller": "get_conversation_history",
+          "callee": "Conversation.timestamp.desc",
+          "lineNumber": 68
+        },
+        {
+          "caller": "get_conversation_history",
+          "callee": "session.execute",
+          "lineNumber": 71
+        },
+        {
+          "caller": "get_conversation_history",
+          "callee": "list",
+          "lineNumber": 72
+        },
+        {
+          "caller": "get_conversation_history",
+          "callee": "result.scalars().all",
+          "lineNumber": 72
+        },
+        {
+          "caller": "get_conversation_history",
+          "callee": "result.scalars",
+          "lineNumber": 72
+        },
+        {
+          "caller": "get_conversation_history",
+          "callee": "messages.reverse",
+          "lineNumber": 73
+        },
+        {
+          "caller": "clear_conversation_history",
+          "callee": "delete(Conversation).where",
+          "lineNumber": 90
+        },
+        {
+          "caller": "clear_conversation_history",
+          "callee": "delete",
+          "lineNumber": 90
+        },
+        {
+          "caller": "clear_conversation_history",
+          "callee": "session.execute",
+          "lineNumber": 91
+        },
+        {
+          "caller": "clear_conversation_history",
+          "callee": "session.commit",
+          "lineNumber": 92
+        },
+        {
+          "caller": "clear_conversation_history",
+          "callee": "logger.info",
+          "lineNumber": 94
+        },
+        {
+          "caller": "get_conversation_count",
+          "callee": "select(func.count(Conversation.id))\n        .where",
+          "lineNumber": 104
+        },
+        {
+          "caller": "get_conversation_count",
+          "callee": "select",
+          "lineNumber": 104
+        },
+        {
+          "caller": "get_conversation_count",
+          "callee": "func.count",
+          "lineNumber": 104
+        },
+        {
+          "caller": "get_conversation_count",
+          "callee": "session.execute",
+          "lineNumber": 107
+        },
+        {
+          "caller": "get_conversation_count",
+          "callee": "result.scalar",
+          "lineNumber": 108
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 4,
+        "functionCount": 4,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "services/user_service.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 130,
+      "nonEmptyLines": 102,
+      "functions": [
+        {
+          "name": "get_or_create_user",
+          "startLine": 22,
+          "endLine": 68,
+          "params": [
+            "session",
+            "telegram_id",
+            "username",
+            "display_name"
+          ]
+        },
+        {
+          "name": "get_user_by_id",
+          "startLine": 71,
+          "endLine": 76,
+          "params": [
+            "session",
+            "user_id"
+          ]
+        },
+        {
+          "name": "get_user_by_telegram_id",
+          "startLine": 79,
+          "endLine": 86,
+          "params": [
+            "session",
+            "telegram_id"
+          ]
+        },
+        {
+          "name": "update_user_preferences",
+          "startLine": 89,
+          "endLine": 120,
+          "params": [
+            "session",
+            "user_id",
+            "**kwargs"
+          ]
+        },
+        {
+          "name": "get_user_preferences",
+          "startLine": 123,
+          "endLine": 130,
+          "params": [
+            "session",
+            "user_id"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "get_or_create_user",
+          "line": 22,
+          "isDefault": false
+        },
+        {
+          "name": "get_user_by_id",
+          "line": 71,
+          "isDefault": false
+        },
+        {
+          "name": "get_user_by_telegram_id",
+          "line": 79,
+          "isDefault": false
+        },
+        {
+          "name": "update_user_preferences",
+          "line": 89,
+          "isDefault": false
+        },
+        {
+          "name": "get_user_preferences",
+          "line": 123,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "get_or_create_user",
+          "callee": "select(User).where",
+          "lineNumber": 39
+        },
+        {
+          "caller": "get_or_create_user",
+          "callee": "select",
+          "lineNumber": 39
+        },
+        {
+          "caller": "get_or_create_user",
+          "callee": "session.execute",
+          "lineNumber": 40
+        },
+        {
+          "caller": "get_or_create_user",
+          "callee": "result.scalar_one_or_none",
+          "lineNumber": 41
+        },
+        {
+          "caller": "get_or_create_user",
+          "callee": "User",
+          "lineNumber": 44
+        },
+        {
+          "caller": "get_or_create_user",
+          "callee": "session.add",
+          "lineNumber": 49
+        },
+        {
+          "caller": "get_or_create_user",
+          "callee": "session.commit",
+          "lineNumber": 50
+        },
+        {
+          "caller": "get_or_create_user",
+          "callee": "session.refresh",
+          "lineNumber": 51
+        },
+        {
+          "caller": "get_or_create_user",
+          "callee": "Preference",
+          "lineNumber": 54
+        },
+        {
+          "caller": "get_or_create_user",
+          "callee": "session.add",
+          "lineNumber": 55
+        },
+        {
+          "caller": "get_or_create_user",
+          "callee": "session.commit",
+          "lineNumber": 56
+        },
+        {
+          "caller": "get_or_create_user",
+          "callee": "logger.info",
+          "lineNumber": 58
+        },
+        {
+          "caller": "get_or_create_user",
+          "callee": "datetime.now",
+          "lineNumber": 61
+        },
+        {
+          "caller": "get_or_create_user",
+          "callee": "session.commit",
+          "lineNumber": 66
+        },
+        {
+          "caller": "get_user_by_id",
+          "callee": "session.get",
+          "lineNumber": 76
+        },
+        {
+          "caller": "get_user_by_telegram_id",
+          "callee": "select(User).where",
+          "lineNumber": 84
+        },
+        {
+          "caller": "get_user_by_telegram_id",
+          "callee": "select",
+          "lineNumber": 84
+        },
+        {
+          "caller": "get_user_by_telegram_id",
+          "callee": "session.execute",
+          "lineNumber": 85
+        },
+        {
+          "caller": "get_user_by_telegram_id",
+          "callee": "result.scalar_one_or_none",
+          "lineNumber": 86
+        },
+        {
+          "caller": "update_user_preferences",
+          "callee": "select(Preference).where",
+          "lineNumber": 107
+        },
+        {
+          "caller": "update_user_preferences",
+          "callee": "select",
+          "lineNumber": 107
+        },
+        {
+          "caller": "update_user_preferences",
+          "callee": "session.execute",
+          "lineNumber": 108
+        },
+        {
+          "caller": "update_user_preferences",
+          "callee": "result.scalar_one_or_none",
+          "lineNumber": 109
+        },
+        {
+          "caller": "update_user_preferences",
+          "callee": "kwargs.items",
+          "lineNumber": 114
+        },
+        {
+          "caller": "update_user_preferences",
+          "callee": "hasattr",
+          "lineNumber": 115
+        },
+        {
+          "caller": "update_user_preferences",
+          "callee": "setattr",
+          "lineNumber": 116
+        },
+        {
+          "caller": "update_user_preferences",
+          "callee": "session.commit",
+          "lineNumber": 118
+        },
+        {
+          "caller": "update_user_preferences",
+          "callee": "session.refresh",
+          "lineNumber": 119
+        },
+        {
+          "caller": "get_user_preferences",
+          "callee": "select(Preference).where",
+          "lineNumber": 128
+        },
+        {
+          "caller": "get_user_preferences",
+          "callee": "select",
+          "lineNumber": 128
+        },
+        {
+          "caller": "get_user_preferences",
+          "callee": "session.execute",
+          "lineNumber": 129
+        },
+        {
+          "caller": "get_user_preferences",
+          "callee": "result.scalar_one_or_none",
+          "lineNumber": 130
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 5,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    }
+  ]
+}
