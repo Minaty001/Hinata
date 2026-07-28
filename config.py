@@ -53,12 +53,12 @@ class Settings(BaseSettings):
     BOT_TOKEN: str = ""
 
     # Groq
-    GROQ_API_KEY: str = "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"
+    GROQ_API_KEY: str = ""
 
     # AI Provider & OpenCode Zen (https://opencode.ai/zen/v1)
     AI_PROVIDER: str = "groq"
     OPENCODE_ZEN_BASE_URL: str = "https://opencode.ai/zen/v1"
-    OPENCODE_ZEN_API_KEY: str = "sk-nZW90gwuiw5jh0htTJuCegPSC4UE14taBXPUM0qClu19u4FLJDAQMQUr1ErHnHyt"
+    OPENCODE_ZEN_API_KEY: str = ""
     OPENCODE_ZEN_MODEL: str = "opencode-zen-free"
     ENABLE_AI_FALLBACK: bool = True
 
