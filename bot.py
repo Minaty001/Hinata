@@ -28,6 +28,10 @@ from ai.personality_engine import PersonalityEngine
 from ai.prompt_builder import PromptBuilder
 from ai.relationship_engine import RelationshipEngine
 from ai.unified_ai_client import UnifiedAIClient
+from ai.feeling_detector import FeelingDetector
+from ai.need_analyzer import NeedAnalyzer
+from ai.defense_detector import DefenseDetector
+from ai.response_mode_selector import ResponseModeSelector
 from config import settings
 from constants import BOT_VERSION, LOGS_DIR
 from database.database import async_session_factory, close_database, init_database
@@ -48,6 +52,10 @@ from handlers.command_handler import (
 )
 from handlers.error_handler import error_handler
 from handlers.message_handler import handle_message
+from training.behavioral_tracker import BehavioralTracker
+from training.quality_scorer import QualityScorer
+from training.conversation_encoder import ConversationEncoder
+from training.model_router import ModelRouter
 from utils.rate_limit import rate_limiter
 
 logger = logging.getLogger(__name__)
@@ -84,6 +92,16 @@ def create_application() -> Application:
     application.bot_data["relationship_engine"] = RelationshipEngine()
     application.bot_data["rate_limiter"] = rate_limiter
     application.bot_data["prompt_builder"] = PromptBuilder()
+
+    # Next-Level AI Engines
+    application.bot_data["feeling_detector"] = FeelingDetector()
+    application.bot_data["need_analyzer"] = NeedAnalyzer()
+    application.bot_data["defense_detector"] = DefenseDetector()
+    application.bot_data["response_selector"] = ResponseModeSelector()
+    application.bot_data["behavioral_tracker"] = BehavioralTracker()
+    application.bot_data["quality_scorer"] = QualityScorer()
+    application.bot_data["conversation_encoder"] = ConversationEncoder()
+    application.bot_data["model_router"] = ModelRouter()
 
     ai_client = UnifiedAIClient()
     application.bot_data["ai_client"] = ai_client

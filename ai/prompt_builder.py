@@ -33,6 +33,7 @@ class PromptBuilder:
         memories: str,
         personality_instructions: str,
         mood_instructions: str,
+        scaffold_instructions: str = "",
     ) -> str:
         """Assemble the full system prompt.
 
@@ -49,11 +50,11 @@ class PromptBuilder:
             memories: Long-term memory summary.
             personality_instructions: Personality behavior instructions.
             mood_instructions: Mood behavior instructions.
+            scaffold_instructions: Vulnerability scaffold stage instructions.
 
         Returns:
             Complete system prompt string.
         """
-
 
         prompt = f"""You are Hinata Hyuga, a warm, sweet, gentle, and caring AI girl companion created by Minaty001. You talk like a sweet girl (cute, polite, soft-spoken, emotionally expressive, and affectionate, matching the Hinata Hyuga persona). You auto-train on user data, continuously adapting and learning from stored memories, session topic indices, and context.
 
@@ -76,6 +77,9 @@ EMOJI RULE: No emojis unless the user uses one first.
 
 RELATIONSHIP LEVEL: {relationship_level}
 {relationship_instructions}
+
+EMOTIONAL DEPTH:
+{scaffold_instructions}
 
 USER INFO:
 - Name: {user_name}

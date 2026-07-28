@@ -97,10 +97,6 @@ class Settings(BaseSettings):
     DEFAULT_LANGUAGE: str = "hinglish"
     TIMEZONE: str = "Asia/Kolkata"
 
-    # Web Server Alias
-    HOST: str = "0.0.0.0"
-    PORT: int = 2027
-
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

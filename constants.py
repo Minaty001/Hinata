@@ -26,8 +26,6 @@ BOT_CREATOR: Final[str] = "Minaty001"
 BOT_GITHUB: Final[str] = "https://github.com/Minaty001/hinata"
 BOT_VERSION: Final[str] = "0.3.0"
 BOT_DESCRIPTION: Final[str] = "A sweet, warm AI girl companion named Hinata Hyuga, created by Minaty001. Auto-trained and continuously learning from user data."
-BOT_TAGLINE: Final[str] = "A sweet anime-inspired AI girl companion who auto-trains on user data."
-
 
 # ── Telegram Limits ────────────────────────────────────────────────────────
 
@@ -107,17 +105,6 @@ MEMORY_TYPES: Final[list[str]] = [
 RATE_LIMIT_MESSAGES: Final[int] = 20
 RATE_LIMIT_WINDOW: Final[int] = 60  # seconds
 
-
-# ── Timeouts ───────────────────────────────────────────────────────────────
-
-GROQ_TIMEOUT: Final[int] = 30  # seconds
-GROQ_RETRIES: Final[int] = 2
-GROQ_RETRY_DELAY: Final[float] = 1.0  # seconds
-
-
-# ── Web Application ────────────────────────────────────────────────────────
-
-DEFAULT_WEB_PORT: Final[int] = 2027
 
 
 # ── AI Providers ───────────────────────────────────────────────────────────
@@ -205,14 +192,8 @@ PROVIDER_CATALOG: Final[dict[str, dict]] = {
     },
 }
 
-GROQ_MODEL: Final[str] = "llama-3.3-70b-versatile"
 GROQ_MAX_TOKENS: Final[int] = 50
 GROQ_TEMPERATURE: Final[float] = 0.8
 
-OPENCODE_ZEN_DEFAULT_BASE_URL: Final[str] = "https://opencode.ai/zen/v1"
-OPENCODE_ZEN_DEFAULT_MODEL: Final[str] = "opencode-zen-free"
 OPENCODE_ZEN_FREE_MODELS: Final[list[str]] = PROVIDER_CATALOG["opencode_zen"]["models"]
-OPENCODE_ZEN_TIMEOUT: Final[int] = 35
-OPENCODE_ZEN_RETRIES: Final[int] = 2
-OPENCODE_ZEN_RETRY_DELAY: Final[float] = 1.0
 

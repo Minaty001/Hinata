@@ -69,44 +69,6 @@ def split_long_message(text: str) -> list[str]:
     return chunks
 
 
-def escape_markdown(text: str) -> str:
-    """Escape special Markdown characters for Telegram.
-
-    Only escape characters outside code blocks.
-
-    Args:
-        text: The text to escape.
-
-    Returns:
-        Escaped text safe for Telegram markdown.
-    """
-    # Don't escape inside code blocks
-    parts = re.split(r"(```[\s\S]*?```|`[^`]*`)", text)
-    for i, part in enumerate(parts):
-        if not part.startswith("`"):
-            # Escape special markdown characters
-            part = part.replace("\\", "\\\\")
-            part = part.replace("_", r"\_")
-            part = part.replace("*", r"\*")
-            part = part.replace("[", r"\[")
-            part = part.replace("]", r"\]")
-            part = part.replace("(", r"\(")
-            part = part.replace(")", r"\)")
-            part = part.replace("~", r"\~")
-            part = part.replace(">", r"\>")
-            part = part.replace("#", r"\#")
-            part = part.replace("+", r"\+")
-            part = part.replace("-", r"\-")
-            part = part.replace("=", r"\=")
-            part = part.replace("|", r"\|")
-            part = part.replace("{", r"\{")
-            part = part.replace("}", r"\}")
-            part = part.replace(".", r"\.")
-            part = part.replace("!", r"\!")
-            parts[i] = part
-    return "".join(parts)
-
-
 # ── Internal helpers ─────────────────────────────────────────────────────
 
 

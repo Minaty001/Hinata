@@ -592,7 +592,7 @@ Cron-driven but **contextually intelligent**:
 |---|---------|--------|--------|
 | 1 | **ConversationEncoder** — every interaction → training sample | 2d | 🔥🔥🔥🔥🔥 |
 | 2 | **FeatureEmbedder** — text → 1536-dim vectors | 2d | 🔥🔥🔥🔥🔥 |
-| 3 | **VectorStore** — FAISS + SQLite semantic memory | 2d | 🔥🔥🔥🔥🔥 |
+| 3 | ~~**VectorStore** — FAISS + SQLite semantic memory~~ 🗑️ | 2d | 🔥🔥🔥🔥🔥 |
 | 4 | **Multi-dim Emotion Detection** — 16-dim vector per message | 3d | 🔥🔥🔥🔥🔥 |
 | 5 | **Behavioral Signal Tracker** — response time, patterns | 1d | 🔥🔥🔥🔥 |
 | 6 | **QualityScorer** — auto-rate every interaction | 1d | 🔥🔥🔥 |
@@ -601,12 +601,12 @@ Cron-driven but **contextually intelligent**:
 
 | # | Feature | Effort | Impact |
 |---|---------|--------|--------|
-| 7 | **PreferenceLearner** — topic/response/style vectors | 3d | 🔥🔥🔥🔥🔥 |
+| 7 | ~~**PreferenceLearner** — topic/response/style vectors~~ 🗑️ | 3d | 🔥🔥🔥🔥🔥 |
 | 8 | **NeedAnalyzer** — map emotions to unmet needs | 2d | 🔥🔥🔥🔥🔥 |
 | 9 | **DefenseDetector** — recognize 8 defense mechanisms | 2d | 🔥🔥🔥🔥 |
-| 10 | **Attachment Analyzer** — detect style over 50+ interactions | 3d | 🔥🔥🔥🔥🔥 |
-| 11 | **LoveLanguageTracker** — 5 dimensions | 1d | 🔥🔥🔥🔥 |
-| 12 | **UserPsychology profile builder** | 2d | 🔥🔥🔥🔥🔥 |
+| 10 | ~~**Attachment Analyzer** — detect style over 50+ interactions~~ 🗑️ | 3d | 🔥🔥🔥🔥🔥 |
+| 11 | ~~**LoveLanguageTracker** — 5 dimensions~~ 🗑️ | 1d | 🔥🔥🔥🔥 |
+| 12 | ~~**UserPsychology profile builder**~~ 🗑️ | 2d | 🔥🔥🔥🔥🔥 |
 
 ### Phase 2 — Adaptive Response
 
@@ -615,16 +615,16 @@ Cron-driven but **contextually intelligent**:
 | 13 | **8 Response Modes** — comfort, celebrate, ground, etc. | 3d | 🔥🔥🔥🔥🔥 |
 | 14 | **Multi-dim Relationship Model** — 6 dimensions | 2d | 🔥🔥🔥🔥 |
 | 15 | **ModelRouter** — auto-select provider per user | 1d | 🔥🔥🔥 |
-| 16 | **EmotionalSync** — cycle + trigger detection | 3d | 🔥🔥🔥🔥🔥 |
+| 16 | ~~**EmotionalSync** — cycle + trigger detection~~ 🗑️ | 3d | 🔥🔥🔥🔥🔥 |
 
 ### Phase 3 — Training & Data
 
 | # | Feature | Effort | Impact |
 |---|---------|--------|--------|
-| 17 | **ChatMLBuilder** — generate fine-tuning pairs | 2d | 🔥🔥🔥🔥🔥 |
-| 18 | **DPOBuilder** — preference ranking data | 2d | 🔥🔥🔥🔥🔥 |
+| 17 | ~~**ChatMLBuilder** — generate fine-tuning pairs~~ 🗑️ | 2d | 🔥🔥🔥🔥🔥 |
+| 18 | ~~**DPOBuilder** — preference ranking data~~ 🗑️ | 2d | 🔥🔥🔥🔥🔥 |
 | 19 | **Daily Consolidation Cron** — auto-pipeline | 2d | 🔥🔥🔥🔥🔥 |
-| 20 | **ForgettingCurve manager** | 1d | 🔥🔥🔥🔥 |
+| 20 | ~~**ForgettingCurve manager**~~ 🗑️ | 1d | 🔥🔥🔥🔥 |
 
 ### Phase 4 — Experience
 
@@ -632,9 +632,9 @@ Cron-driven but **contextually intelligent**:
 |---|---------|--------|--------|
 | 21 | **VulnerabilityScaffold** — graduated depth | 2d | 🔥🔥🔥🔥🔥 |
 | 22 | **DistressDetector + CARE protocol** | 3d | 🔥🔥🔥🔥🔥 |
-| 23 | **Voice (emotion-aware TTS)** | 2d | 🔥🔥🔥🔥 |
-| 24 | **Proactive scheduler** | 2d | 🔥🔥🔥🔥 |
-| 25 | **PWA + push notifications** | 3d | 🔥🔥🔥 |
+| 23 | ~~**Voice (emotion-aware TTS)**~~ 🗑️ | 2d | 🔥🔥🔥🔥 |
+| 24 | ~~**Proactive scheduler**~~ 🗑️ | 2d | 🔥🔥🔥🔥 |
+| 25 | **PWA + Android APK** | 3d | 🔥🔥🔥 |
 
 ---
 
@@ -648,41 +648,23 @@ hinata/
 │   ├── feeling_detector.py         # Multi-dim emotion + subtext detection
 │   ├── need_analyzer.py            # Map feelings → unmet core needs
 │   ├── defense_detector.py         # 8 defense mechanism recognition
-│   ├── attachment_analyzer.py      # Attachment style detection
-│   ├── love_language_tracker.py    # 5 love language dimensions
-│   ├── user_psychology.py          # Comprehensive user profile builder
 │   ├── response_mode_selector.py   # Select from 8 response modes
-│   └── emotional_sync.py           # Cycle/trigger detection
 │
 ├── training/
 │   ├── __init__.py
 │   ├── conversation_encoder.py     # Every interaction → training sample
 │   ├── feature_embedder.py         # Text → embedding vectors
-│   ├── preference_learner.py       # Build preference vectors
 │   ├── quality_scorer.py           # Auto-rate interactions
 │   ├── model_router.py             # Auto-select provider per user
-│   ├── chatml_builder.py           # Generate ChatML pairs
-│   ├── dpo_builder.py              # Generate DPO preference data
-│   ├── consolidation_engine.py     # Daily consolidation job
-│   ├── forgetting_curve.py         # Ebbinghaus memory management
 │   ├── behavioral_tracker.py       # Response time, patterns
-│   └── formats/
-│       ├── training_sample_schema.json
-│       ├── preference_vector_schema.json
-│       └── chatml_schema.json
 │
 ├── memory/
-│   ├── memory_manager.py           # MODIFIED — embeddings
-│   └── vector_store.py             # NEW — FAISS + SQLite
-│
-├── services/
-│   ├── proactive_service.py        # NEW — intelligent check-ins
-│   └── voice_service.py            # NEW — emotion-aware TTS
+│   └── memory_manager.py           # Long-term memory storage & retrieval
 │
 ├── database/
-│   └── models.py                   # MODIFIED — add new tables
+│   └── models.py                   # DB tables
 │
-└── web/                            # MODIFIED — PWA, notifications
+└── web/                            # Web UI assets
 ```
 
 ### 9.2 New DB Tables
@@ -692,33 +674,13 @@ hinata/
 FeelingSnapshot (id, user_id, message_id, valence, arousal, dominance,
     social_warmth, vulnerability, need, subtext, confidence, timestamp)
 
--- Behavioral patterns  
-BehavioralPattern (id, user_id, date, avg_response_time, avg_msg_length,
-    vulnerability_score, dominant_mood, primary_need, defense_mechanism,
-    interaction_count)
-
--- User psychology (internal model, never shown)
-UserPsychology (user_id, attachment_style, dominant_needs_json,
-    love_languages_json, communication_style, defense_mechanisms_json,
-    emotional_triggers_json, cognitive_biases_json, growth_edges_json,
-    updated_at)
-
 -- Training data
 TrainingSample (id, user_id, interaction_json, embedding_vector,
     quality_score, created_at)
 
-ChatMLPair (id, user_id, messages_json, metadata_json,
-    effectiveness_score, created_at)
-
-DPOPair (id, user_id, chosen_json, rejected_json, created_at)
-
 -- Multi-dim relationship
 RelationshipDimensions (user_id, trust, intimacy, attraction, comfort,
     respect, dependency, updated_at)
-
--- Preference vectors
-PreferenceVector (user_id, topic_weights_json, style_weights_json,
-    response_affinity_json, emotional_baseline_json, updated_at)
 ```
 
 ### 9.3 AI-Native Data Formats — The Key Innovation

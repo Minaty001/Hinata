@@ -26,8 +26,13 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from typing import Any
 
+from ai.mood_engine import MoodState
 from ai.prompt_builder import PromptBuilder
 from ai.unified_ai_client import UnifiedAIClient
+from ai.feeling_detector import FeelingDetector
+from ai.need_analyzer import NeedAnalyzer
+from ai.defense_detector import DefenseDetector
+from ai.response_mode_selector import ResponseModeSelector
 from config import settings
 from constants import (
     BOT_NAME,
@@ -53,6 +58,9 @@ from services.chat_service import (
 from memory.memory_manager import get_memories_list, get_memories_summary, save_memory
 from ai.context_builder import build_conversation_context
 from database.models import Conversation, Memory, Setting, SessionIndex
+from training.behavioral_tracker import BehavioralTracker
+from training.quality_scorer import QualityScorer
+from training.conversation_encoder import ConversationEncoder
 
 
 async def load_settings_from_db():
@@ -107,6 +115,15 @@ logger = logging.getLogger(__name__)
 # Shared AI Client & Prompt Builder
 unified_ai_client = UnifiedAIClient()
 prompt_builder = PromptBuilder()
+
+# Next-Level AI Engines
+feeling_detector = FeelingDetector()
+need_analyzer = NeedAnalyzer()
+defense_detector = DefenseDetector()
+response_selector = ResponseModeSelector()
+behavioral_tracker = BehavioralTracker()
+quality_scorer = QualityScorer()
+conversation_encoder = ConversationEncoder()
 
 
 def _run_async(coro):
@@ -305,13 +322,32 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
                     # 3. Get user memories
                     memories_text = await get_memories_summary(session, user.id)
 
-                    # 4. Build system prompt (default language: Hinglish)
+                    # 4. Feeling detection (next-level)
+                    detected_feeling = feeling_detector.detect(user_message)
+                    need_result = need_analyzer.analyze(detected_feeling, user_message)
+
+                    # 5. Response mode selection
+                    selected_mode = response_selector.select(
+                        feeling=detected_feeling,
+                        need_result=need_result,
+                        relationship_level="friend",
+                    )
+                    mode_instructions = response_selector.get_instructions(
+                        selected_mode.get("name", "comfort").lower()
+                    )
+
+                    # 6. Build system prompt (default language: Hinglish)
                     act_prov = unified_ai_client.get_active_provider()
+                    enhanced_mood = (
+                        f"Current mood is Happy.\n\n"
+                        f"Response Mode: {selected_mode.get('name', 'Comfort')}\n"
+                        f"{mode_instructions}"
+                    )
                     system_prompt = prompt_builder.build_system_prompt(
                         personality_name="Sweet",
                         personality={"name": "Sweet", "tone": "warm and affectionate"},
                         mood_name="happy",
-                        mood=type("Mood", (), {"name": "happy"})(),
+                        mood=MoodState(name="happy"),
                         relationship_level="friend",
                         relationship_instructions="Warm, friendly, and affectionate companion.",
                         user_name=user.display_name or "User",
@@ -319,7 +355,7 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
                         preferences="- Preferred Engine: " + act_prov,
                         memories=memories_text,
                         personality_instructions="Be sweet, polite, caring, and warm.",
-                        mood_instructions="Current mood is Happy.",
+                        mood_instructions=enhanced_mood,
                     )
 
                     messages = prompt_builder.build_messages(
@@ -328,13 +364,18 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
                         user_message=user_message,
                     )
 
-                    # 5. Call AI completion
-                    ai_reply = await unified_ai_client.chat_completion(messages, model=model)
+                    # 7. Call AI completion
+                    mode_temp = response_selector.get_temperature(
+                        selected_mode.get("name", "comfort").lower()
+                    )
+                    ai_reply = await unified_ai_client.chat_completion(
+                        messages, model=model, temperature=mode_temp
+                    )
 
-                    # 6. Save assistant message to DB
+                    # 8. Save assistant message to DB
                     await save_message(session, user.id, "assistant", ai_reply, chain_id=actual_chain_id)
 
-                    # 7. Auto-index session topics for fast proceed lookup
+                    # 9. Auto-index session topics for fast proceed lookup
                     await auto_index_session(session, user.id, actual_chain_id)
 
                     return actual_chain_id, ai_reply
@@ -593,8 +634,8 @@ def run_web_app(host: str = "0.0.0.0", port: int = 2027) -> None:
 if __name__ == "__main__":
     default_host = getattr(settings, "WEB_HOST", "0.0.0.0")
     default_port = getattr(settings, "WEB_PORT", 2027)
-    host_arg = os.getenv("HOST", os.getenv("WEB_HOST", default_host))
-    port_arg = int(os.getenv("PORT", str(default_port)))
+    host_arg = os.getenv("WEB_HOST", default_host)
+    port_arg = int(os.getenv("WEB_PORT", str(default_port)))
     for arg in sys.argv:
         if arg.startswith("--port="):
             try:

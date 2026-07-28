@@ -82,6 +82,9 @@ python bot.py
 1. Connect your Android phone to the same Wi-Fi network as your computer.
 2. Run `python app.py`.
 3. Open the Wi-Fi Network URL printed in the terminal (e.g. `http://192.168.1.X:2027`).
+4. Or install the **Android APK** from `web/hinata-android.apk` — enter your PC's IP:port on first launch.
+
+> **APK Features:** Fullscreen WebView, 24 permissions (notifications, camera, mic, storage, bluetooth), native notification bridge, foreground keep-alive service, boot reconnect. Supports Android 9–15.
 
 ---
 

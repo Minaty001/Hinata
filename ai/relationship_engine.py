@@ -9,20 +9,10 @@ quality, and message frequency.
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
 
 from constants import RELATIONSHIP_LEVELS, RELATIONSHIP_THRESHOLDS
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class Relationship:
-    """The current relationship state."""
-
-    level: str = "stranger"
-    score: int = 0
-    level_index: int = 0
 
 
 class RelationshipEngine:

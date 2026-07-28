@@ -51,19 +51,6 @@ class RateLimiter:
         self._buckets[user_id].append(now)
         return False
 
-    def remaining(self, user_id: int) -> int:
-        """Return how many messages the user can still send in the current window."""
-        now = time.time()
-        cutoff = now - self._window
-        self._buckets[user_id] = [
-            ts for ts in self._buckets[user_id] if ts > cutoff
-        ]
-        return max(0, self._max_messages - len(self._buckets[user_id]))
-
-    def reset(self, user_id: int) -> None:
-        """Clear the rate limit bucket for a user."""
-        self._buckets.pop(user_id, None)
-
 
 # Global rate limiter instance (cached in bot_data)
 rate_limiter = RateLimiter()

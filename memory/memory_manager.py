@@ -4,20 +4,21 @@ Hinata - Memory Manager
 Controls long-term memory storage, retrieval, and forgetting.
 Memories are categorised by type (fact, preference, goal, event,
 achievement, nickname) and have an importance rating.
+
+Next-level: supports embedding generation and vector storage for
+semantic memory retrieval.
 """
 
 from __future__ import annotations
 
+import json
 import logging
-from typing import Optional
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models import Memory
 
 logger = logging.getLogger(__name__)
-
 
 async def save_memory(
     session: AsyncSession,
@@ -48,6 +49,7 @@ async def save_memory(
     session.add(entry)
     await session.commit()
     await session.refresh(entry)
+
     logger.debug("Saved memory (%s) for user_id=%d.", type, user_id)
     return entry
 

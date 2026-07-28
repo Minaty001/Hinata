@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import json
 import logging
-import random
 from pathlib import Path
 from typing import Any
 
@@ -55,25 +54,6 @@ class PersonalityEngine:
     def list_personalities(self) -> list[str]:
         """Return sorted list of available personality names."""
         return sorted(self._personalities.keys())
-
-    def random_greeting(self, name: str, user_name: str) -> str:
-        """Generate a personality-aware greeting."""
-        p = self.get_personality(name)
-        style = p.get("greeting_style", "warm")
-        templates = [
-            f"Hey {user_name}!",
-            f"Hello {user_name}!",
-            f"Hi {user_name}!",
-        ]
-        if style == "soft and welcoming":
-            templates = [f"Hello, {user_name}. It's nice to talk with you."]
-        elif style == "exciting and energetic":
-            templates = [f"Hey hey {user_name}! Let's go!"]
-        elif style == "brisk and professional":
-            templates = [f"Hello {user_name}. Ready when you are."]
-        elif style == "intrigued and warm":
-            templates = [f"Oh, {user_name}! I was hoping you'd message."]
-        return random.choice(templates)
 
     # ── Internal ───────────────────────────────────────────────────
 

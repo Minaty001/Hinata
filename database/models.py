@@ -168,3 +168,66 @@ class Setting(Base):
 
     def __repr__(self) -> str:
         return f"<Setting(key={self.key}, value={self.value})>"
+
+
+# ── Next-Level Plan: New Tables ─────────────────────────────────────────────
+
+
+class FeelingSnapshot(Base):
+    """Multi-dimensional emotion vector snapshot per user message."""
+
+    __tablename__ = "feeling_snapshots"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    message_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("conversations.id"), nullable=True)
+    valence: Mapped[float] = mapped_column(Float, default=0.0)        # -1 to 1
+    arousal: Mapped[float] = mapped_column(Float, default=0.0)        # 0 to 1
+    dominance: Mapped[float] = mapped_column(Float, default=0.0)      # 0 to 1
+    social_warmth: Mapped[float] = mapped_column(Float, default=0.0)  # 0 to 1
+    vulnerability: Mapped[float] = mapped_column(Float, default=0.0)  # 0 to 1
+    need: Mapped[str] = mapped_column(String(64), default="")
+    subtext: Mapped[str] = mapped_column(Text, default="")
+    micro_emotion: Mapped[str] = mapped_column(String(64), default="")
+    confidence: Mapped[float] = mapped_column(Float, default=0.0)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
+
+    def __repr__(self) -> str:
+        return f"<FeelingSnapshot(id={self.id}, user_id={self.user_id}, need={self.need})>"
+
+
+class TrainingSample(Base):
+    """Every interaction encoded as a structured training sample."""
+
+    __tablename__ = "training_samples"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    interaction_json: Mapped[str] = mapped_column(Text, nullable=False)
+    quality_score: Mapped[float] = mapped_column(Float, default=0.0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+    def __repr__(self) -> str:
+        return f"<TrainingSample(id={self.id}, user_id={self.user_id}, score={self.quality_score})>"
+
+
+class RelationshipDimension(Base):
+    """Multi-dimensional relationship state per user."""
+
+    __tablename__ = "relationship_dimensions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
+    trust: Mapped[float] = mapped_column(Float, default=0.1)
+    intimacy: Mapped[float] = mapped_column(Float, default=0.0)
+    attraction: Mapped[float] = mapped_column(Float, default=0.0)
+    comfort: Mapped[float] = mapped_column(Float, default=0.1)
+    respect: Mapped[float] = mapped_column(Float, default=0.1)
+    dependency: Mapped[float] = mapped_column(Float, default=0.0)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+
+    def __repr__(self) -> str:
+        return f"<RelationshipDimension(user_id={self.user_id}, trust={self.trust})>"
+
+
+
