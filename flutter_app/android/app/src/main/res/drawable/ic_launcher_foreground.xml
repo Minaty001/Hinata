@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Background circle -->
+    <path
+        android:fillColor="#FF69B4"
+        android:pathData="M54,54m-40,0a40,40 0,1 1,80 0a40,40 0,1 1,-80 0"/>
+    <!-- Hair - left side -->
+    <path
+        android:fillColor="#1a1a2e"
+        android:pathData="M36,24c-4,6 -6,14 -6,22c0,4 0.5,8 1.5,12c-3,-2 -5,-5 -6,-9c-2,-8 0,-18 4,-25c2,-4 6,-7 10,-8c-2,2 -3,5 -3.5,8z"/>
+    <!-- Hair - right side -->
+    <path
+        android:fillColor="#1a1a2e"
+        android:pathData="M72,24c4,6 6,14 6,22c0,4 -0.5,8 -1.5,12c3,-2 5,-5 6,-9c2,-8 0,-18 -4,-25c-2,-4 -6,-7 -10,-8c2,2 3,5 3.5,8z"/>
+    <!-- Face -->
+    <ellipse
+        android:fillColor="#FFE0BD"
+        android:cx="54"
+        android:cy="48"
+        android:rx="16"
+        android:ry="18"/>
+    <!-- Eyes -->
+    <ellipse
+        android:fillColor="#1a1a2e"
+        android:cx="47"
+        android:cy="44"
+        android:rx="2.5"
+        android:ry="3"/>
+    <ellipse
+        android:fillColor="#1a1a2e"
+        android:cx="61"
+        android:cy="44"
+        android:rx="2.5"
+        android:ry="3"/>
+    <!-- Eye shine -->
+    <circle
+        android:fillColor="#FFFFFF"
+        android:cx="48"
+        android:cy="42.5"
+        android:r="1"/>
+    <circle
+        android:fillColor="#FFFFFF"
+        android:cx="62"
+        android:cy="42.5"
+        android:r="1"/>
+    <!-- Blush -->
+    <ellipse
+        android:fillColor="#FFB0B0"
+        android:cx="42"
+        android:cy="52"
+        android:rx="3"
+        android:ry="1.5"/>
+    <ellipse
+        android:fillColor="#FFB0B0"
+        android:cx="66"
+        android:cy="52"
+        android:rx="3"
+        android:ry="1.5"/>
+    <!-- Mouth - happy smile -->
+    <path
+        android:fillColor="#FF6B6B"
+        android:pathData="M48,54 Q54,60 60,54"
+        android:strokeWidth="1.5"
+        android:strokeColor="#CC4444"/>
+    <!-- Hair fringe/bangs -->
+    <path
+        android:fillColor="#1a1a2e"
+        android:pathData="M38,30c3,-4 8,-6 16,-6c8,0 13,2 16,6c2,-6 0,-14 -6,-19c-4,-3 -10,-5 -16,-5c-6,0 -12,2 -16,5c-6,5 -8,13 -6,19z"/>
+    <!-- Hair highlight -->
+    <path
+        android:fillColor="#2a2a4e"
+        android:pathData="M42,28c2,-3 5,-5 12,-5c7,0 10,2 12,5c-1,-4 -5,-8 -12,-8c-7,0 -11,4 -12,8z"/>
+    <!-- Small hair tufts -->
+    <path
+        android:fillColor="#1a1a2e"
+        android:pathData="M44,20c-1,-2 -2,-3 0,-4c2,-1 4,0 5,2z"/>
+    <path
+        android:fillColor="#1a1a2e"
+        android:pathData="M64,20c1,-2 2,-3 0,-4c-2,-1 -4,0 -5,2z"/>
+    <!-- Body hint -->
+    <path
+        android:fillColor="#FFD1DC"
+        android:pathData="M38,64c0,8 4,18 16,18c12,0 16,-10 16,-18c0,0 -32,0 -32,0z"/>
+    <!-- Collar -->
+    <path
+        android:fillColor="#FF69B4"
+        android:pathData="M46,66c0,0 8,4 8,4c0,0 8,-4 8,-4l-2,-4l-12,0z"/>
+</vector>

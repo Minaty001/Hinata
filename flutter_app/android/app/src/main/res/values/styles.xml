@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.HinataAI" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:colorPrimary">#FFFF69B4</item>
+        <item name="android:colorPrimaryDark">#FFD4558A</item>
+        <item name="android:colorAccent">#FFFF69B4</item>
+        <item name="android:statusBarColor">#FFFF69B4</item>
+        <item name="android:navigationBarColor">#FFFF69B4</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>
