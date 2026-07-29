@@ -136,9 +136,8 @@ PROVIDER_CATALOG: Final[dict[str, dict]] = {
     "opencode_zen": {
         "name": "OpenCode Zen API",
         "default_base_url": "https://opencode.ai/zen/v1",
-        "default_model": "opencode-zen-free",
+        "default_model": "opencode/deepseek-v4-flash-free",
         "models": [
-            "opencode-zen-free",
             "opencode/big-pickle",
             "opencode/deepseek-v4-flash-free",
             "opencode/nemotron-3-ultra-free",
@@ -192,8 +191,9 @@ PROVIDER_CATALOG: Final[dict[str, dict]] = {
     },
 }
 
-GROQ_MAX_TOKENS: Final[int] = 50
+GROQ_MAX_TOKENS: Final[int] = 500
 GROQ_TEMPERATURE: Final[float] = 0.8
+
 
 OPENCODE_ZEN_FREE_MODELS: Final[list[str]] = PROVIDER_CATALOG["opencode_zen"]["models"]
 

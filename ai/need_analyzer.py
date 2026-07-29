@@ -53,7 +53,8 @@ class NeedAnalyzer:
             "guarded": ["autonomy", "security"],
             "longing": ["connection", "significance"],
             "embarrassed": ["significance", "connection"],
-            "tender": ["connection", "intimacy"],
+            "tender": ["connection"],
+
         }
 
     def analyze(

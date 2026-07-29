@@ -138,7 +138,8 @@ async def provider_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
     if not context.args:
         active = ai_client.get_active_provider() if ai_client else "groq"
-        model_name = ai_client.opencode_model if active == "opencode_zen" else ai_client.groq_model
+        model_name = ai_client.providers[active]["active_model"] if ai_client else ""
+
         formatted_models = "\n".join(f"• `{m}`" for m in OPENCODE_ZEN_FREE_MODELS)
         lines = [
             "⚡ **AI Provider Settings**",

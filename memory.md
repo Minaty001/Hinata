@@ -12,9 +12,9 @@
 | **NeedAnalyzer** — Map feelings → unmet core needs (7 need framework) | `ai/need_analyzer.py` | ✅ LIVE |
 | **DefenseDetector** — 8 defense mechanisms (humor, intellectualization, projection, etc.) | `ai/defense_detector.py` | ✅ LIVE |
 | **ResponseModeSelector** — 8 emotion-matched response modes (comfort, space, grounding, celebration, etc.) | `ai/response_mode_selector.py` | ✅ LIVE |
-| **BehavioralTracker** — Response time, message length, vulnerability trends | `training/behavioral_tracker.py` | ✅ LIVE |
+| **BehavioralTracker** — Response time, message length, vulnerability trends | `training/behavioral_tracker.py` | ⚠️ LIVE — `compute_signals()` never called (dead code, ponytail audit) |
 | **QualityScorer** — Auto-rate every interaction | `training/quality_scorer.py` | ✅ LIVE |
-| **FeatureEmbedder** — Text → 384-dim vectors (hash-based fallback, sentence-transformers optional) | `training/feature_embedder.py` | ✅ LIVE |
+| **FeatureEmbedder** — Text → 384-dim vectors (hash-based fallback, sentence-transformers optional) | `training/feature_embedder.py` | ⚠️ LIVE — `cosine_similarity()` never called; `sentence-transformers` not in requirements |
 | **ConversationEncoder** — Every interaction → structured training sample | `training/conversation_encoder.py` | ✅ LIVE |
 
 ## ✅ Completed: Phase 1 — Human Nature Model (100%)
@@ -30,7 +30,7 @@
 |--------|------|--------|
 | **8 Response Modes** — Integrated into message_handler via `ResponseModeSelector` | `ai/response_mode_selector.py` | ✅ LIVE |
 | **Multi-dim Relationship** — 6 dimensions (trust, intimacy, attraction, comfort, respect, dependency) | `database/models.py` + `message_handler.py` | ✅ LIVE |
-| **ModelRouter** — Auto-select provider + temperature per mode | `training/model_router.py` | ✅ LIVE |
+| **ModelRouter** — Auto-select provider + temperature per mode | `training/model_router.py` | ⚠️ LIVE — `ModelRouter` class is a delegation shell wrapping `select_route()`
 
 ## ✅ Completed: Phase 4 — Experience
 

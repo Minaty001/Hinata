@@ -47,11 +47,31 @@ class TestMultiProvider(unittest.TestCase):
             # Reload settings from DB
             await load_settings_from_db()
 
-            client = UnifiedAIClient()
+            from app import unified_ai_client
             # Verify active provider was restored from DB
-            self.assertEqual(client.get_active_provider(), "openai")
-            self.assertEqual(client.providers["openai"]["api_key"], "sk-test123456789")
-            self.assertEqual(client.providers["openai"]["active_model"], "gpt-4o")
+            self.assertEqual(unified_ai_client.get_active_provider(), "openai")
+
+            self.assertEqual(unified_ai_client.providers["openai"]["api_key"], "sk-test123456789")
+            self.assertEqual(unified_ai_client.providers["openai"]["active_model"], "gpt-4o")
+
+            # Clean up test settings to prevent polluting the database
+            from database.models import Setting
+            from sqlalchemy import delete
+            async with async_session_factory() as session:
+                await session.execute(
+                    delete(Setting).where(
+                        Setting.key.in_([
+                            "provider_openai_key",
+                            "provider_openai_model",
+                            "active_provider"
+                        ])
+                    )
+                )
+                await session.commit()
+
+            # Restore original provider defaults
+            unified_ai_client.set_active_provider("groq")
+
 
         asyncio.run(_test())
 

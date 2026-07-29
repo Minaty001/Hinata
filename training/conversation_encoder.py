@@ -140,9 +140,10 @@ class ConversationEncoder:
 
         # Need-based adjustments
         need = detected_feeling.get("need", "")
-        if need in ("validation", "connection"):
+        if need == "connection":
             impact["intimacy"] += 0.02
         elif need == "autonomy":
             impact["trust"] += 0.01
+
 
         return impact

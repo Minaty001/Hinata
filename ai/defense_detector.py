@@ -146,14 +146,15 @@ class DefenseDetector:
         """Detect projection — attributing one's own feelings to Hinata."""
         score = 0.0
         projection_patterns = [
-            r"\byou\w+ (don't care|don't understand|don't get it|are mad|are upset)\b",
-            r"\byou\w+ (think|feel) (i'm|i am) (bad|wrong|stupid)\b",
-            r"\byou\w+ (hate|don't like) me\b",
+            r"\byou\b\s*(don't care|don't understand|don't get it|are mad|are upset)\b",
+            r"\byou\b\s*(think|feel) (i'm|i am) (bad|wrong|stupid)\b",
+            r"\byou\b\s*(hate|don't like) me\b",
             r"\byou're just (saying|pretending)\b",
         ]
         for pattern in projection_patterns:
             if re.search(pattern, msg_lower):
                 score += 0.5
+
 
         if score > 0:
             mechanisms["projection"] = min(score, 1.0)
@@ -181,7 +182,8 @@ class DefenseDetector:
 
     @staticmethod
     def _check_idealization_devaluation(msg: str, msg_lower: str, mechanisms: dict[str, float]) -> None:
-        """Detect extreme praise followed by criticism — fearul-avoidant pattern."""
+        """Detect extreme praise followed by criticism — fearful-avoidant pattern."""
+
         has_extreme_praise = any(w in msg_lower for w in [
             "you're the best", "perfect", "amazing", "incredible",
             "you're so good", "i love you so much",

@@ -20,4 +20,4 @@ python-dotenv>=1.0.0
 tzdata>=2024.1
 
 # Vector / ML (next-level plan)
-numpy>=2.0.0
+

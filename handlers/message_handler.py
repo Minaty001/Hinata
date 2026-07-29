@@ -30,7 +30,9 @@ from typing import Any
 
 import telegram
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
+
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -174,10 +176,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 if prev_sample_id:
                     try:
                         stmt = (
-                            __import__("sqlalchemy", fromlist=["select"])
-                            .select(TrainingSample)
+                            select(TrainingSample)
                             .where(TrainingSample.id == prev_sample_id)
                         )
+
                         result = await session.execute(stmt)
                         sample = result.scalar_one_or_none()
                         if sample:
@@ -195,12 +197,50 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 m.message for m in recent_msgs if m.role == "user"
             ]
 
+            # Compute behavioral signals dynamically
+            user_msgs = [m for m in recent_msgs if m.role == "user"]
+            message_lengths_recent = [len(m.message) for m in user_msgs]
+
+            response_times_recent = []
+            for i in range(1, len(recent_msgs)):
+                if recent_msgs[i].role == "user" and recent_msgs[i-1].role == "assistant":
+                    dt = (recent_msgs[i].timestamp - recent_msgs[i-1].timestamp).total_seconds()
+                    response_times_recent.append(dt)
+
+            import re
+            emoji_pattern = re.compile(r"[\u263a-\u263f\u2700-\u27bf\U0001f300-\U0001f9ff]")
+            emoji_count_recent = [len(emoji_pattern.findall(m.message)) for m in user_msgs]
+
+            topic_switches_recent = [len(m.message) < 50 for m in user_msgs]
+            self_disclosures_recent = [any(w in m.message.lower() for w in ["i feel", "my", "i am", "me", "personally"]) for m in user_msgs]
+
+            import time
+            current_time = time.time()
+            last_response_time = None
+            if recent_msgs and recent_msgs[-1].role == "assistant" and recent_msgs[-1].timestamp:
+                ts = recent_msgs[-1].timestamp
+                if ts.tzinfo is None:
+                    ts = ts.replace(tzinfo=timezone.utc)
+                last_response_time = (datetime.now(timezone.utc) - ts).total_seconds()
+
+            computed_signals = behavioral_tracker.compute_signals(
+                current_time=current_time,
+                last_response_time=last_response_time,
+                message_length=len(message_text),
+                message_lengths_recent=message_lengths_recent,
+                response_times_recent=response_times_recent,
+                emoji_count_recent=emoji_count_recent,
+                topic_switches_recent=topic_switches_recent,
+                self_disclosures_recent=self_disclosures_recent,
+            )
+
             # ── 5. Feeling Detection (multi-dim) ──────────────────
             feeling = feeling_detector.detect(
                 message_text,
                 message_history=recent_user_msgs,
-                behavioral_signals=prev_state.get("last_signals"),
+                behavioral_signals=computed_signals,
             )
+
 
             # Store feeling snapshot
             feeling_snapshot = FeelingSnapshot(
@@ -369,8 +409,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             await session.refresh(training_record)
 
             # Store state for deferred quality scoring
+            if len(_user_message_history) > 1000:
+                oldest_keys = list(_user_message_history.keys())[:100]
+                for k in oldest_keys:
+                    _user_message_history.pop(k, None)
+
             _user_message_history[user.id] = {
                 "last_assistant_msg": cleaned,
+
                 "last_sample_id": training_record.id,
                 "prev_msg": message_text,
                 "last_response_time": None,

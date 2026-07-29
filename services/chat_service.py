@@ -149,7 +149,9 @@ async def delete_chain(
     user_id: int,
     chain_id: str,
 ) -> bool:
-    """Delete a chain and all associated conversations."""
+    """Delete a chain and all associated conversations and session indices."""
+    await session.execute(delete(Conversation).where(Conversation.chain_id == chain_id, Conversation.user_id == user_id))
+    await session.execute(delete(SessionIndex).where(SessionIndex.chain_id == chain_id))
     stmt = delete(Chain).where(Chain.chain_id == chain_id, Chain.user_id == user_id)
     res = await session.execute(stmt)
     await session.commit()
@@ -249,16 +251,20 @@ async def search_session_indices(
     query: str,
 ) -> list[dict]:
     """Fast indexed jump: search session topic indices for direct topic query matching."""
-    clean_q = f"%{query.strip()}%"
+    escaped = query.strip().replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
+    clean_q = f"%{escaped}%"
     stmt = (
         select(SessionIndex, Chain)
         .join(Chain, SessionIndex.chain_id == Chain.chain_id)
         .where(
             Chain.user_id == user_id,
-            (SessionIndex.topic.ilike(clean_q) | SessionIndex.summary.ilike(clean_q) | SessionIndex.keywords.ilike(clean_q))
+            (SessionIndex.topic.ilike(clean_q, escape="\\") |
+             SessionIndex.summary.ilike(clean_q, escape="\\") |
+             SessionIndex.keywords.ilike(clean_q, escape="\\"))
         )
         .limit(10)
     )
+
     res = await session.execute(stmt)
     results = []
     for idx, chain in res.all():
@@ -279,15 +285,27 @@ async def auto_index_session(
     chain_id: str,
 ) -> Optional[SessionIndex]:
     """Auto-index session topics from recent messages so prompt building is fast and indexed."""
-    msgs = await get_conversation_history(session, user_id, chain_id=chain_id, limit=6)
-    if len(msgs) < 2:
-        return None
+    # Count total conversation messages in this chain
+    stmt = select(func.count(Conversation.id)).where(
+        Conversation.chain_id == chain_id,
+        Conversation.user_id == user_id
+    )
+    total_msgs = await session.scalar(stmt) or 0
 
     # Check existing index count
     indices = await get_session_indices(session, chain_id)
-    page_num = len(indices) + 1
+    required_indices = max(1, total_msgs // 10)
+    if total_msgs < 2 or len(indices) >= required_indices:
+        return None
 
+
+    page_num = len(indices) + 1
+    msgs = await get_conversation_history(session, user_id, chain_id=chain_id, limit=6)
+    if not msgs:
+        return None
     last_user_msg = ""
+
+
     for m in reversed(msgs):
         if m.role == "user":
             last_user_msg = m.message

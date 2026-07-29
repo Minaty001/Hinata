@@ -2,7 +2,7 @@
 
 **Author:** Minaty001
 **Repo:** [github.com/Minaty001/hinata](https://github.com/Minaty001/hinata)
-**Status:** Foundation Phase
+**Status:** Phases 0–2, 4 implemented (see `memory.md` for live status)
 
 ---
 
@@ -31,7 +31,7 @@
 | Multi-Provider AI | ✅ | 6 providers (Groq, OpenCode Zen, OpenAI, Gemini, OpenRouter, Bytez) with auto-failover |
 | Personality System | ✅ | 8 personalities (sweet, calm, smart, gamer, playful, curious, boss, supportive) |
 | Mood Engine | ⚠️ | 9 moods but **random/timer-based, no real detection** |
-| Relationship System | ⚠️ | 5 levels but **single score, linear progression** |
+| Relationship System | ✅ | 6-dim model (trust, intimacy, attraction, comfort, respect, dependency) |
 | Memory System | ⚠️ | Fact storage but **keyword ILIKE search, no semantic understanding** |
 | Multi-Language | ✅ | English, Hindi, Hinglish auto-detection |
 | Session Indexing | ✅ | Auto-indexes conversations for fast search |

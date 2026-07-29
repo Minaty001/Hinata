@@ -20,19 +20,26 @@ import asyncio
 import json
 import logging
 import os
+import socket
 import sys
+
 
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from typing import Any
 
-from ai.mood_engine import MoodState
+from ai.mood_engine import MoodState, MoodEngine
 from ai.prompt_builder import PromptBuilder
 from ai.unified_ai_client import UnifiedAIClient
 from ai.feeling_detector import FeelingDetector
 from ai.need_analyzer import NeedAnalyzer
 from ai.defense_detector import DefenseDetector
 from ai.response_mode_selector import ResponseModeSelector
+from ai.distress_detector import detect_distress
+from ai.vulnerability_scaffold import get_scaffold_instructions
+from ai.relationship_engine import RelationshipEngine
+from ai.personality_engine import PersonalityEngine
+
 from config import settings
 from constants import (
     BOT_NAME,
@@ -181,6 +188,15 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
         else:
             self._send_json({"error": "Endpoint not found"}, status=404)
 
+    def do_OPTIONS(self) -> None:
+        """Handle CORS preflight requests."""
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.end_headers()
+
+
     def _handle_api_get_chains(self) -> None:
         """Return list of conversation chains/sessions for web user."""
         async def _impl():
@@ -326,36 +342,67 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
                     detected_feeling = feeling_detector.detect(user_message)
                     need_result = need_analyzer.analyze(detected_feeling, user_message)
 
-                    # 5. Response mode selection
+                    # 5. Distress detection & CARE protocol (aligning with Telegram)
+                    distress_result = detect_distress(
+                        user_message,
+                        feeling_valence=detected_feeling.get("valence"),
+                    )
+                    care_instructions = distress_result.get("care_instructions", "")
+
+                    # 6. Response mode selection
+                    rel_engine = RelationshipEngine()
+                    personality_engine = PersonalityEngine()
+                    mood_engine = MoodEngine()
+
+                    rel_level = rel_engine.get_level(user.relationship_score)
                     selected_mode = response_selector.select(
                         feeling=detected_feeling,
                         need_result=need_result,
-                        relationship_level="friend",
+                        relationship_level=rel_level,
+                        interaction_count=user.relationship_score,
                     )
                     mode_instructions = response_selector.get_instructions(
                         selected_mode.get("name", "comfort").lower()
                     )
 
-                    # 6. Build system prompt (default language: Hinglish)
+                    # 7. Personality, mood and relationship instructions
+                    personality = personality_engine.get_personality(user.current_personality or "sweet")
+                    personality_instructions = personality_engine.get_instructions(user.current_personality or "sweet")
+
+                    mood = mood_engine.determine_mood(
+                        current_mood=user.current_mood,
+                        relationship_score=user.relationship_score,
+                    )
+                    mood_instructions = mood_engine.get_instructions(mood)
+
+                    rel_instructions = rel_engine.get_instructions(user.relationship_score)
+
+                    # 8. Build system prompt
                     act_prov = unified_ai_client.get_active_provider()
                     enhanced_mood = (
-                        f"Current mood is Happy.\n\n"
+                        f"{mood_instructions}\n\n"
                         f"Response Mode: {selected_mode.get('name', 'Comfort')}\n"
                         f"{mode_instructions}"
                     )
+                    if care_instructions:
+                        enhanced_mood += f"\n\nCARE PROTOCOL ACTIVE:\n{care_instructions}"
+
+                    scaffold_instructions = get_scaffold_instructions(rel_level)
+
                     system_prompt = prompt_builder.build_system_prompt(
-                        personality_name="Sweet",
-                        personality={"name": "Sweet", "tone": "warm and affectionate"},
-                        mood_name="happy",
-                        mood=MoodState(name="happy"),
-                        relationship_level="friend",
-                        relationship_instructions="Warm, friendly, and affectionate companion.",
+                        personality_name=(user.current_personality or "sweet").capitalize(),
+                        personality=personality,
+                        mood_name=mood.name,
+                        mood=mood,
+                        relationship_level=rel_level,
+                        relationship_instructions=rel_instructions,
                         user_name=user.display_name or "User",
-                        language="hinglish",
+                        language=user.language or "hinglish",
                         preferences="- Preferred Engine: " + act_prov,
                         memories=memories_text,
-                        personality_instructions="Be sweet, polite, caring, and warm.",
+                        personality_instructions=personality_instructions,
                         mood_instructions=enhanced_mood,
+                        scaffold_instructions=scaffold_instructions,
                     )
 
                     messages = prompt_builder.build_messages(
@@ -364,7 +411,7 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
                         user_message=user_message,
                     )
 
-                    # 7. Call AI completion
+                    # 9. Call AI completion
                     mode_temp = response_selector.get_temperature(
                         selected_mode.get("name", "comfort").lower()
                     )
@@ -372,13 +419,22 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
                         messages, model=model, temperature=mode_temp
                     )
 
-                    # 8. Save assistant message to DB
+                    # 10. Save assistant message to DB
                     await save_message(session, user.id, "assistant", ai_reply, chain_id=actual_chain_id)
 
-                    # 9. Auto-index session topics for fast proceed lookup
+                    # 11. Update relationship score & mood in DB (aligning with Telegram)
+                    increase = rel_engine.calculate_score_increase(
+                        len(user_message),
+                        user.relationship_score,
+                    )
+                    user.relationship_score += increase
+                    user.current_mood = mood.name
+
+                    # 12. Auto-index session topics for fast proceed lookup
                     await auto_index_session(session, user.id, actual_chain_id)
 
                     return actual_chain_id, ai_reply
+
 
             actual_chain_id, ai_reply = _run_async(_process_db_chat())
 
@@ -413,6 +469,9 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
             self._send_json({"query": "", "results": []})
             return
 
+        escaped_query = query.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
+
+
         async def _impl():
             async with async_session_factory() as session:
                 user = await get_or_create_web_user(session)
@@ -432,7 +491,7 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
                 # 2. Search Conversations table
                 conv_stmt = select(Conversation).where(
                     Conversation.user_id == user.id,
-                    Conversation.message.ilike(f"%{query}%")
+                    Conversation.message.ilike(f"%{escaped_query}%", escape="\\")
                 ).limit(10)
                 conv_res = await session.execute(conv_stmt)
                 for msg in conv_res.scalars().all():
@@ -447,7 +506,7 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
                 # 3. Search Memory table
                 mem_stmt = select(Memory).where(
                     Memory.user_id == user.id,
-                    Memory.content.ilike(f"%{query}%")
+                    Memory.content.ilike(f"%{escaped_query}%", escape="\\")
                 ).limit(10)
                 mem_res = await session.execute(mem_stmt)
                 for mem in mem_res.scalars().all():
@@ -456,6 +515,7 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
                         "title": f"Memory [{mem.type}]",
                         "snippet": mem.content,
                     })
+
 
                 # 4. Model matches across all providers
                 providers_info = unified_ai_client.get_all_providers_info()
@@ -587,19 +647,15 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
         self.wfile.write(body_bytes)
 
 
-import socket
-
-
 def get_local_ip() -> str:
     """Detect local Wi-Fi / LAN IP address."""
     try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()[0]
-        s.close()
-        return ip
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(("8.8.8.8", 80))
+            return s.getsockname()[0]
     except Exception:
         return "127.0.0.1"
+
 
 
 def run_web_app(host: str = "0.0.0.0", port: int = 2027) -> None:

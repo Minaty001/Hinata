@@ -202,12 +202,13 @@ class ResponseModeSelector:
         """Classify which response mode fits best."""
 
         # Direct need-based selection
-        if need == "validation" or need == "connection":
+        if need == "connection":
             if vulnerability > 0.6:
                 return "intimate"
             if valence < -0.2:
                 return "comfort"
             return "comfort"
+
 
         if need == "autonomy":
             if arousal > 0.6:

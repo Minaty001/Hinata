@@ -13,7 +13,7 @@ Hinata Hyuga is a warm, gentle, and emotionally expressive AI girl companion bui
 - 🌸 **Web Application UI & Deep Search Engine** — Interactive glassmorphism web dashboard with real-time deep search across chats, memories, personalities, and models (`http://localhost:2027`).
 - 👧 **Talks Like a Sweet Girl** — Gentle, cute, polite, soft-spoken, and affectionate conversational tone.
 - ⚡ **Auto-Trained on User Data** — Automatically extracts and stores user preferences, facts, goals, and nicknames from chat interactions.
-- 🤖 **OpenCode Zen & Groq API Integration** — Powered by Groq API & **OpenCode Zen** (`https://opencode.ai/zen/v1`) featuring free thinking and deep reasoning models (`opencode/big-pickle`, `deepseek-v4-flash-free`, `mimo-v2.5-free`, `deepseek-r1`, `qwen2.5-72b-instruct`).
+- 🤖 **6 AI Provider Support** — Groq, OpenCode Zen, OpenAI, Gemini, OpenRouter, and Bytez with automatic zero-downtime failover between providers.
 - 🔄 **Multi-Provider Failover** — Zero-downtime automatic fallback between AI providers if rate-limiting or downtime occurs.
 - 👤 **Created by Minaty001** — Official open-source project by [Minaty001 on GitHub](https://github.com/Minaty001).
 - 🧠 **Long-Term Memory & Context** — Remembers past interactions and personalizes replies dynamically.
@@ -32,8 +32,8 @@ Hinata Hyuga is a warm, gentle, and emotionally expressive AI girl companion bui
 | **Developer** | [Minaty001](https://github.com/Minaty001) |
 | **Backend** | Python 3.13+ (Asyncio) |
 | **Telegram API** | `python-telegram-bot` v20+ |
-| **AI LLM Providers** | Groq API (`llama-3.3-70b-versatile`) & **OpenCode Zen** (`https://opencode.ai/zen/v1`) |
-| **Thinking Models** | `opencode-zen-free`, `deepseek-r1`, `qwen2.5-72b-instruct` |
+| **AI LLM Providers** | 6 providers with auto-failover: Groq, OpenCode Zen, OpenAI, Gemini, OpenRouter, Bytez |
+| **Provider Models** | Groq: `llama-3.3-70b-versatile`; OpenCode Zen: `opencode-zen-free`/`deepseek-r1`; OpenAI: `gpt-4o-mini`; Gemini: `gemini-2.0-flash`; OpenRouter: `meta-llama/llama-3.3-70b-instruct`; Bytez: `bytez-default` |
 | **Database** | SQLite via SQLAlchemy 2.0 (Async Engine) |
 | **Validation** | Pydantic Settings |
 | **Data Models** | Async SQLite / SQLAlchemy |
@@ -46,7 +46,7 @@ Hinata Hyuga is a warm, gentle, and emotionally expressive AI girl companion bui
 
 - Python 3.13+
 - A Telegram Bot Token (from [@BotFather](https://t.me/BotFather))
-- A Groq API Key (from [console.groq.com](https://console.groq.com)) or OpenCode Zen API Endpoint (`https://opencode.ai/zen/v1`)
+- At least one AI API key: Groq ([console.groq.com](https://console.groq.com)), OpenAI, Gemini, OpenRouter, Bytez, or OpenCode Zen (`https://opencode.ai/zen/v1`)
 
 ### Installation
 
@@ -136,36 +136,82 @@ Hinata supports the OpenCode Zen API endpoint (`https://opencode.ai/zen/v1`) for
 Hinata/
 ├── LICENSE                # MIT License file (Minaty001)
 ├── README.md              # Project documentation
-├── app.py                 # Bot entry point & lifecycle manager
+├── app.py                 # Web Application entry point & lifecycle manager
 ├── bot.py                 # Telegram Application setup & handler registration
 ├── config.py              # Environment configuration (Pydantic Settings)
 ├── constants.py           # Core bot constants & defaults
 ├── handlers/              # Telegram update handlers
+│   ├── __init__.py
 │   ├── admin_handler.py   # Admin commands & broadcast
 │   ├── command_handler.py # User commands (/start, /about, /provider, /memory, etc.)
 │   ├── error_handler.py   # Global error logging
-│   └── message_handler.py # Main AI conversation pipeline
-├── ai/                    # AI core engine
+│   └── message_handler.py # Main AI conversation pipeline (feel → need → mode → respond)
+├── ai/                    # AI core engine & emotional intelligence
+│   ├── __init__.py
 │   ├── prompt_builder.py  # System prompt generator with persona & user memory
 │   ├── groq_client.py     # Groq API client with fallback & retry logic
-│   ├── opencode_client.py # OpenCode Zen API client (https://opencode.ai/zen/v1)
-│   ├── unified_ai_client.py# Unified AI manager & automatic failover engine
+│   ├── opencode_client.py # OpenCode Zen API client
+│   ├── unified_ai_client.py # Unified AI manager & multi-provider failover engine
 │   ├── mood_engine.py     # 9 dynamic emotional states manager
 │   ├── personality_engine.py # 8 character personality profiles
 │   ├── relationship_engine.py # Affinity scoring & levels
 │   ├── context_builder.py # Recent message history formatter
 │   ├── response_cleaner.py # Output validation & formatting
-│   └── language_detector.py# Auto-detects English/Hindi/Hinglish
+│   ├── language_detector.py # Auto-detects English/Hindi/Hinglish
+│   ├── feeling_detector.py  # 16-dim emotion vector, 20 micro-emotions
+│   ├── need_analyzer.py     # Map feelings → 7 core unmet needs
+│   ├── defense_detector.py  # 8 defense mechanism recognition
+│   ├── response_mode_selector.py # 8 emotion-matched response modes
+│   ├── vulnerability_scaffold.py # Graduated emotional depth stages
+│   └── distress_detector.py   # Distress signals + CARE protocol
+├── training/              # Auto-training & ML pipeline
+│   ├── __init__.py
+│   ├── conversation_encoder.py # Every interaction → structured training sample
+│   ├── feature_embedder.py     # Text → 384-dim embedding vectors
+│   ├── quality_scorer.py       # Auto-rate every interaction
+│   ├── model_router.py         # Auto-select provider + temperature per mode
+│   └── behavioral_tracker.py   # Response time, length, vulnerability trends
 ├── memory/                # Memory & Auto-training system
 │   └── memory_manager.py  # Save, retrieve, and filter user memories
 ├── database/              # SQLite database layer
-│   ├── engine.py          # SQLAlchemy async session setup
-│   └── models.py          # User, Conversation, Memory, Preference models
+│   ├── __init__.py
+│   ├── database.py        # SQLAlchemy async engine & session setup
+│   ├── models.py          # User, Conversation, Memory, FeelingSnapshot, TrainingSample models
+│   └── backup.py          # Database backup utilities
 ├── services/              # Business logic services
-├── utils/                 # Helpers, rate limiters, and validators
-├── prompts/               # JSON templates for personalities, moods & prompts
-├── data/                  # Runtime database file & avatars
-└── tests/                 # Unit and integration test suite
+│   ├── __init__.py
+│   ├── chat_service.py    # Chat orchestration logic
+│   └── user_service.py    # User management & preferences
+├── utils/                 # Utility modules
+│   ├── __init__.py
+│   ├── formatter.py       # Text formatting helpers
+│   ├── helpers.py         # General utility functions
+│   ├── rate_limit.py      # Rate limiting middleware
+│   └── validators.py      # Input validation
+├── prompts/               # JSON templates (personalities, moods, prompts)
+│   ├── moods.json
+│   └── personalities.json
+├── data/                  # Runtime database file & cache
+│   ├── cache/
+│   └── hinata.db
+├── logs/                  # Application logs
+│   └── webapp.log
+├── tests/                 # Unit and integration test suite
+│   ├── __init__.py
+│   ├── test_app.py
+│   ├── test_multi_provider.py
+│   ├── test_session_indexing_hinglish.py
+│   └── test_storage_chains.py
+├── web/                   # Web UI assets (PWA)
+│   ├── app.js
+│   ├── style.css
+│   ├── index.html
+│   ├── manifest.json
+│   ├── sw.js              # Service worker (offline support)
+│   ├── icon-192.svg
+│   ├── icon-512.svg
+│   └── hinata-android.apk # Android WebView APK (Android 9-15)
+└── backups/               # Database backups
 ```
 
 ---

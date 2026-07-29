@@ -143,8 +143,9 @@ async def admin_logs(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     except (IndexError, ValueError):
         n = 20
 
-    log_file = LOGS_DIR / "hinata.log"
+    log_file = LOGS_DIR / "hinata_bot.log"
     if not log_file.exists():
+
         await update.message.reply_text("No log file found.")
         return
 
