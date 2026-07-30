@@ -189,6 +189,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                         pass
 
             # ── 3. Get conversation context (for feeling + need) ──
+            # Fetch history BEFORE saving this turn so context/trajectory exclude it
             conversation_context = await build_conversation_context(session, user.id)
 
             # ── 4. Get recent messages for trajectory ──────────────
@@ -196,6 +197,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             recent_user_msgs = [
                 m.message for m in recent_msgs if m.role == "user"
             ]
+
+            # Persist user message (was missing — broke multi-turn memory)
+            await save_message(session, user.id, "user", message_text)
 
             # Compute behavioral signals dynamically
             user_msgs = [m for m in recent_msgs if m.role == "user"]
@@ -291,12 +295,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 relationship_level=rel_level,
                 interaction_count=user.relationship_score,
             )
-            mode_instructions = response_selector.get_instructions(selected_mode.get("name", "comfort").lower())
-            mode_temperature = response_selector.get_temperature(selected_mode.get("name", "comfort").lower())
+            mode_id = selected_mode.get("id", "comfort")
+            mode_instructions = response_selector.get_instructions(mode_id)
+            mode_temperature = response_selector.get_temperature(mode_id)
 
             # ── 9. Model Router (auto-select provider) ────────────
             router_result = model_router.select(
-                response_mode=selected_mode.get("name", "comfort").lower(),
+                response_mode=mode_id,
                 available_providers=list(ai_client.providers.keys()) if hasattr(ai_client, "providers") else None,
                 active_provider=ai_client.get_active_provider() if hasattr(ai_client, "get_active_provider") else "groq",
             )
@@ -328,6 +333,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             enhanced_mood = f"{mood_instructions}\n\nResponse Mode: {selected_mode.get('name', 'Comfort')}\n{mode_instructions}"
             if care_instructions:
                 enhanced_mood += f"\n\nCARE PROTOCOL ACTIVE:\n{care_instructions}"
+            if defense_result.get("primary", "none") != "none":
+                enhanced_mood += f"\n\nDefense strategy: {defense_result.get('strategy', '')}"
 
             scaffold_instructions = get_scaffold_instructions(rel_level)
 
@@ -392,7 +399,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 user_message=message_text,
                 conversation_context=conversation_context or "",
                 ai_response=cleaned,
-                response_mode=selected_mode.get("name", "comfort").lower(),
+                response_mode=mode_id,
                 user_memories=memories_summary or "",
                 relationship_state=relationship_state,
                 detected_feeling=feeling,
@@ -424,7 +431,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                     "hour_of_day": datetime.now(timezone.utc).hour,
                     "message_length": len(message_text),
                 },
-                "last_mode": selected_mode.get("name", "comfort").lower(),
+                "last_mode": mode_id,
                 "recent_valences": recent_valences,
             }
 

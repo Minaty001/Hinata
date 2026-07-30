@@ -623,17 +623,24 @@ document.addEventListener('DOMContentLoaded', () => {
         })
       });
       const data = await res.json();
+      if (!res.ok || data.error || !data.reply) {
+        chatMessages.removeChild(typingElem);
+        appendMessage('assistant', cName, data.error
+          ? `Sorry, something went wrong: ${data.error}`
+          : "Oops... I couldn't reply just now. Try again in a moment? 🌸");
+        return;
+      }
       if (data.chain_id && data.chain_id !== state.activeChainId) {
         state.activeChainId = data.chain_id;
         localStorage.setItem('hinata_active_chain_id', data.chain_id);
       }
       chatMessages.removeChild(typingElem);
-      appendMessage('assistant', cName, data.reply || 'I am always here for you! 💖');
+      appendMessage('assistant', cName, data.reply);
       // Refresh chain title in list
       loadChains();
     } catch (err) {
       chatMessages.removeChild(typingElem);
-      appendMessage('assistant', cName, `I'm happy to chat with you! (Provider: ${state.activeProvider}, Model: ${state.activeModel}) 🌸`);
+      appendMessage('assistant', cName, "Oops... I couldn't reach the server. Check your connection and try again? 🌸");
     }
   }
 
@@ -986,7 +993,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div style="display: flex; flex-direction: column; gap: 6px;">
           <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">API Key:</label>
           <div style="display: flex; gap: 6px;">
-            <input type="password" class="custom-input input-api-key" data-provider="${provKey}" value="${escapeHtml(p.api_key || '')}" placeholder="Enter ${escapeHtml(p.name)} API Key..." style="flex: 1; padding: 6px 10px; font-size: 0.85rem;" />
+            <input type="password" class="custom-input input-api-key" data-provider="${provKey}" value="" placeholder="${p.api_key_set ? escapeHtml(p.api_key_hint || '•••• set') : 'Enter ' + escapeHtml(p.name) + ' API Key...'}" style="flex: 1; padding: 6px 10px; font-size: 0.85rem;" />
             <button class="btn btn-sm btn-outline btn-save-key" data-provider="${provKey}">Save</button>
           </div>
         </div>
@@ -1026,9 +1033,11 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.addEventListener('click', async () => {
         const provKey = btn.getAttribute('data-provider');
         const inputElem = container.querySelector(`.input-api-key[data-provider="${provKey}"]`);
-        if (inputElem) {
-          await updateProviderConfig(provKey, { api_key: inputElem.value });
+        if (inputElem && inputElem.value.trim()) {
+          await updateProviderConfig(provKey, { api_key: inputElem.value.trim() });
           showToast(`Saved API key for ${providers[provKey].name}! 🔑`, 'success');
+        } else {
+          showToast('Enter a new API key to save (existing key is not shown).', 'info');
         }
       });
     });

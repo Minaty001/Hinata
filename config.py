@@ -59,7 +59,7 @@ class Settings(BaseSettings):
     AI_PROVIDER: str = "groq"
     OPENCODE_ZEN_BASE_URL: str = "https://opencode.ai/zen/v1"
     OPENCODE_ZEN_API_KEY: str = ""
-    OPENCODE_ZEN_MODEL: str = "opencode-zen-free"
+    OPENCODE_ZEN_MODEL: str = "opencode/deepseek-v4-flash-free"
     ENABLE_AI_FALLBACK: bool = True
 
     # Database

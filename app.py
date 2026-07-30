@@ -341,6 +341,7 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
                     # 4. Feeling detection (next-level)
                     detected_feeling = feeling_detector.detect(user_message)
                     need_result = need_analyzer.analyze(detected_feeling, user_message)
+                    defense_result = defense_detector.detect(user_message)
 
                     # 5. Distress detection & CARE protocol (aligning with Telegram)
                     distress_result = detect_distress(
@@ -361,9 +362,8 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
                         relationship_level=rel_level,
                         interaction_count=user.relationship_score,
                     )
-                    mode_instructions = response_selector.get_instructions(
-                        selected_mode.get("name", "comfort").lower()
-                    )
+                    mode_id = selected_mode.get("id", "comfort")
+                    mode_instructions = response_selector.get_instructions(mode_id)
 
                     # 7. Personality, mood and relationship instructions
                     personality = personality_engine.get_personality(user.current_personality or "sweet")
@@ -386,6 +386,8 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
                     )
                     if care_instructions:
                         enhanced_mood += f"\n\nCARE PROTOCOL ACTIVE:\n{care_instructions}"
+                    if defense_result.get("primary", "none") != "none":
+                        enhanced_mood += f"\n\nDefense strategy: {defense_result.get('strategy', '')}"
 
                     scaffold_instructions = get_scaffold_instructions(rel_level)
 
@@ -412,9 +414,7 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
                     )
 
                     # 9. Call AI completion
-                    mode_temp = response_selector.get_temperature(
-                        selected_mode.get("name", "comfort").lower()
-                    )
+                    mode_temp = response_selector.get_temperature(mode_id)
                     ai_reply = await unified_ai_client.chat_completion(
                         messages, model=model, temperature=mode_temp
                     )
@@ -432,6 +432,9 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
 
                     # 12. Auto-index session topics for fast proceed lookup
                     await auto_index_session(session, user.id, actual_chain_id)
+
+                    # Persist score/mood — auto_index often no-ops without committing
+                    await session.commit()
 
                     return actual_chain_id, ai_reply
 

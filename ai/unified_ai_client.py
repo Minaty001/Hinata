@@ -53,11 +53,17 @@ class UnifiedAIClient:
 
             base_url = getattr(settings, f"{prov_key.upper()}_BASE_URL", catalog["default_base_url"])
 
+            active_model = catalog["default_model"]
+            if prov_key == "opencode_zen":
+                configured = getattr(settings, "OPENCODE_ZEN_MODEL", "") or ""
+                if configured in catalog["models"]:
+                    active_model = configured
+
             self.providers[prov_key] = {
                 "name": catalog["name"],
                 "api_key": api_key,
                 "base_url": base_url.rstrip("/"),
-                "active_model": catalog["default_model"],
+                "active_model": active_model,
                 "models": list(catalog["models"]),
             }
 
@@ -132,12 +138,15 @@ class UnifiedAIClient:
         logger.info("Updated provider config for %s: model=%s, base_url=%s", clean, self.providers[clean]["active_model"], self.providers[clean]["base_url"])
 
     def get_all_providers_info(self) -> dict[str, Any]:
-        """Return catalog and configuration for all providers."""
+        """Return catalog and configuration for all providers (API keys redacted)."""
         out = {}
         for k, v in self.providers.items():
+            key = v.get("api_key") or ""
             out[k] = {
                 "name": v["name"],
-                "api_key": v["api_key"],
+                "api_key": "",  # never expose secrets over HTTP
+                "api_key_set": bool(key),
+                "api_key_hint": f"••••{key[-4:]}" if len(key) >= 4 else ("••••" if key else ""),
                 "base_url": v["base_url"],
                 "active_model": v["active_model"],
                 "models": v["models"],

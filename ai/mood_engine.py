@@ -114,7 +114,7 @@ class MoodEngine:
         if 12 <= hour < 17:
             return random.choice(["energetic", "happy", "thoughtful"])
         if 17 <= hour < 21:
-            return random.choice(["excited", "happy", "playful"])
+            return random.choice(["excited", "happy", "curious"])
         # Night (21-5)
         return random.choice(["sleepy", "relaxed", "thoughtful", "shy"])
 

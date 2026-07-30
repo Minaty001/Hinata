@@ -3,7 +3,7 @@
  * Provides offline fallback & cache-first for static assets.
  */
 
-const CACHE = "hinata-v1";
+const CACHE = "hinata-v2";
 const STATIC_ASSETS = [
   "/",
   "/index.html",
@@ -34,7 +34,13 @@ self.addEventListener("fetch", (event) => {
   // Cache static assets, network-first for API calls
   if (event.request.url.includes("/api/")) {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match("/index.html"))
+      fetch(event.request).catch(
+        () =>
+          new Response(JSON.stringify({ error: "offline", status: "error" }), {
+            status: 503,
+            headers: { "Content-Type": "application/json" },
+          })
+      )
     );
   } else {
     event.respondWith(

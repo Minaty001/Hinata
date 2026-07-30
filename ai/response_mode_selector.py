@@ -152,7 +152,11 @@ class ResponseModeSelector:
 
         valence = feeling.get("valence", 0.0)
         arousal = feeling.get("arousal", 0.5)
-        need = feeling.get("need", "")
+        # Prefer NeedAnalyzer primary_need over feeling's coarse need tag
+        if need_result and need_result.get("primary_need"):
+            need = need_result["primary_need"]
+        else:
+            need = feeling.get("need", "")
         micro = feeling.get("micro_emotion", "")
         vuln = feeling.get("vulnerability", 0.0)
         subtext = feeling.get("subtext", "")
@@ -172,6 +176,7 @@ class ResponseModeSelector:
             selected_mode = "comfort"
 
         mode_config = dict(RESPONSE_MODES[selected_mode])
+        mode_config["id"] = selected_mode
 
         logger.debug("Selected mode: %s (valence=%.2f, arousal=%.2f, need=%s)", selected_mode, valence, arousal, need)
         return mode_config
@@ -269,4 +274,6 @@ class ResponseModeSelector:
     @staticmethod
     def _default_mode() -> dict[str, Any]:
         """Return the default response mode."""
-        return dict(RESPONSE_MODES["comfort"])
+        config = dict(RESPONSE_MODES["comfort"])
+        config["id"] = "comfort"
+        return config
