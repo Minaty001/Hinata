@@ -71,8 +71,9 @@ cp .env.example .env
 ### Run Applications
 
 ```bash
-# 🌸 Run Web Application UI & Deep Search Engine
-python app.py
+# 🌸 Install requirements and run the unified FastAPI server
+pip install -r backend/requirements.txt
+cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 # 🤖 Run Telegram Bot
 python bot.py
@@ -80,13 +81,9 @@ python bot.py
 
 #### 📱 Accessing from Android / Wi-Fi Network:
 1. Connect your Android phone to the same Wi-Fi network as your computer.
-2. Run `python app.py`.
-3. Open the Wi-Fi Network URL printed in the terminal (e.g. `http://192.168.1.X:2027`).
-4. Or install the **Android APK** from `web/hinata-android.apk` — enter your PC's IP:port on first launch.
-
-> **APK Features:** Fullscreen WebView, 24 permissions (notifications, camera, mic, storage, bluetooth), native notification bridge, foreground keep-alive service, boot reconnect. Supports Android 9–15.
-
----
+2. Run the unified FastAPI server.
+3. Open the Wi-Fi Network URL in your browser: `http://192.168.1.X:8000/web/index.html`.
+4. Or install the **Android APK** from `web/hinata-android.apk` — enter your server IP (`192.168.1.X:8000`) on first launch.
 
 ## 🤖 Bot Commands
 
@@ -213,6 +210,47 @@ Hinata/
 │   └── hinata-android.apk # Android WebView APK (Android 9-15)
 └── backups/               # Database backups
 ```
+
+## 🌐 Deployment on Render.com
+
+You can host both the **FastAPI Web Service (Backend + PWA Web UI)** and the **Telegram Bot Background Worker** on [Render.com](https://render.com) for free.
+
+### 1. Web Service (FastAPI Backend + Web PWA UI)
+
+Create a new **Web Service** on Render and connect your fork of this repository:
+
+- **Runtime**: `Python`
+- **Build Command**: `pip install -r backend/requirements.txt`
+- **Start Command**: `cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- **Mount Directory (Disk)**:
+  Since SQLite databases are ephemeral and reset on every Render deploy/restart, you must attach a **Persistent Disk** to prevent data loss:
+  - Go to your Web Service settings ➔ **Disks** ➔ **Add Disk**.
+  - **Name**: `hinata-data`
+  - **Mount Path**: `/data`
+  - **Size**: `1 GiB` (free tier)
+
+### 2. Background Worker (Telegram Bot)
+
+Since the Telegram Bot needs to run continuously in the background without exposing an HTTP port, create a **Background Worker** on Render:
+
+- **Runtime**: `Python`
+- **Build Command**: `pip install -r backend/requirements.txt`
+- **Start Command**: `python bot.py`
+
+### 3. Environment Variables (Configured on both Services)
+
+Add the following Environment Variables under the **Environment** tab of both services (or use a shared **Env Group**):
+
+| Key | Description | Example / Recommended Value |
+|-----|-------------|----------------------------|
+| `APP_ENV` | Application environment | `production` |
+| `DATABASE_URL` | SQLite path pointing to persistent disk | `sqlite+aiosqlite:////data/hinata.db` |
+| `JWT_SECRET` | Secret key for JWT generation | *Generate via `openssl rand -hex 32`* |
+| `TELEGRAM_BOT_TOKEN` | Telegram Bot Token | *Get from @BotFather* |
+| `AI_PROVIDER` | Default active AI LLM provider | `groq` (or `opencode_zen`) |
+| `GROQ_API_KEY` | Groq Cloud platform API Key | *Required if AI_PROVIDER is groq* |
+| `OPENCODE_ZEN_API_KEY` | OpenCode Zen API Key | *Required if AI_PROVIDER is opencode_zen* |
+| `WEB_ORIGINS` | Permitted CORS origins | `https://your-app-name.onrender.com` |
 
 ---
 
