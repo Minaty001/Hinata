@@ -211,46 +211,49 @@ Hinata/
 └── backups/               # Database backups
 ```
 
-## 🌐 Deployment on Render.com
+## 🌐 Deploy the Web App on Render
 
-You can host both the **FastAPI Web Service (Backend + PWA Web UI)** and the **Telegram Bot Background Worker** on [Render.com](https://render.com) for free.
+This repository's deployable web app is the root `app.py` server. It serves the dashboard and API from one Render **Web Service**. The server binds to Render's `PORT` automatically.
 
-### 1. Web Service (FastAPI Backend + Web PWA UI)
+1. In the [Render Dashboard](https://dashboard.render.com), select **New → Web Service** and connect this repository.
+2. Select the `master` branch and the **Python** runtime.
+3. Set the following commands:
 
-Create a new **Web Service** on Render and connect your fork of this repository:
+   | Setting | Value |
+   |---|---|
+   | Build Command | `pip install -r requirements.txt` |
+   | Start Command | `python app.py` |
+4. Add these environment variables under **Environment**. Never commit API keys or tokens to the repository.
 
-- **Runtime**: `Python`
-- **Build Command**: `pip install -r backend/requirements.txt`
-- **Start Command**: `cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-- **Mount Directory (Disk)**:
-  Since SQLite databases are ephemeral and reset on every Render deploy/restart, you must attach a **Persistent Disk** to prevent data loss:
-  - Go to your Web Service settings ➔ **Disks** ➔ **Add Disk**.
-  - **Name**: `hinata-data`
-  - **Mount Path**: `/data`
-  - **Size**: `1 GiB` (free tier)
+   | Key | Value / purpose |
+   |---|---|
+   | `APP_ENV` | `production` |
+   | `WEB_HOST` | `0.0.0.0` |
+   | `BOT_TOKEN` | Telegram token from BotFather (only needed when also running `bot.py`) |
+   | `AI_PROVIDER` | `groq`, `opencode_zen`, `openai`, `gemini`, `openrouter`, or `bytez` |
+   | Provider API key | Set the matching key, e.g. `GROQ_API_KEY` |
+   | `WEB_ORIGINS` | Your public URL, e.g. `https://hinata.onrender.com` |
 
-### 2. Background Worker (Telegram Bot)
+5. Click **Create Web Service**. Once the deploy is live, open the `onrender.com` URL shown by Render. A push to `master` triggers a new deploy when auto-deploy is enabled.
 
-Since the Telegram Bot needs to run continuously in the background without exposing an HTTP port, create a **Background Worker** on Render:
+### Persisting SQLite data
 
-- **Runtime**: `Python`
-- **Build Command**: `pip install -r backend/requirements.txt`
-- **Start Command**: `python bot.py`
+Render's normal filesystem is ephemeral, so SQLite data is lost after a redeploy or restart unless you attach a persistent disk. In **Advanced → Disks**, add a disk with mount path `/var/data`, then set:
 
-### 3. Environment Variables (Configured on both Services)
+```text
+DATABASE_URL=sqlite:////var/data/hinata.db
+```
 
-Add the following Environment Variables under the **Environment** tab of both services (or use a shared **Env Group**):
+Persistent disks are attached to one service instance; use a managed database such as Render Postgres when the app needs multiple instances or shared production data.
 
-| Key | Description | Example / Recommended Value |
-|-----|-------------|----------------------------|
-| `APP_ENV` | Application environment | `production` |
-| `DATABASE_URL` | SQLite path pointing to persistent disk | `sqlite+aiosqlite:////data/hinata.db` |
-| `JWT_SECRET` | Secret key for JWT generation | *Generate via `openssl rand -hex 32`* |
-| `TELEGRAM_BOT_TOKEN` | Telegram Bot Token | *Get from @BotFather* |
-| `AI_PROVIDER` | Default active AI LLM provider | `groq` (or `opencode_zen`) |
-| `GROQ_API_KEY` | Groq Cloud platform API Key | *Required if AI_PROVIDER is groq* |
-| `OPENCODE_ZEN_API_KEY` | OpenCode Zen API Key | *Required if AI_PROVIDER is opencode_zen* |
-| `WEB_ORIGINS` | Permitted CORS origins | `https://your-app-name.onrender.com` |
+### Deploy troubleshooting
+
+- If Render reports that no port is open, use exactly `python app.py`; the app reads Render's `PORT` and binds to `0.0.0.0`.
+- If a module is missing, ensure the build command is `pip install -r requirements.txt`, then redeploy with a cleared build cache if necessary.
+- Read the **Logs** tab for the first traceback; the final exception identifies the startup issue.
+- Render currently lets you choose a Python version with `PYTHON_VERSION`. Set a fully qualified release such as `3.13.5` if you need a pinned runtime.
+
+For Render platform details, see the official [Web Services](https://render.com/docs/web-services), [persistent disks](https://render.com/docs/disks), and [environment variables](https://render.com/docs/configure-environment-variables) documentation.
 
 ---
 

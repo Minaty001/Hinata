@@ -16,8 +16,10 @@ import numpy as np
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Backend imports
-from app.database.models import Memory
+# The deployable web application is the top-level ``app.py`` module.  Importing
+# ``app.database`` here resolves to that module instead of the separate backend
+# package, causing a circular import while the server starts.
+from database.models import Memory
 
 logger = logging.getLogger(__name__)
 

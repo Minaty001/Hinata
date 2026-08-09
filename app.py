@@ -710,7 +710,9 @@ if __name__ == "__main__":
     default_host = getattr(settings, "WEB_HOST", "0.0.0.0")
     default_port = getattr(settings, "WEB_PORT", 2027)
     host_arg = os.getenv("WEB_HOST", default_host)
-    port_arg = int(os.getenv("WEB_PORT", str(default_port)))
+    # Render supplies the listening port through PORT.  Keep WEB_PORT for
+    # local development, while allowing platform-provided PORT to take priority.
+    port_arg = int(os.getenv("PORT", os.getenv("WEB_PORT", str(default_port))))
     for arg in sys.argv:
         if arg.startswith("--port="):
             try:
@@ -720,4 +722,3 @@ if __name__ == "__main__":
         elif arg.startswith("--host="):
             host_arg = arg.split("=")[1]
     run_web_app(host=host_arg, port=port_arg)
-
