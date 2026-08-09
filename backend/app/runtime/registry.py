@@ -195,3 +195,148 @@ class DeviceActionTool(BaseTool):
         if success:
             return f"Command '{command}' successfully dispatched to user device WebSocket."
         return f"Command '{command}' registered, but client has no active WebSocket connection."
+
+
+# ── 6. Productivity Add Task Tool ──────────────────────────────────────────
+
+class AddTaskInput(BaseModel):
+    user_id: int = Field(description="User ID target of action")
+    title: str = Field(description="Task title")
+    description: Optional[str] = Field(None, description="Optional task description details")
+    due_date_str: Optional[str] = Field(None, description="Due date string in YYYY-MM-DD format")
+
+
+@register_tool
+class AddTaskTool(BaseTool):
+    name = "add_task"
+    description = "Add a personal productivity task or todo item for the user."
+    args_schema = AddTaskInput
+
+    async def execute(
+        self,
+        user_id: int,
+        title: str,
+        description: Optional[str] = None,
+        due_date_str: Optional[str] = None,
+    ) -> str:
+        from app.database.engine import AsyncSessionMaker
+        from app.database.models import Task
+        
+        due_date = None
+        if due_date_str:
+            try:
+                for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
+                    try:
+                        due_date = datetime.strptime(due_date_str, fmt)
+                        break
+                    except ValueError:
+                        continue
+            except Exception:
+                pass
+
+        async with AsyncSessionMaker() as session:
+            try:
+                task = Task(
+                    user_id=user_id,
+                    title=title,
+                    description=description,
+                    due_date=due_date,
+                    status="pending"
+                )
+                session.add(task)
+                await session.commit()
+                return f"Task '{title}' created successfully."
+            except Exception as exc:
+                return f"Error creating task: {exc}"
+
+
+# ── 7. Productivity Add Event Tool ─────────────────────────────────────────
+
+class AddEventInput(BaseModel):
+    user_id: int = Field(description="User ID target of action")
+    title: str = Field(description="Event title")
+    description: Optional[str] = Field(None, description="Optional description of the event")
+    start_time_str: str = Field(description="Start date and time string in YYYY-MM-DD HH:MM:SS format")
+    location: Optional[str] = Field(None, description="Event location or link")
+
+
+@register_tool
+class AddEventTool(BaseTool):
+    name = "add_event"
+    description = "Schedule a reminder, event or appointment for the user."
+    args_schema = AddEventInput
+
+    async def execute(
+        self,
+        user_id: int,
+        title: str,
+        start_time_str: str,
+        description: Optional[str] = None,
+        location: Optional[str] = None,
+    ) -> str:
+        from app.database.engine import AsyncSessionMaker
+        from app.database.models import Event
+        
+        try:
+            start_time = datetime.strptime(start_time_str, "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            try:
+                start_time = datetime.strptime(start_time_str, "%Y-%m-%d")
+            except ValueError:
+                return f"Error: Start time '{start_time_str}' does not match format YYYY-MM-DD HH:MM:SS."
+
+        async with AsyncSessionMaker() as session:
+            try:
+                event = Event(
+                    user_id=user_id,
+                    title=title,
+                    description=description,
+                    start_time=start_time,
+                    location=location,
+                )
+                session.add(event)
+                await session.commit()
+                return f"Event '{title}' scheduled at {start_time_str}."
+            except Exception as exc:
+                return f"Error scheduling event: {exc}"
+
+
+# ── 8. Productivity Add Goal Tool ──────────────────────────────────────────
+
+class AddGoalInput(BaseModel):
+    user_id: int = Field(description="User ID target of action")
+    title: str = Field(description="Goal title")
+    target_value: float = Field(100.0, description="Target value metric to achieve")
+    unit: Optional[str] = Field("%", description="Target metric unit, e.g. 'kg', 'km', '%'")
+
+
+@register_tool
+class AddGoalTool(BaseTool):
+    name = "add_goal"
+    description = "Create a long-term goal for the user to track progressive metrics."
+    args_schema = AddGoalInput
+
+    async def execute(
+        self,
+        user_id: int,
+        title: str,
+        target_value: float = 100.0,
+        unit: Optional[str] = "%",
+    ) -> str:
+        from app.database.engine import AsyncSessionMaker
+        from app.database.models import Goal
+
+        async with AsyncSessionMaker() as session:
+            try:
+                goal = Goal(
+                    user_id=user_id,
+                    title=title,
+                    target_value=target_value,
+                    unit=unit,
+                    current_value=0.0
+                )
+                session.add(goal)
+                await session.commit()
+                return f"Goal '{title}' created with target {target_value} {unit}."
+            except Exception as exc:
+                return f"Error creating goal: {exc}"
