@@ -4,6 +4,8 @@ import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
+import 'dart:convert';
+import 'package:flutter/services.dart';
 
 /// Manages backend URL configuration.
 /// The URL is persisted in SharedPreferences and can be changed in Settings.
@@ -150,6 +152,12 @@ class _WebViewAppState extends State<WebViewApp> {
   Future<void> _initWebView() async {
     final controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..addJavaScriptChannel(
+        'HinataDeviceBridge',
+        onMessageReceived: (JavaScriptMessage message) {
+          _handleNativeCommand(message.message);
+        },
+      )
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (url) {
@@ -184,6 +192,45 @@ class _WebViewAppState extends State<WebViewApp> {
 
     if (mounted) {
       setState(() => _controller = controller);
+    }
+  }
+
+  static const _deviceChannel = MethodChannel('hinata/device_control');
+
+  Future<void> _handleNativeCommand(String messageStr) async {
+    try {
+      final data = jsonDecode(messageStr);
+      final command = data['command'] as String?;
+      final args = data['arguments'] as Map<String, dynamic>? ?? {};
+
+      switch (command) {
+        case 'android.flashlight':
+          final state = args['state'] == 'on';
+          await _deviceChannel.invokeMethod('toggleFlashlight', {'state': state});
+          break;
+        case 'android.volume_up':
+          await _deviceChannel.invokeMethod('adjustVolume', {'direction': 'up'});
+          break;
+        case 'android.volume_down':
+          await _deviceChannel.invokeMethod('adjustVolume', {'direction': 'down'});
+          break;
+        case 'android.media_play':
+          await _deviceChannel.invokeMethod('mediaControl', {'action': 'play'});
+          break;
+        case 'android.media_pause':
+          await _deviceChannel.invokeMethod('mediaControl', {'action': 'pause'});
+          break;
+        case 'android.open_app':
+          final pkg = args['package'] as String? ?? args['app_name'] as String? ?? '';
+          await _deviceChannel.invokeMethod('openApp', {'packageName': pkg});
+          break;
+        case 'android.battery_status':
+          final int level = await _deviceChannel.invokeMethod('getBatteryStatus');
+          await _controller.runJavaScript('if (window.onBatteryStatus) window.onBatteryStatus($level);');
+          break;
+      }
+    } catch (e) {
+      debugPrint('Error executing native command: $e');
     }
   }
 
