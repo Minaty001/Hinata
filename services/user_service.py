@@ -25,37 +25,56 @@ async def get_or_create_user(
     username: Optional[str] = None,
     display_name: Optional[str] = None,
 ) -> User:
-    """Retrieve a user by Telegram ID, creating them if they don't exist.
+    """Retrieve a user by Telegram ID resolving through platform Identity records."""
+    from database.models import Identity, RelationshipDimension
 
-    Args:
-        session: Active database session.
-        telegram_id: The user's Telegram ID.
-        username: Optional Telegram username.
-        display_name: Optional display name.
+    stmt_ident = select(Identity).where(
+        Identity.platform == "telegram",
+        Identity.platform_id == str(telegram_id)
+    )
+    res_ident = await session.execute(stmt_ident)
+    identity = res_ident.scalars().first()
 
-    Returns:
-        The User instance.
-    """
-    stmt = select(User).where(User.telegram_id == telegram_id)
-    result = await session.execute(stmt)
-    user: User | None = result.scalar_one_or_none()
+    user = None
+    if identity:
+        user = await session.get(User, identity.user_id)
 
     if user is None:
-        user = User(
-            telegram_id=telegram_id,
-            username=username,
-            display_name=display_name,
-        )
-        session.add(user)
+        # Fallback to old telegram_id column compat check
+        stmt = select(User).where(User.telegram_id == telegram_id)
+        result = await session.execute(stmt)
+        user = result.scalar_one_or_none()
+
+        if user is None:
+            user = User(
+                telegram_id=telegram_id,
+                username=username,
+                display_name=display_name,
+            )
+            session.add(user)
+            await session.flush()
+
+            # Create default preferences
+            pref = Preference(user_id=user.id)
+            session.add(pref)
+
+            # Create default relationship dimensions
+            rel = RelationshipDimension(user_id=user.id)
+            session.add(rel)
+
+            logger.info("Created new user: %s (tg_id=%d)", username, telegram_id)
+
+        # Create identity record if missing
+        if not identity:
+            identity = Identity(
+                user_id=user.id,
+                platform="telegram",
+                platform_id=str(telegram_id)
+            )
+            session.add(identity)
+
         await session.commit()
         await session.refresh(user)
-
-        # Create default preferences
-        pref = Preference(user_id=user.id)
-        session.add(pref)
-        await session.commit()
-
-        logger.info("Created new user: %s (tg_id=%d)", username, telegram_id)
     else:
         # Update last interaction
         user.last_interaction = datetime.now(timezone.utc)
@@ -63,6 +82,8 @@ async def get_or_create_user(
             user.username = username
         if display_name:
             user.display_name = display_name
+        await session.commit()
+
     return user
 
 
