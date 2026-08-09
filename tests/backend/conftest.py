@@ -39,10 +39,7 @@ TestSessionMaker = async_sessionmaker(test_engine, expire_on_commit=False)
 
 
 async def create_test_account(username: str, password: str = "password123") -> User:
-    """Seed a private account for authenticated endpoint tests.
-
-    Public registration is intentionally unavailable in the application.
-    """
+    """Seed a private account for authenticated endpoint tests."""
     async with TestSessionMaker() as session:
         user = User(username=username, display_name=username)
         session.add(user)

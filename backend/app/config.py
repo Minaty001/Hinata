@@ -1,5 +1,27 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+import re
 import warnings
+from pathlib import Path
+
+# Project root: /root/Hinata (backend/app/config.py -> parents[2])
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+_SQLITE_RELATIVE_RE = re.compile(r"^(sqlite(?:\+[a-z]+)?:///)(.*)$")
+
+
+def _resolve_sqlite_url(url: str) -> str:
+    """Resolve a relative SQLite path against the project root so the DB
+    file location does not depend on the process working directory."""
+    match = _SQLITE_RELATIVE_RE.match(url)
+    if not match:
+        return url
+    scheme, path = match.group(1), match.group(2)
+    if not path or path == ":memory:" or Path(path).is_absolute():
+        return url
+    resolved = PROJECT_ROOT / path
+    resolved.parent.mkdir(parents=True, exist_ok=True)
+    return f"{scheme}{resolved}"
+
 
 class Settings(BaseSettings):
     APP_ENV: str = "development"
@@ -38,7 +60,8 @@ class Settings(BaseSettings):
         self.DATABASE_URL = database_url
 
         if self.DATABASE_URL.startswith("sqlite") and "://" in self.DATABASE_URL:
-            # resolve to absolute path if needed
-            pass
+            # Anchor relative SQLite paths to the project root so the database
+            # file is stable regardless of which directory starts the server.
+            self.DATABASE_URL = _resolve_sqlite_url(self.DATABASE_URL)
 
 settings = Settings()
