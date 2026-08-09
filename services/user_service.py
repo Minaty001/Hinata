@@ -66,17 +66,45 @@ async def get_or_create_user(
     return user
 
 
-WEB_USER_TELEGRAM_ID = 999999
+
+# ── SECURITY NOTE ──────────────────────────────────────────────────────────
+# The legacy `get_or_create_web_user()` function below uses a placeholder
+# Telegram ID (999_999_999) to represent unauthenticated web sessions.
+# This is a TEMPORARY migration shim — all web users share one identity,
+# which means zero multi-user isolation.
+#
+# This function MUST be eliminated in Phase 1 when JWT authentication
+# is added. After Phase 1 every request carries a real user identity.
+#
+# DO NOT expand usage of this function. DO NOT rely on it for new features.
+# ────────────────────────────────────────────────────────────────────────────
+
+# Placeholder ID used only while the old HTTP server (app.py) is still running.
+# The value is intentionally unusual so it stands out in logs/DB.
+# Phase 1 (FastAPI) will replace this with real auth entirely.
+_WEB_PLACEHOLDER_TELEGRAM_ID: int = 999_999_999
 
 
 async def get_or_create_web_user(session: AsyncSession) -> User:
-    """Retrieve or create standard user record for the Web UI."""
+    """[DEPRECATED] Return or create a placeholder user for unauthenticated web sessions.
+
+    .. deprecated::
+        This exists solely to keep app.py working during the Phase 0 → Phase 1
+        migration window. It will be removed when FastAPI + JWT auth is added.
+        Never use this for new feature development.
+    """
+    import logging as _logging
+    _logging.getLogger(__name__).warning(
+        "get_or_create_web_user() called \u2014 this is a migration shim and will be "
+        "removed in Phase 1. Ensure you are not expanding unauthenticated access."
+    )
     return await get_or_create_user(
         session,
-        telegram_id=WEB_USER_TELEGRAM_ID,
-        username="web_user",
-        display_name="Web User",
+        telegram_id=_WEB_PLACEHOLDER_TELEGRAM_ID,
+        username="web_placeholder",
+        display_name="Web (Unauthenticated)",
     )
+
 
 
 async def get_user_by_id(

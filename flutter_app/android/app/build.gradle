@@ -47,16 +47,29 @@ android {
 
     signingConfigs {
         release {
-            storeFile file("../../keystore/hinata-keystore.jks")
-            storePassword System.getenv("STORE_PASSWORD") ?: "hinata123"
-            keyAlias System.getenv("KEY_ALIAS") ?: "hinata"
-            keyPassword System.getenv("KEY_PASSWORD") ?: "hinata123"
+            // Signing credentials MUST be provided via environment variables.
+            // Never hardcode passwords or commit keystore files.
+            // Set these in your CI/CD pipeline or local shell before building:
+            //   KEYSTORE_PATH    — absolute path to your .jks keystore file
+            //   KEYSTORE_PASSWORD — keystore password
+            //   KEY_ALIAS        — key alias inside the keystore
+            //   KEY_PASSWORD     — key password
+            def keystorePath = System.getenv("KEYSTORE_PATH") ?: ""
+            if (keystorePath) {
+                storeFile file(keystorePath)
+            }
+            storePassword System.getenv("KEYSTORE_PASSWORD") ?: ""
+            keyAlias System.getenv("KEY_ALIAS") ?: ""
+            keyPassword System.getenv("KEY_PASSWORD") ?: ""
         }
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.release
+            // Only apply release signing if KEYSTORE_PATH is configured.
+            // Falls back to debug signing locally to avoid build failures.
+            def hasKeystore = System.getenv("KEYSTORE_PATH") != null
+            signingConfig = hasKeystore ? signingConfigs.release : signingConfigs.debug
             minifyEnabled = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }

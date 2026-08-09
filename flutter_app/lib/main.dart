@@ -5,6 +5,26 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 
+/// Manages backend URL configuration.
+/// The URL is persisted in SharedPreferences and can be changed in Settings.
+/// IMPORTANT: Never hardcode production URLs or emulator-only addresses here.
+class BackendConfig {
+  static const String _prefKey = 'backend_url';
+  // Default is localhost for local development.
+  // On a real device, open Settings and enter your server's address.
+  static const String defaultUrl = 'http://localhost:8000';
+
+  static Future<String> getUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_prefKey) ?? defaultUrl;
+  }
+
+  static Future<void> setUrl(String url) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_prefKey, url.trim().replaceAll(RegExp(r'/+$'), ''));
+  }
+}
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const HinataApp());
@@ -111,13 +131,19 @@ class _WebViewAppState extends State<WebViewApp> {
   final TextEditingController _urlController = TextEditingController();
   String _currentUrl = '';
 
-  // Backend base URL
-  static const String _baseUrl = 'http://10.0.2.2:5000';
-  static const String _webUrl = 'http://10.0.2.2:8000';
+  // Backend URL is loaded from SharedPreferences — NOT hardcoded.
+  // Configure it in app Settings > Backend URL.
+  String _backendUrl = BackendConfig.defaultUrl;
 
   @override
   void initState() {
     super.initState();
+    _loadBackendUrlThenInit();
+  }
+
+  Future<void> _loadBackendUrlThenInit() async {
+    final url = await BackendConfig.getUrl();
+    setState(() => _backendUrl = url);
     _initWebView();
   }
 
@@ -147,7 +173,7 @@ class _WebViewAppState extends State<WebViewApp> {
           },
         ),
       )
-      ..loadRequest(Uri.parse('http://10.0.2.2:8000'));
+      ..loadRequest(Uri.parse(_backendUrl));
 
     // Enable hybrid composition for Android 9-16 compatibility
     if (controller.platform is AndroidWebViewController) {
@@ -178,13 +204,13 @@ class _WebViewAppState extends State<WebViewApp> {
     setState(() => _selectedIndex = index);
     switch (index) {
       case 0:
-        _controller.loadRequest(Uri.parse('http://10.0.2.2:8000'));
+        _controller.loadRequest(Uri.parse(_backendUrl));
         break;
       case 1:
-        _controller.loadRequest(Uri.parse('http://10.0.2.2:8000#search'));
+        _controller.loadRequest(Uri.parse('$_backendUrl#search'));
         break;
       case 2:
-        _controller.loadRequest(Uri.parse('http://10.0.2.2:8000#memories'));
+        _controller.loadRequest(Uri.parse('$_backendUrl#memories'));
         break;
     }
   }

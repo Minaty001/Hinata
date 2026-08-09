@@ -62,3 +62,28 @@ build/
 
 # Antigravity CLI metadata
 .ua/
+
+# ── Security: Android Signing ──────────────────────────────────────────────
+# NEVER commit keystores, signing keys, or APK release artifacts.
+# Use CI/CD environment variables instead.
+*.jks
+*.keystore
+*.p12
+*.pfx
+flutter_app/android/keystore/
+android/*/keystore/
+
+# ── Release Artifacts ───────────────────────────────────────────────────────
+# APKs and AABs are build outputs — never commit them.
+# Use GitHub Releases or CI/CD artifact storage.
+*.apk
+*.aab
+web/*.apk
+web/*.aab
+
+# ── Flutter ─────────────────────────────────────────────────────────────────
+flutter_app/.dart_tool/
+flutter_app/.flutter-plugins
+flutter_app/.flutter-plugins-dependencies
+flutter_app/build/
+flutter_app/.packages

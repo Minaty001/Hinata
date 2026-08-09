@@ -119,6 +119,16 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# ── CORS configuration ────────────────────────────────────────────────────
+# Set WEB_ORIGINS to a comma-separated list of allowed origins.
+# In production, this must be set explicitly (e.g., https://your-domain.com).
+# Wildcard (*) is intentionally disabled.
+_WEB_ORIGINS: set[str] = {
+    o.strip()
+    for o in os.getenv("WEB_ORIGINS", "http://localhost:2027,http://127.0.0.1:2027").split(",")
+    if o.strip()
+}
+
 # Shared AI Client & Prompt Builder
 unified_ai_client = UnifiedAIClient()
 prompt_builder = PromptBuilder()
@@ -189,9 +199,12 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
             self._send_json({"error": "Endpoint not found"}, status=404)
 
     def do_OPTIONS(self) -> None:
-        """Handle CORS preflight requests."""
+        """Handle CORS preflight requests — only allow configured origins."""
+        origin = self.headers.get("Origin", "")
         self.send_response(204)
-        self.send_header("Access-Control-Allow-Origin", "*")
+        if origin in _WEB_ORIGINS:
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
         self.end_headers()
@@ -640,12 +653,15 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
         super().log_error(format, *args)
 
     def _send_json(self, payload: dict[str, Any], status: int = 200) -> None:
-        """Send JSON HTTP response."""
+        """Send JSON HTTP response with configurable CORS headers."""
         body_bytes = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        origin = self.headers.get("Origin", "")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body_bytes)))
-        self.send_header("Access-Control-Allow-Origin", "*")
+        if origin in _WEB_ORIGINS:
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
         self.end_headers()
         self.wfile.write(body_bytes)
 
