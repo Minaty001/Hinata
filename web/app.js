@@ -55,18 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const path = authMode === 'login' ? '/api/v1/auth/login' : '/api/v1/auth/register';
       try {
-        const payloadBody = authMode === 'login'
-          ? `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
-          : JSON.stringify({ username, password });
-
-        const headers = authMode === 'login'
-          ? { 'Content-Type': 'application/x-www-form-urlencoded' }
-          : { 'Content-Type': 'application/json' };
-
         const res = await fetch(path, {
           method: 'POST',
-          headers: headers,
-          body: payloadBody
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
         });
 
         const data = await res.json();
@@ -75,17 +67,15 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        if (authMode === 'register') {
-          showToast('Registration successful! Please login.', 'success');
-          btnTabLogin.click();
-        } else {
-          jwtToken = data.access_token;
-          localStorage.setItem('hinata_token', jwtToken);
-          authModal.classList.remove('active');
-          authModal.style.display = 'none';
-          showToast('Welcome back, companion! 🌸', 'success');
-          initAfterAuth();
-        }
+        jwtToken = data.access_token;
+        localStorage.setItem('hinata_token', jwtToken);
+        authModal.classList.remove('active');
+        authModal.style.display = 'none';
+        showToast(
+          authMode === 'register' ? 'Account created! Welcome, companion! 🌸' : 'Welcome back, companion! 🌸',
+          'success'
+        );
+        initAfterAuth();
       } catch (err) {
         console.error(err);
         showToast('Failed to connect to backend server.', 'error');

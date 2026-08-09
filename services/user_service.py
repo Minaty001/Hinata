@@ -8,13 +8,17 @@ and preference management.
 from __future__ import annotations
 
 import logging
+import sys
 from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.models import Preference, User
+if getattr(sys.modules.get("app"), "__path__", None):
+    from app.database.models import Preference, User
+else:
+    from database.models import Preference, User
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +30,10 @@ async def get_or_create_user(
     display_name: Optional[str] = None,
 ) -> User:
     """Retrieve a user by Telegram ID resolving through platform Identity records."""
-    from database.models import Identity, RelationshipDimension
+    if getattr(sys.modules.get("app"), "__path__", None):
+        from app.database.models import Identity, RelationshipDimension
+    else:
+        from database.models import Identity, RelationshipDimension
 
     stmt_ident = select(Identity).where(
         Identity.platform == "telegram",

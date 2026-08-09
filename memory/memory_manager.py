@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import re
+import sys
 from datetime import datetime, timezone
 from typing import Any, Optional
 
@@ -16,10 +17,13 @@ import numpy as np
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# The deployable web application is the top-level ``app.py`` module.  Importing
-# ``app.database`` here resolves to that module instead of the separate backend
-# package, causing a circular import while the server starts.
-from database.models import Memory
+# The project supports both the legacy root server and the FastAPI backend.
+# Select models from the active runtime so a backend session never mixes ORM
+# mappings from the legacy database module.
+if getattr(sys.modules.get("app"), "__path__", None):
+    from app.database.models import Memory
+else:
+    from database.models import Memory
 
 logger = logging.getLogger(__name__)
 

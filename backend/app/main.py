@@ -44,9 +44,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-if (ROOT / "web").exists():
-    app.mount("/web", StaticFiles(directory=str(ROOT / "web")), name="web")
-
 app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(users_router, prefix="/api/v1/users", tags=["users"])
 app.include_router(chat_router, prefix="/api/v1/chat", tags=["chat"])
@@ -54,12 +51,13 @@ app.include_router(memory_router, prefix="/api/v1/memory", tags=["memory"])
 app.include_router(settings_router, prefix="/api/v1/settings", tags=["settings"])
 app.include_router(ws_router, tags=["websocket"])
 app.include_router(voice_router, prefix="/api/v1/voice", tags=["voice"])
-app.include_router(productivity_router, prefix="/api/v1/productivity", tags=["productivity"])
-
-@app.get("/")
-async def root():
-    return {"name": "Hinata API", "version": "1.0.0", "status": "running"}
-
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
+
+app.include_router(productivity_router, prefix="/api/v1/productivity", tags=["productivity"])
+
+# Register the static site after API and health routes so the login/register
+# client and its authenticated API calls are served from the same public origin.
+if (ROOT / "web").exists():
+    app.mount("/", StaticFiles(directory=str(ROOT / "web"), html=True), name="web")

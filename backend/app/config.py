@@ -4,6 +4,7 @@ import warnings
 class Settings(BaseSettings):
     APP_ENV: str = "development"
     DATABASE_URL: str = "sqlite+aiosqlite:///data/hinata.db"
+    SUPABASE_DB_URL: str = ""
     JWT_SECRET: str = ""
     JWT_ACCESS_EXPIRE_MINUTES: int = 60
     JWT_REFRESH_EXPIRE_DAYS: int = 30
@@ -24,6 +25,15 @@ class Settings(BaseSettings):
     def model_post_init(self, __context):
         if self.APP_ENV == "production" and not self.JWT_SECRET:
             warnings.warn("JWT_SECRET is not set in production!")
+
+        database_url = self.DATABASE_URL
+        if database_url == "sqlite+aiosqlite:///data/hinata.db" and self.SUPABASE_DB_URL:
+            database_url = self.SUPABASE_DB_URL
+        if database_url.startswith("postgres://"):
+            database_url = "postgresql+asyncpg://" + database_url[len("postgres://"):]
+        elif database_url.startswith("postgresql://"):
+            database_url = "postgresql+asyncpg://" + database_url[len("postgresql://"):]
+        self.DATABASE_URL = database_url
 
         if self.DATABASE_URL.startswith("sqlite") and "://" in self.DATABASE_URL:
             # resolve to absolute path if needed

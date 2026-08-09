@@ -213,7 +213,7 @@ Hinata/
 
 ## 🌐 Deploy the Web App on Render
 
-This repository's deployable web app is the root `app.py` server. It serves the dashboard and API from one Render **Web Service**. The server binds to Render's `PORT` automatically.
+The deployable web app is the FastAPI backend. It serves the dashboard, sign-in/register API, and authenticated chat API from one Render **Web Service**.
 
 1. In the [Render Dashboard](https://dashboard.render.com), select **New → Web Service** and connect this repository.
 2. Select the `master` branch and the **Python** runtime.
@@ -221,14 +221,14 @@ This repository's deployable web app is the root `app.py` server. It serves the 
 
    | Setting | Value |
    |---|---|
-   | Build Command | `pip install -r requirements.txt` |
-   | Start Command | `python app.py` |
+   | Build Command | `pip install -r backend/requirements.txt` |
+   | Start Command | `cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
 4. Add these environment variables under **Environment**. Never commit API keys or tokens to the repository.
 
    | Key | Value / purpose |
    |---|---|
    | `APP_ENV` | `production` |
-   | `WEB_HOST` | `0.0.0.0` |
+   | `JWT_SECRET` | A unique random secret, e.g. `openssl rand -hex 32` |
    | `BOT_TOKEN` | Telegram token from BotFather (only needed when also running `bot.py`) |
    | `AI_PROVIDER` | `groq`, `opencode_zen`, `openai`, `gemini`, `openrouter`, or `bytez` |
    | Provider API key | Set the matching key, e.g. `GROQ_API_KEY` |
@@ -248,7 +248,7 @@ Hinata connects directly to Supabase Postgres through SQLAlchemy; no Supabase se
 SUPABASE_DB_URL=postgresql://postgres.PROJECT_REF:YOUR_URL_ENCODED_PASSWORD@aws-REGION.pooler.supabase.com:5432/postgres
 ```
 
-`DATABASE_URL` can be used instead and takes priority over `SUPABASE_DB_URL`. Both `postgres://` and `postgresql://` URLs from the Supabase dashboard are accepted. On first startup, Hinata creates its SQLAlchemy tables in the selected database automatically.
+`DATABASE_URL` can be used instead and takes priority over `SUPABASE_DB_URL`. Both `postgres://` and `postgresql://` URLs from the Supabase dashboard are accepted. On first startup, Hinata creates the account, session, chat, memory, and related tables in the selected database automatically.
 
 Use the **database password / connection string** from Supabase only as a Render secret. The browser-facing Supabase URL, anon key, and service-role key are not required by this application and must not be exposed in the web UI.
 
@@ -264,8 +264,8 @@ Persistent disks are attached to one service instance. Supabase Postgres avoids 
 
 ### Deploy troubleshooting
 
-- If Render reports that no port is open, use exactly `python app.py`; the app reads Render's `PORT` and binds to `0.0.0.0`.
-- If a module is missing, ensure the build command is `pip install -r requirements.txt`, then redeploy with a cleared build cache if necessary.
+- If Render reports that no port is open, use the documented Uvicorn start command with `--port $PORT`.
+- If a module is missing, ensure the build command is `pip install -r backend/requirements.txt`, then redeploy with a cleared build cache if necessary.
 - Read the **Logs** tab for the first traceback; the final exception identifies the startup issue.
 - Render currently lets you choose a Python version with `PYTHON_VERSION`. Set a fully qualified release such as `3.13.5` if you need a pinned runtime.
 

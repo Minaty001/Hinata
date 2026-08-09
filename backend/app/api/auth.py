@@ -6,7 +6,14 @@ import uuid
 import logging
 
 from app.database.engine import get_session
-from app.database.models import User, Account, UserSession, Identity
+from app.database.models import (
+    User,
+    Account,
+    UserSession,
+    Identity,
+    Preference,
+    RelationshipDimension,
+)
 from app.schemas.auth import RegisterRequest, LoginRequest, TokenResponse, RefreshRequest, TelegramLinkRequest
 from app.core.security import hash_password, verify_password, create_access_token, create_refresh_token, decode_token, get_current_user
 from app.config import settings
@@ -34,6 +41,11 @@ async def register(req: RegisterRequest, session: AsyncSession = Depends(get_ses
     
     identity = Identity(user_id=user.id, platform="web", platform_id=req.username)
     session.add(identity)
+    # Create the per-user records used by the companion pipeline up front.
+    # This keeps preferences, memories, and chats isolated and persistent from
+    # the user's first authenticated request.
+    session.add(Preference(user_id=user.id))
+    session.add(RelationshipDimension(user_id=user.id))
     
     jti = str(uuid.uuid4())
     access_token = create_access_token(user.id, jti)

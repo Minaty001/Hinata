@@ -8,12 +8,16 @@ inclusion in the AI prompt.
 from __future__ import annotations
 
 import logging
+import sys
 from collections.abc import Sequence
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.models import Conversation
+if getattr(sys.modules.get("app"), "__path__", None):
+    from app.database.models import Conversation, SessionIndex
+else:
+    from database.models import Conversation, SessionIndex
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +51,6 @@ async def build_conversation_context(
 
     # 1. Fetch Session Topic Index if chain_id provided
     if chain_id:
-        from database.models import SessionIndex
         idx_stmt = (
             select(SessionIndex)
             .where(SessionIndex.chain_id == chain_id)

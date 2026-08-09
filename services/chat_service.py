@@ -7,6 +7,7 @@ Manages conversation history storage and retrieval.
 from __future__ import annotations
 
 import logging
+import sys
 from datetime import datetime, timezone
 
 import uuid
@@ -14,7 +15,10 @@ from typing import Optional
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.models import Chain, Conversation, SessionIndex
+if getattr(sys.modules.get("app"), "__path__", None):
+    from app.database.models import Chain, Conversation, SessionIndex
+else:
+    from database.models import Chain, Conversation, SessionIndex
 
 logger = logging.getLogger(__name__)
 
@@ -326,4 +330,3 @@ async def auto_index_session(
         keywords=keywords,
         page_number=page_num,
     )
-
