@@ -58,7 +58,12 @@ from ai.distress_detector import detect_distress
 from ai.response_cleaner import clean_response, split_long_message
 from ai.context_builder import build_conversation_context
 
-from memory.memory_manager import get_memories_summary
+from memory.memory_manager import (
+    get_memories_summary,
+    extract_and_save_memories,
+    apply_memory_decay,
+    search_semantic_memories,
+)
 from services.chat_service import save_message, get_conversation_history, get_or_create_chain, auto_index_session
 from services.user_service import get_user_preferences
 
@@ -302,8 +307,18 @@ class HinataBrain:
         )
         router_provider = router_result.get("provider", active_prov)
 
+        # 10.5 Run Memory 2.0 Auto-Extraction & Temporal Decay
+        await extract_and_save_memories(session, user.id, message_text)
+        await apply_memory_decay(session, user.id)
+
         # 11. Retrieve Memories & User Preferences
-        memories_summary = await get_memories_summary(session, user.id)
+        # Retrieve memories semantically matching the incoming query
+        semantic_mems = await search_semantic_memories(session, user.id, message_text, limit=5)
+        if semantic_mems:
+            memories_summary = "\n".join([f"- [{m.type}] {m.content}" for m in semantic_mems])
+        else:
+            memories_summary = "No saved memories."
+
         prefs = await get_user_preferences(session, user.id)
         preferences_text = self._format_preferences(prefs)
 
