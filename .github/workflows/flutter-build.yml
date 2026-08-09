@@ -32,7 +32,9 @@ jobs:
       - run: flutter test
 
       - name: Materialize release keystore
-        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+        env:
+          HAS_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 != '' }}
+        if: env.HAS_KEYSTORE == 'true'
         shell: bash
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "${{ github.workspace }}/hinata-release.jks"
@@ -41,7 +43,7 @@ jobs:
       - name: Build release APK
         run: flutter build apk --release
         env:
-          KEYSTORE_PATH: ${{ secrets.KEYSTORE_BASE64 != '' && github.workspace + '/hinata-release.jks' || '' }}
+          KEYSTORE_PATH: ${{ secrets.KEYSTORE_BASE64 != '' && format('{0}/hinata-release.jks', github.workspace) || '' }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
