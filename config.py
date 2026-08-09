@@ -30,6 +30,10 @@ import os
 def _resolve_db_url(url: str | None) -> str:
     """Resolve the database URL to an absolute path if it's relative."""
     if not url:
+        # SUPABASE_DB_URL is a convenient production-specific alias.  DATABASE_URL
+        # takes precedence whenever it is explicitly configured.
+        url = os.getenv("SUPABASE_DB_URL", "")
+    if not url:
         url = "sqlite:///data/hinata.db"
     # Convert legacy aiosqlite scheme to standard sqlite scheme if present
     if "sqlite+aiosqlite:///" in url:
@@ -39,6 +43,12 @@ def _resolve_db_url(url: str | None) -> str:
         abs_path = PROJECT_ROOT / rel_path
         abs_path.parent.mkdir(parents=True, exist_ok=True)
         return f"sqlite:///{abs_path}"
+    # The Supabase dashboard may provide postgres:// or postgresql:// URLs.
+    # Use psycopg 3 explicitly so the required SQLAlchemy driver is unambiguous.
+    if url.startswith("postgres://"):
+        return "postgresql+psycopg://" + url[len("postgres://"):]
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url[len("postgresql://"):]
     return url
 
 

@@ -16,6 +16,7 @@ from typing import Any
 
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+from sqlalchemy.pool import NullPool
 
 from config import settings
 
@@ -40,12 +41,25 @@ if _db_path and _db_path.is_file() and _db_path.stat().st_size == 0:
     _db_path.unlink()
     logger.warning("Removed stale 0-byte database file: %s", _db_path)
 
-# Create synchronous engine (built-in sqlite3 driver, no greenlet required)
-engine = create_engine(
-    _db_url,
-    echo=False,
-    connect_args={"check_same_thread": False},
-)
+# Create a sync engine. SQLite uses its built-in driver; Supabase uses psycopg 3.
+if _db_url.startswith("sqlite"):
+    engine = create_engine(
+        _db_url,
+        echo=False,
+        connect_args={"check_same_thread": False},
+    )
+elif ":6543/" in _db_url:
+    # Supavisor transaction mode does not support prepared statements or a
+    # client-side pool. This is the connection mode commonly used by Render.
+    engine = create_engine(
+        _db_url,
+        echo=False,
+        poolclass=NullPool,
+        pool_pre_ping=True,
+        connect_args={"prepare_threshold": None},
+    )
+else:
+    engine = create_engine(_db_url, echo=False, pool_pre_ping=True)
 
 # Sync session factory
 _SyncSessionFactory = sessionmaker(

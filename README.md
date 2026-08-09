@@ -236,15 +236,31 @@ This repository's deployable web app is the root `app.py` server. It serves the 
 
 5. Click **Create Web Service**. Once the deploy is live, open the `onrender.com` URL shown by Render. A push to `master` triggers a new deploy when auto-deploy is enabled.
 
-### Persisting SQLite data
+### Connect Supabase (recommended for production)
 
-Render's normal filesystem is ephemeral, so SQLite data is lost after a redeploy or restart unless you attach a persistent disk. In **Advanced → Disks**, add a disk with mount path `/var/data`, then set:
+Hinata connects directly to Supabase Postgres through SQLAlchemy; no Supabase service key is needed for this server-side database connection.
+
+1. Create a project in the [Supabase Dashboard](https://supabase.com/dashboard), wait until it is running, then select **Connect**.
+2. For Render, copy the **Shared Pooler — Session mode** connection string (port `5432`). It works from IPv4-only hosts and is suitable for this persistent web service. Use the transaction-pooler string (port `6543`) only for short-lived/serverless workloads.
+3. In Render → **Environment**, add the complete string as `SUPABASE_DB_URL`. Do not add quotes around it, and URL-encode password characters such as `@`, `:`, `/`, and `#`.
+
+```text
+SUPABASE_DB_URL=postgresql://postgres.PROJECT_REF:YOUR_URL_ENCODED_PASSWORD@aws-REGION.pooler.supabase.com:5432/postgres
+```
+
+`DATABASE_URL` can be used instead and takes priority over `SUPABASE_DB_URL`. Both `postgres://` and `postgresql://` URLs from the Supabase dashboard are accepted. On first startup, Hinata creates its SQLAlchemy tables in the selected database automatically.
+
+Use the **database password / connection string** from Supabase only as a Render secret. The browser-facing Supabase URL, anon key, and service-role key are not required by this application and must not be exposed in the web UI.
+
+### SQLite alternative
+
+For a small single-instance deployment, Render's normal filesystem is ephemeral, so attach a persistent disk in **Advanced → Disks** with mount path `/var/data` and set:
 
 ```text
 DATABASE_URL=sqlite:////var/data/hinata.db
 ```
 
-Persistent disks are attached to one service instance; use a managed database such as Render Postgres when the app needs multiple instances or shared production data.
+Persistent disks are attached to one service instance. Supabase Postgres avoids that limitation and is the recommended production option.
 
 ### Deploy troubleshooting
 
