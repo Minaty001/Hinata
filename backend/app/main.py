@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT))
 
 from app.database.engine import init_db
 from app.config import settings
-from app.api.auth import router as auth_router
+from app.api.auth import ensure_bootstrap_admin, router as auth_router
 from app.api.users import router as users_router
 from app.api.chat import router as chat_router
 from app.api.memory import router as memory_router
@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    await ensure_bootstrap_admin()
     logger.info("Hinata FastAPI backend started")
     yield
     logger.info("Hinata FastAPI backend shutting down")

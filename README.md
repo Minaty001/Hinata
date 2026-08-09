@@ -213,7 +213,7 @@ Hinata/
 
 ## 🌐 Deploy the Web App on Render
 
-The deployable web app is the FastAPI backend. It serves the dashboard, sign-in API, and authenticated chat API from one Render **Web Service**. It is sign-in only for existing accounts.
+The deployable web app is the FastAPI backend. It serves the dashboard, sign-up/sign-in API, and authenticated chat API from one Render **Web Service**.
 
 1. In the [Render Dashboard](https://dashboard.render.com), select **New → Web Service** and connect this repository.
 2. Select the `master` branch and the **Python** runtime.
@@ -229,6 +229,8 @@ The deployable web app is the FastAPI backend. It serves the dashboard, sign-in 
    |---|---|
    | `APP_ENV` | `production` |
    | `JWT_SECRET` | A unique random secret, e.g. `openssl rand -hex 32` |
+   | `ADMIN_USERNAME` | `Admin` |
+   | `ADMIN_INITIAL_PASSWORD` | `00000000` — requested initial password; replace it with a strong secret before production use |
    | `BOT_TOKEN` | Telegram token from BotFather (only needed when also running `bot.py`) |
    | `AI_PROVIDER` | `groq`, `opencode_zen`, `openai`, `gemini`, `openrouter`, or `bytez` |
    | Provider API key | Set the matching key, e.g. `GROQ_API_KEY` |

@@ -12,6 +12,15 @@ from tests.backend.conftest import create_test_account
 pytestmark = pytest.mark.asyncio
 
 
+async def test_register_creates_an_authenticated_account(client: AsyncClient):
+    response = await client.post(
+        "/api/v1/auth/register",
+        json={"username": "new_companion", "password": "password123"},
+    )
+    assert response.status_code == 200
+    assert response.json()["access_token"]
+
+
 async def test_login_success(client: AsyncClient):
     await create_test_account("logintest_ok")
     res = await client.post(

@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     JWT_SECRET: str = ""
     JWT_ACCESS_EXPIRE_MINUTES: int = 60
     JWT_REFRESH_EXPIRE_DAYS: int = 30
+    ADMIN_USERNAME: str = "Admin"
+    ADMIN_INITIAL_PASSWORD: str = ""
     WEB_ORIGINS: str = "http://localhost:2027,http://localhost:8000,http://127.0.0.1:2027,http://127.0.0.1:8000"
     BOT_TOKEN: str = ""
     GROQ_API_KEY: str = ""

@@ -8,10 +8,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Auth DOM elements
   const authModal = document.getElementById('authModal');
+  const btnTabLogin = document.getElementById('btnTabLogin');
+  const btnTabRegister = document.getElementById('btnTabRegister');
   const btnSubmitAuth = document.getElementById('btnSubmitAuth');
   const authUsernameInput = document.getElementById('authUsername');
   const authPasswordInput = document.getElementById('authPassword');
   const btnLogout = document.getElementById('btnLogout');
+  let authMode = 'login';
+
+  if (btnTabLogin && btnTabRegister) {
+    btnTabLogin.addEventListener('click', () => {
+      authMode = 'login';
+      btnTabLogin.classList.add('active');
+      btnTabRegister.classList.remove('active');
+      btnTabLogin.style.borderBottom = '2px solid var(--pink-accent)';
+      btnTabRegister.style.borderBottom = 'none';
+      btnSubmitAuth.textContent = 'Sign In';
+    });
+    btnTabRegister.addEventListener('click', () => {
+      authMode = 'register';
+      btnTabRegister.classList.add('active');
+      btnTabLogin.classList.remove('active');
+      btnTabRegister.style.borderBottom = '2px solid var(--pink-accent)';
+      btnTabLogin.style.borderBottom = 'none';
+      btnSubmitAuth.textContent = 'Create Account';
+    });
+  }
 
   // Handle Authentication submit
   if (btnSubmitAuth) {
@@ -25,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       try {
-        const res = await fetch('/api/v1/auth/login', {
+        const res = await fetch(`/api/v1/auth/${authMode === 'register' ? 'register' : 'login'}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
@@ -41,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('hinata_token', jwtToken);
         authModal.classList.remove('active');
         authModal.style.display = 'none';
-        showToast('Welcome back, companion! 🌸', 'success');
+        showToast(authMode === 'register' ? 'Account created. Welcome! 🌸' : 'Welcome back, companion! 🌸', 'success');
         initAfterAuth();
       } catch (err) {
         console.error(err);
