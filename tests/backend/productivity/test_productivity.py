@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # Backend imports
 from app.database.models import Task, Event, Goal, User
 from app.runtime.registry import AddTaskTool, AddEventTool, AddGoalTool
-from tests.backend.conftest import TestSessionMaker
+from tests.backend.conftest import TestSessionMaker, create_test_account
 
 
 @pytest_asyncio.fixture
@@ -26,14 +26,11 @@ async def db_session() -> AsyncSession:
         yield session
 
 
-async def _register_and_login(client: AsyncClient, username: str) -> tuple[str, int]:
-    """Helper: register a user and return the access token and user ID."""
-    reg = await client.post(
-        "/api/v1/auth/register",
-        json={"username": username, "password": "password123"},
-    )
-    assert reg.status_code == 200, f"Register failed: {reg.json()}"
-    token = reg.json()["access_token"]
+async def _login(client: AsyncClient, username: str) -> tuple[str, int]:
+    await create_test_account(username)
+    login = await client.post("/api/v1/auth/login", json={"username": username, "password": "password123"})
+    assert login.status_code == 200
+    token = login.json()["access_token"]
     
     # Retrieve user ID
     me = await client.get("/api/v1/users/me", headers={"Authorization": f"Bearer {token}"})
@@ -43,7 +40,7 @@ async def _register_and_login(client: AsyncClient, username: str) -> tuple[str, 
 
 @pytest.mark.asyncio
 async def test_tasks_crud(client: AsyncClient):
-    token, user_id = await _register_and_login(client, "prod_user_1")
+    token, user_id = await _login(client, "prod_user_1")
     headers = {"Authorization": f"Bearer {token}"}
 
     # 1. Create Task
@@ -86,7 +83,7 @@ async def test_tasks_crud(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_events_crud(client: AsyncClient):
-    token, user_id = await _register_and_login(client, "prod_user_2")
+    token, user_id = await _login(client, "prod_user_2")
     headers = {"Authorization": f"Bearer {token}"}
 
     # 1. Create Event
@@ -114,7 +111,7 @@ async def test_events_crud(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_goals_crud(client: AsyncClient):
-    token, user_id = await _register_and_login(client, "prod_user_3")
+    token, user_id = await _login(client, "prod_user_3")
     headers = {"Authorization": f"Bearer {token}"}
 
     # 1. Create Goal
@@ -152,7 +149,7 @@ async def test_goals_crud(client: AsyncClient):
 @pytest.mark.asyncio
 async def test_productivity_runtime_tools(client: AsyncClient, db_session: AsyncSession):
     # Setup mock companion user profile
-    token, user_id = await _register_and_login(client, "prod_user_tools")
+    token, user_id = await _login(client, "prod_user_tools")
     
     # 1. Run AddTaskTool execution
     from unittest.mock import patch

@@ -26,6 +26,8 @@ os.environ.setdefault("JWT_SECRET", "test_secret_key_32_chars_minimum_here")
 
 from app.main import app
 from app.database.engine import get_session, Base
+from app.database.models import Account, User
+from app.core.security import hash_password
 
 
 # ── Test database setup ────────────────────────────────────────────────────
@@ -34,6 +36,27 @@ TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
 test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
 TestSessionMaker = async_sessionmaker(test_engine, expire_on_commit=False)
+
+
+async def create_test_account(username: str, password: str = "password123") -> User:
+    """Seed a private account for authenticated endpoint tests.
+
+    Public registration is intentionally unavailable in the application.
+    """
+    async with TestSessionMaker() as session:
+        user = User(username=username, display_name=username)
+        session.add(user)
+        await session.flush()
+        session.add(
+            Account(
+                user_id=user.id,
+                username=username,
+                password_hash=hash_password(password),
+            )
+        )
+        await session.commit()
+        await session.refresh(user)
+        return user
 
 
 async def override_get_session():

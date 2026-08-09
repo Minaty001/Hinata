@@ -6,19 +6,17 @@ from __future__ import annotations
 
 import pytest
 from httpx import AsyncClient
+from tests.backend.conftest import create_test_account
 
 
 pytestmark = pytest.mark.asyncio
 
 
-async def _register_and_login(client: AsyncClient, username: str) -> str:
-    """Helper: register a user and return the access token."""
-    reg = await client.post(
-        "/api/v1/auth/register",
-        json={"username": username, "password": "password123"},
-    )
-    assert reg.status_code == 200, f"Register failed: {reg.json()}"
-    return reg.json()["access_token"]
+async def _login(client: AsyncClient, username: str) -> str:
+    await create_test_account(username)
+    response = await client.post("/api/v1/auth/login", json={"username": username, "password": "password123"})
+    assert response.status_code == 200
+    return response.json()["access_token"]
 
 
 async def test_chat_requires_auth(client: AsyncClient):
@@ -30,7 +28,7 @@ async def test_chat_requires_auth(client: AsyncClient):
 
 
 async def test_chat_with_auth(client: AsyncClient):
-    token = await _register_and_login(client, "chat_user_1")
+    token = await _login(client, "chat_user_1")
     res = await client.post(
         "/api/v1/chat/",
         json={"message": "hello"},
@@ -43,7 +41,7 @@ async def test_chat_with_auth(client: AsyncClient):
 
 
 async def test_chat_persists_chain_id(client: AsyncClient):
-    token = await _register_and_login(client, "chat_user_2")
+    token = await _login(client, "chat_user_2")
     # First message creates a chain
     res1 = await client.post(
         "/api/v1/chat/",
@@ -68,7 +66,7 @@ async def test_get_chains_requires_auth(client: AsyncClient):
 
 
 async def test_get_chains_with_auth(client: AsyncClient):
-    token = await _register_and_login(client, "chat_user_3")
+    token = await _login(client, "chat_user_3")
     # Create a chat to have at least one chain
     await client.post(
         "/api/v1/chat/",
@@ -85,7 +83,7 @@ async def test_get_chains_with_auth(client: AsyncClient):
 
 
 async def test_create_chain(client: AsyncClient):
-    token = await _register_and_login(client, "chat_user_4")
+    token = await _login(client, "chat_user_4")
     res = await client.post(
         "/api/v1/chat/chains",
         headers={"Authorization": f"Bearer {token}"},
@@ -97,7 +95,7 @@ async def test_create_chain(client: AsyncClient):
 
 
 async def test_delete_chain(client: AsyncClient):
-    token = await _register_and_login(client, "chat_user_5")
+    token = await _login(client, "chat_user_5")
     # Create a chain
     create_res = await client.post(
         "/api/v1/chat/chains",
@@ -113,8 +111,8 @@ async def test_delete_chain(client: AsyncClient):
 
 
 async def test_cannot_delete_other_users_chain(client: AsyncClient):
-    token1 = await _register_and_login(client, "chat_user_6a")
-    token2 = await _register_and_login(client, "chat_user_6b")
+    token1 = await _login(client, "chat_user_6a")
+    token2 = await _login(client, "chat_user_6b")
     # User 1 creates a chain
     create_res = await client.post(
         "/api/v1/chat/chains",
@@ -130,7 +128,7 @@ async def test_cannot_delete_other_users_chain(client: AsyncClient):
 
 
 async def test_get_history(client: AsyncClient):
-    token = await _register_and_login(client, "chat_user_7")
+    token = await _login(client, "chat_user_7")
     # Chat to populate history
     chat_res = await client.post(
         "/api/v1/chat/",

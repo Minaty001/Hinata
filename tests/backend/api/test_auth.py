@@ -6,57 +6,22 @@ from __future__ import annotations
 
 import pytest
 from httpx import AsyncClient
+from tests.backend.conftest import create_test_account
 
 
 pytestmark = pytest.mark.asyncio
 
 
-async def test_register_success(client: AsyncClient):
+async def test_public_registration_is_unavailable(client: AsyncClient):
     res = await client.post(
         "/api/v1/auth/register",
         json={"username": "testuser_reg", "password": "password123"},
     )
-    assert res.status_code == 200
-    body = res.json()
-    assert "access_token" in body
-    assert "refresh_token" in body
-    assert body["token_type"] == "bearer"
-
-
-async def test_register_duplicate_username(client: AsyncClient):
-    await client.post(
-        "/api/v1/auth/register",
-        json={"username": "testuser_dup", "password": "password123"},
-    )
-    res = await client.post(
-        "/api/v1/auth/register",
-        json={"username": "testuser_dup", "password": "password123"},
-    )
-    assert res.status_code == 400
-    assert "already taken" in res.json()["detail"].lower()
-
-
-async def test_register_password_too_short(client: AsyncClient):
-    res = await client.post(
-        "/api/v1/auth/register",
-        json={"username": "testuser_short", "password": "123"},
-    )
-    assert res.status_code == 400
-
-
-async def test_register_username_too_short(client: AsyncClient):
-    res = await client.post(
-        "/api/v1/auth/register",
-        json={"username": "ab", "password": "password123"},
-    )
-    assert res.status_code == 400
+    assert res.status_code == 404
 
 
 async def test_login_success(client: AsyncClient):
-    await client.post(
-        "/api/v1/auth/register",
-        json={"username": "logintest_ok", "password": "password123"},
-    )
+    await create_test_account("logintest_ok")
     res = await client.post(
         "/api/v1/auth/login",
         json={"username": "logintest_ok", "password": "password123"},
@@ -66,10 +31,7 @@ async def test_login_success(client: AsyncClient):
 
 
 async def test_login_wrong_password(client: AsyncClient):
-    await client.post(
-        "/api/v1/auth/register",
-        json={"username": "logintest_wrong", "password": "password123"},
-    )
+    await create_test_account("logintest_wrong")
     res = await client.post(
         "/api/v1/auth/login",
         json={"username": "logintest_wrong", "password": "wrongpassword"},
@@ -91,11 +53,9 @@ async def test_get_me_unauthenticated(client: AsyncClient):
 
 
 async def test_get_me_authenticated(client: AsyncClient):
-    reg = await client.post(
-        "/api/v1/auth/register",
-        json={"username": "metest_auth", "password": "password123"},
-    )
-    token = reg.json()["access_token"]
+    await create_test_account("metest_auth")
+    login = await client.post("/api/v1/auth/login", json={"username": "metest_auth", "password": "password123"})
+    token = login.json()["access_token"]
     res = await client.get(
         "/api/v1/auth/me",
         headers={"Authorization": f"Bearer {token}"},
@@ -107,11 +67,9 @@ async def test_get_me_authenticated(client: AsyncClient):
 
 
 async def test_refresh_token(client: AsyncClient):
-    reg = await client.post(
-        "/api/v1/auth/register",
-        json={"username": "refreshtest_ok", "password": "password123"},
-    )
-    refresh = reg.json()["refresh_token"]
+    await create_test_account("refreshtest_ok")
+    login = await client.post("/api/v1/auth/login", json={"username": "refreshtest_ok", "password": "password123"})
+    refresh = login.json()["refresh_token"]
     res = await client.post(
         "/api/v1/auth/refresh",
         json={"refresh_token": refresh},
@@ -124,11 +82,9 @@ async def test_refresh_token(client: AsyncClient):
 
 async def test_refresh_token_reuse_fails(client: AsyncClient):
     """After refresh, old refresh token must be revoked."""
-    reg = await client.post(
-        "/api/v1/auth/register",
-        json={"username": "refreshtest_reuse", "password": "password123"},
-    )
-    old_refresh = reg.json()["refresh_token"]
+    await create_test_account("refreshtest_reuse")
+    login = await client.post("/api/v1/auth/login", json={"username": "refreshtest_reuse", "password": "password123"})
+    old_refresh = login.json()["refresh_token"]
 
     # First refresh works
     await client.post("/api/v1/auth/refresh", json={"refresh_token": old_refresh})
@@ -139,11 +95,9 @@ async def test_refresh_token_reuse_fails(client: AsyncClient):
 
 
 async def test_logout(client: AsyncClient):
-    reg = await client.post(
-        "/api/v1/auth/register",
-        json={"username": "logouttest_ok", "password": "password123"},
-    )
-    token = reg.json()["access_token"]
+    await create_test_account("logouttest_ok")
+    login = await client.post("/api/v1/auth/login", json={"username": "logouttest_ok", "password": "password123"})
+    token = login.json()["access_token"]
     res = await client.post(
         "/api/v1/auth/logout",
         headers={"Authorization": f"Bearer {token}"},
