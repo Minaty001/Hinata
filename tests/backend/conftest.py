@@ -51,6 +51,15 @@ async def setup_test_db():
         await conn.run_sync(Base.metadata.drop_all)
 
 
+@pytest.fixture(autouse=True)
+def mock_ai_completion(monkeypatch):
+    """Mock the AI completion method to avoid network calls and speed up tests."""
+    from app.core.brain import brain
+    async def mock_complete(*args, **kwargs):
+        return "Hello! I am Hinata (Mocked)."
+    monkeypatch.setattr(brain.unified_client, "chat_completion", mock_complete)
+
+
 @pytest_asyncio.fixture(autouse=True)
 async def override_db():
     """Override the database dependency to use the test database."""

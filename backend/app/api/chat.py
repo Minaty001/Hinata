@@ -14,48 +14,33 @@ from app.database.models import User, Chain, Conversation
 from app.schemas.chat import ChatRequest, ChatResponse, ChainSchema, HistoryResponse, MessageSchema
 from app.core.security import get_current_user
 
-# Mock AI for the tests
-class MockClient:
-    async def get_chat_response(self, *args, **kwargs):
-        return "Mock response", []
-
-unified_client = MockClient()
-try:
-    from ai.unified_ai_client import get_unified_client
-    unified_client = get_unified_client()
-except ImportError:
-    pass
+from app.core.brain import brain
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 @router.post("/", response_model=ChatResponse)
 async def chat(req: ChatRequest, user: User = Depends(get_current_user), session: AsyncSession = Depends(get_session)):
-    chain_id = req.chain_id or str(uuid.uuid4())
-    
-    # Save user message
-    msg = Conversation(user_id=user.id, chain_id=chain_id, role="user", message=req.message)
-    session.add(msg)
-    
-    # Ensure chain exists
-    res = await session.execute(select(Chain).where(Chain.chain_id == chain_id))
-    chain = res.scalars().first()
-    if not chain:
-        chain = Chain(chain_id=chain_id, user_id=user.id, title="New Chat")
-        session.add(chain)
-    
-    # Run AI
     try:
-        reply_text, _ = await unified_client.get_chat_response("system prompt", [{"role":"user", "content":req.message}], req.provider or "groq", req.model or "llama3-70b-8192")
-    except Exception:
-        reply_text = "Hello! I am Hinata."
-
-    # Save assistant message
-    reply_msg = Conversation(user_id=user.id, chain_id=chain_id, role="assistant", message=reply_text)
-    session.add(reply_msg)
-    
-    await session.commit()
-    return ChatResponse(reply=reply_text, chain_id=chain_id, provider=req.provider or "groq", model=req.model or "llama", timestamp=datetime.now(timezone.utc))
+        result = await brain.handle(
+            user=user,
+            message=req.message,
+            source=req.source,
+            chain_id=req.chain_id,
+            provider=req.provider,
+            model=req.model,
+            session=session,
+        )
+        return ChatResponse(
+            reply=result.reply,
+            chain_id=result.chain_id,
+            provider=result.provider,
+            model=result.model,
+            timestamp=result.timestamp,
+        )
+    except Exception as exc:
+        logger.exception("Error in chat route processing")
+        raise HTTPException(status_code=500, detail=str(exc))
 
 @router.get("/chains", response_model=list[ChainSchema])
 async def get_chains(user: User = Depends(get_current_user), session: AsyncSession = Depends(get_session)):
