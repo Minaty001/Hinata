@@ -23,7 +23,7 @@ Every non-auth API endpoint (chat, memory, settings, productivity, voice) and th
 - Delete: `oauth2_scheme`, `create_access_token`, `create_refresh_token`, `decode_token`, `hash_password`, `verify_password` (bcrypt/python-jose imports go with them).
 - Rewire `get_current_user` and `get_current_user_optional` to take no token — both resolve the default user via `get_default_user(session)`.
 - Add `get_default_user(session)`:
-  - Looks up the `User` row with the fixed local identity (e.g. `username="local"`).
+  - Looks up the `User` row with `username="local"` (the fixed local identity).
   - **Lazily creates it if missing** (defensive — a request never fails on identity).
 
 ### `api/auth.py`
