@@ -14,7 +14,7 @@ from app.database.models import (
     Preference,
     RelationshipDimension,
 )
-from app.schemas.auth import RegisterRequest, LoginRequest, TokenResponse, RefreshRequest, TelegramLinkRequest
+from app.schemas.auth import LoginRequest, TokenResponse, RefreshRequest, TelegramLinkRequest
 from app.core.security import hash_password, verify_password, create_access_token, create_refresh_token, decode_token, get_current_user
 from app.config import settings
 
@@ -61,36 +61,6 @@ async def ensure_bootstrap_admin() -> None:
         await session.commit()
         logger.info("Bootstrap admin account created: %s", settings.ADMIN_USERNAME)
 
-
-@router.post("/register", response_model=TokenResponse)
-async def register(req: RegisterRequest, session: AsyncSession = Depends(get_session)):
-    username = req.username.strip()
-    if len(username) < 3 or len(username) > 50:
-        raise HTTPException(status_code=400, detail="Username must be 3-50 characters")
-    if len(req.password) < 8:
-        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
-
-    result = await session.execute(select(Account).where(Account.username == username))
-    if result.scalars().first():
-        raise HTTPException(status_code=400, detail="Username already taken")
-
-    user = await _create_account(
-        session,
-        username=username,
-        password=req.password,
-        display_name=req.display_name,
-    )
-    jti = str(uuid.uuid4())
-    access_token = create_access_token(user.id, jti)
-    refresh_token = create_refresh_token(user.id, jti)
-    session.add(UserSession(
-        user_id=user.id,
-        jti=jti,
-        source="web",
-        expires_at=datetime.now(timezone.utc) + timedelta(days=settings.JWT_REFRESH_EXPIRE_DAYS),
-    ))
-    await session.commit()
-    return TokenResponse(access_token=access_token, refresh_token=refresh_token, expires_in=settings.JWT_ACCESS_EXPIRE_MINUTES * 60)
 
 @router.post("/login", response_model=TokenResponse)
 async def login(req: LoginRequest, session: AsyncSession = Depends(get_session)):
