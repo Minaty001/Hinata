@@ -17,6 +17,7 @@ from app.api.chat import router as chat_router
 from app.api.memory import router as memory_router
 from app.api.settings import router as settings_router
 from app.api.websocket import router as ws_router
+from app.api.voice import router as voice_router
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +52,7 @@ app.include_router(chat_router, prefix="/api/v1/chat", tags=["chat"])
 app.include_router(memory_router, prefix="/api/v1/memory", tags=["memory"])
 app.include_router(settings_router, prefix="/api/v1/settings", tags=["settings"])
 app.include_router(ws_router, tags=["websocket"])
+app.include_router(voice_router, prefix="/api/v1/voice", tags=["voice"])
 
 @app.get("/")
 async def root():
