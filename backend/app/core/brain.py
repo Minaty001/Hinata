@@ -39,6 +39,10 @@ from app.database.models import (
     RelationshipDimension,
 )
 
+# Reflex Brain imports
+from app.reflex.classifier import ReflexClassifier
+from app.reflex.executor import ReflexExecutor
+
 # AI Engines (from root codebase)
 from ai.feeling_detector import FeelingDetector
 from ai.need_analyzer import NeedAnalyzer
@@ -106,6 +110,8 @@ class HinataBrain:
 
         # Shared user memory for deferred quality score tracking
         self._user_message_history: dict[int, dict[str, Any]] = {}
+        self.reflex_classifier = ReflexClassifier()
+        self.reflex_executor = ReflexExecutor()
 
     async def handle(
         self,
@@ -162,6 +168,38 @@ class HinataBrain:
 
         # 4. Save current user message turn to Database
         await save_message(session, user.id, "user", message_text, chain_id=actual_chain_id)
+
+        # 4.5 Check for reflex command match
+        reflex_match = self.reflex_classifier.classify(message_text)
+        if reflex_match:
+            exec_result = await self.reflex_executor.execute(reflex_match, user)
+            reply_text = exec_result["reply"]
+            
+            # Save assistant reply to DB
+            await save_message(session, user.id, "assistant", reply_text, chain_id=actual_chain_id)
+            
+            # Increment relationship score slightly
+            score_increase = self.relationship_engine.calculate_score_increase(
+                len(message_text),
+                user.relationship_score,
+            )
+            user.relationship_score += score_increase
+            
+            await auto_index_session(session, user.id, actual_chain_id)
+            await session.commit()
+            
+            return BrainResult(
+                reply=reply_text,
+                chain_id=actual_chain_id,
+                provider="reflex",
+                model="deterministic",
+                timestamp=datetime.now(timezone.utc),
+                metadata={
+                    "command": exec_result["command"],
+                    "arguments": exec_result["arguments"],
+                    "dispatched": exec_result["dispatched"],
+                },
+            )
 
         # 5. Compute dynamic behavioral signals
         user_msgs = [m for m in recent_msgs if m.role == "user"]
