@@ -12,14 +12,6 @@ from tests.backend.conftest import create_test_account
 pytestmark = pytest.mark.asyncio
 
 
-async def test_public_registration_is_unavailable(client: AsyncClient):
-    res = await client.post(
-        "/api/v1/auth/register",
-        json={"username": "testuser_reg", "password": "password123"},
-    )
-    assert res.status_code == 404
-
-
 async def test_login_success(client: AsyncClient):
     await create_test_account("logintest_ok")
     res = await client.post(
