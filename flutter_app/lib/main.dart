@@ -9,12 +9,11 @@ import 'package:flutter/services.dart';
 
 /// Manages backend URL configuration.
 /// The URL is persisted in SharedPreferences and can be changed in Settings.
-/// IMPORTANT: Never hardcode production URLs or emulator-only addresses here.
+/// IMPORTANT: Never hardcode emulator-only addresses here.
 class BackendConfig {
   static const String _prefKey = 'backend_url';
-  // Default is localhost for local development.
-  // On a real device, open Settings and enter your server's address.
-  static const String defaultUrl = 'http://localhost:8000';
+  // Default is the production backend hosted on Render.
+  static const String defaultUrl = 'https://hinata-m93w.onrender.com';
 
   static Future<String> getUrl() async {
     final prefs = await SharedPreferences.getInstance();

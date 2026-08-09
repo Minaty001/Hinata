@@ -42,4 +42,10 @@ void main() {
       expect(log.last.arguments['state'], true);
     });
   });
+
+  group('BackendConfig', () {
+    test('default URL points to the Render production backend', () {
+      expect(BackendConfig.defaultUrl, 'https://hinata-m93w.onrender.com');
+    });
+  });
 }
