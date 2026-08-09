@@ -8,39 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Auth DOM elements
   const authModal = document.getElementById('authModal');
-  const btnTabLogin = document.getElementById('btnTabLogin');
-  const btnTabRegister = document.getElementById('btnTabRegister');
   const btnSubmitAuth = document.getElementById('btnSubmitAuth');
   const authUsernameInput = document.getElementById('authUsername');
   const authPasswordInput = document.getElementById('authPassword');
   const btnLogout = document.getElementById('btnLogout');
-
-  let authMode = 'login';
-
-  // Toggle Tab
-  if (btnTabLogin && btnTabRegister) {
-    btnTabLogin.addEventListener('click', () => {
-      authMode = 'login';
-      btnTabLogin.classList.add('active');
-      btnTabLogin.style.borderBottom = '2px solid var(--pink-accent)';
-      btnTabLogin.style.color = 'white';
-      btnTabRegister.classList.remove('active');
-      btnTabRegister.style.borderBottom = 'none';
-      btnTabRegister.style.color = 'var(--text-muted)';
-      btnSubmitAuth.innerText = 'Sign In';
-    });
-
-    btnTabRegister.addEventListener('click', () => {
-      authMode = 'register';
-      btnTabRegister.classList.add('active');
-      btnTabRegister.style.borderBottom = '2px solid var(--pink-accent)';
-      btnTabRegister.style.color = 'white';
-      btnTabLogin.classList.remove('active');
-      btnTabLogin.style.borderBottom = 'none';
-      btnTabLogin.style.color = 'var(--text-muted)';
-      btnSubmitAuth.innerText = 'Create Account';
-    });
-  }
 
   // Handle Authentication submit
   if (btnSubmitAuth) {
@@ -53,9 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      const path = authMode === 'login' ? '/api/v1/auth/login' : '/api/v1/auth/register';
       try {
-        const res = await fetch(path, {
+        const res = await fetch('/api/v1/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
@@ -71,10 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('hinata_token', jwtToken);
         authModal.classList.remove('active');
         authModal.style.display = 'none';
-        showToast(
-          authMode === 'register' ? 'Account created! Welcome, companion! 🌸' : 'Welcome back, companion! 🌸',
-          'success'
-        );
+        showToast('Welcome back, companion! 🌸', 'success');
         initAfterAuth();
       } catch (err) {
         console.error(err);

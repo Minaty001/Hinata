@@ -57,7 +57,7 @@ async def health():
 
 app.include_router(productivity_router, prefix="/api/v1/productivity", tags=["productivity"])
 
-# Register the static site after API and health routes so the login/register
-# client and its authenticated API calls are served from the same public origin.
+# Register the static site after API and health routes so the sign-in client
+# and its authenticated API calls are served from the same public origin.
 if (ROOT / "web").exists():
     app.mount("/", StaticFiles(directory=str(ROOT / "web"), html=True), name="web")

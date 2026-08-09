@@ -213,7 +213,7 @@ Hinata/
 
 ## 🌐 Deploy the Web App on Render
 
-The deployable web app is the FastAPI backend. It serves the dashboard, sign-in/register API, and authenticated chat API from one Render **Web Service**.
+The deployable web app is the FastAPI backend. It serves the dashboard, sign-in API, and authenticated chat API from one Render **Web Service**. Public sign-up is permanently disabled; only accounts created by the application operator can sign in.
 
 1. In the [Render Dashboard](https://dashboard.render.com), select **New → Web Service** and connect this repository.
 2. Select the `master` branch and the **Python** runtime.
