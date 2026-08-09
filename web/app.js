@@ -3,6 +3,147 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+  // --- 🌸 HINATA AUTHENTICATION & NATIVE CONTROL STATE 🌸 ---
+  let jwtToken = localStorage.getItem('hinata_token') || '';
+
+  // Auth DOM elements
+  const authModal = document.getElementById('authModal');
+  const btnTabLogin = document.getElementById('btnTabLogin');
+  const btnTabRegister = document.getElementById('btnTabRegister');
+  const btnSubmitAuth = document.getElementById('btnSubmitAuth');
+  const authUsernameInput = document.getElementById('authUsername');
+  const authPasswordInput = document.getElementById('authPassword');
+  const btnLogout = document.getElementById('btnLogout');
+
+  let authMode = 'login';
+
+  // Toggle Tab
+  if (btnTabLogin && btnTabRegister) {
+    btnTabLogin.addEventListener('click', () => {
+      authMode = 'login';
+      btnTabLogin.classList.add('active');
+      btnTabLogin.style.borderBottom = '2px solid var(--pink-accent)';
+      btnTabLogin.style.color = 'white';
+      btnTabRegister.classList.remove('active');
+      btnTabRegister.style.borderBottom = 'none';
+      btnTabRegister.style.color = 'var(--text-muted)';
+      btnSubmitAuth.innerText = 'Sign In';
+    });
+
+    btnTabRegister.addEventListener('click', () => {
+      authMode = 'register';
+      btnTabRegister.classList.add('active');
+      btnTabRegister.style.borderBottom = '2px solid var(--pink-accent)';
+      btnTabRegister.style.color = 'white';
+      btnTabLogin.classList.remove('active');
+      btnTabLogin.style.borderBottom = 'none';
+      btnTabLogin.style.color = 'var(--text-muted)';
+      btnSubmitAuth.innerText = 'Create Account';
+    });
+  }
+
+  // Handle Authentication submit
+  if (btnSubmitAuth) {
+    btnSubmitAuth.addEventListener('click', async () => {
+      const username = authUsernameInput.value.trim();
+      const password = authPasswordInput.value.trim();
+
+      if (!username || !password) {
+        showToast('Please fill in both username and password.', 'error');
+        return;
+      }
+
+      const path = authMode === 'login' ? '/api/v1/auth/login' : '/api/v1/auth/register';
+      try {
+        const payloadBody = authMode === 'login'
+          ? `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+          : JSON.stringify({ username, password });
+
+        const headers = authMode === 'login'
+          ? { 'Content-Type': 'application/x-www-form-urlencoded' }
+          : { 'Content-Type': 'application/json' };
+
+        const res = await fetch(path, {
+          method: 'POST',
+          headers: headers,
+          body: payloadBody
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          showToast(data.detail || 'Authentication failed. Please check credentials.', 'error');
+          return;
+        }
+
+        if (authMode === 'register') {
+          showToast('Registration successful! Please login.', 'success');
+          btnTabLogin.click();
+        } else {
+          jwtToken = data.access_token;
+          localStorage.setItem('hinata_token', jwtToken);
+          authModal.classList.remove('active');
+          authModal.style.display = 'none';
+          showToast('Welcome back, companion! 🌸', 'success');
+          initAfterAuth();
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('Failed to connect to backend server.', 'error');
+      }
+    });
+  }
+
+  // Logout Trigger
+  if (btnLogout) {
+    btnLogout.addEventListener('click', () => {
+      localStorage.removeItem('hinata_token');
+      localStorage.removeItem('hinata_active_chain_id');
+      window.location.reload();
+    });
+  }
+
+  // Authenticated Fetch wrapper
+  async function authFetch(url, options = {}) {
+    options.headers = options.headers || {};
+    if (jwtToken) {
+      options.headers['Authorization'] = `Bearer ${jwtToken}`;
+    }
+    const res = await fetch(url, options);
+    if (res.status === 401) {
+      jwtToken = '';
+      localStorage.removeItem('hinata_token');
+      if (authModal) {
+        authModal.classList.add('active');
+        authModal.style.display = 'flex';
+      }
+      throw new Error('Unauthorized session expired');
+    }
+    return res;
+  }
+
+  // Load backend configurations after successful login session
+  function initAfterAuth() {
+    loadChains();
+    loadMemoriesFromBackend();
+    loadProvidersFromBackend();
+
+    // Query native battery level status if running on dynamic Android client shell
+    if (window.HinataDeviceBridge) {
+      window.HinataDeviceBridge.postMessage(JSON.stringify({
+        command: 'android.battery_status'
+      }));
+    }
+  }
+
+  // Native Android battery status broadcast listener
+  window.onBatteryStatus = function(level) {
+    const badge = document.getElementById('batteryStatusBadge');
+    if (badge) {
+      badge.textContent = `🔋 ${level}%`;
+      badge.style.display = 'inline-flex';
+    }
+  };
+
   // Toast Notification System
   function showToast(message, type = 'info', duration = 3000) {
     const container = document.getElementById('toastContainer');
@@ -450,13 +591,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadChains() {
     try {
-      const res = await fetch('/api/chains');
-      const data = await res.json();
-      if (data.status === 'success' && Array.isArray(data.chains)) {
-        renderChains(data.chains);
-        if (!state.activeChainId || !data.chains.some(c => c.chain_id === state.activeChainId)) {
-          if (data.chains.length > 0) {
-            selectChain(data.chains[0].chain_id);
+      const res = await authFetch('/api/v1/chat/chains');
+      const chains = await res.json();
+      if (Array.isArray(chains)) {
+        renderChains(chains);
+        if (!state.activeChainId || !chains.some(c => c.chain_id === state.activeChainId)) {
+          if (chains.length > 0) {
+            selectChain(chains[0].chain_id);
           }
         } else {
           loadHistory(state.activeChainId);
@@ -514,14 +655,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function createChain() {
     try {
-      const res = await fetch('/api/chains', {
+      const res = await authFetch('/api/v1/chat/chains', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: 'New Conversation' })
       });
       const data = await res.json();
-      if (data.status === 'success' && data.chain) {
-        selectChain(data.chain.chain_id);
+      if (data.chain_id) {
+        selectChain(data.chain_id);
         await loadChains();
         showToast('Created new conversation chain 🌸', 'success');
       }
@@ -532,9 +673,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function deleteChain(chainId) {
     try {
-      const res = await fetch(`/api/chains?chain_id=${encodeURIComponent(chainId)}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.status === 'success') {
+      const res = await authFetch(`/api/v1/chat/chains/${encodeURIComponent(chainId)}`, { method: 'DELETE' });
+      if (res.ok) {
         if (state.activeChainId === chainId) {
           state.activeChainId = null;
           localStorage.removeItem('hinata_active_chain_id');
@@ -553,34 +693,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadHistory(chainId) {
     if (!chatMessages) return;
+    if (!chainId) {
+      chatMessages.innerHTML = '';
+      const cName = profile.companionName || 'Hinata Hyuga';
+      appendMessage('assistant', cName, 'Hello! I\'m Hinata Hyuga, your sweet AI girl companion! How can I help or keep you company today? 💖');
+      return;
+    }
     try {
-      const url = chainId ? `/api/history?chain_id=${encodeURIComponent(chainId)}` : '/api/history';
-      const res = await fetch(url);
+      const res = await authFetch(`/api/v1/chat/chains/${encodeURIComponent(chainId)}/history`);
       const data = await res.json();
       chatMessages.innerHTML = '';
 
-      // Render Session Topic Index Bar if indices exist for fast page jump
-      if (Array.isArray(data.indices) && data.indices.length > 0) {
-        const indexBar = document.createElement('div');
-        indexBar.className = 'session-index-bar';
-        indexBar.style.cssText = 'padding: 8px 12px; background: rgba(255, 105, 180, 0.08); border: 1px solid rgba(255, 105, 180, 0.2); border-radius: 12px; margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;';
-        
-        let pillsHtml = `<span style="font-size: 0.75rem; font-weight: 700; color: var(--pink-accent);">📌 TOPIC INDEX:</span>`;
-        data.indices.forEach(idx => {
-          pillsHtml += `<span class="chip" style="font-size: 0.75rem; padding: 3px 8px; background: rgba(255,255,255,0.1);" title="${escapeHtml(idx.summary)}">Page ${idx.page_number}: ${escapeHtml(idx.topic)}</span>`;
-        });
-        indexBar.innerHTML = pillsHtml;
-        chatMessages.appendChild(indexBar);
-      }
-
-      if (data.status === 'success' && Array.isArray(data.messages) && data.messages.length > 0) {
+      if (data && Array.isArray(data.messages) && data.messages.length > 0) {
         data.messages.forEach(m => {
           const sender = m.role === 'user' ? (profile.userName || 'User') : (profile.companionName || 'Hinata Hyuga');
           appendMessage(m.role, sender, m.message, m.timestamp);
         });
       } else {
         const cName = profile.companionName || 'Hinata Hyuga';
-        appendMessage('assistant', cName, 'Arre waah! Main Hinata hoon, aapki sweet companion! Aaj main aapki kya madad kar sakti hoon? 🌸');
+        appendMessage('assistant', cName, 'Hello! I\'m Hinata Hyuga, your sweet AI girl companion! How can I help or keep you company today? 🌸');
       }
     } catch (e) {
       console.error('Failed to load history', e);
@@ -612,7 +743,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
     try {
-      const res = await fetch('/api/chat', {
+      const res = await authFetch('/api/v1/chat/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -636,6 +767,15 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       chatMessages.removeChild(typingElem);
       appendMessage('assistant', cName, data.reply);
+      
+      // Dispatch reflex commands directly to native client if window.HinataDeviceBridge is active
+      if (data.provider === 'reflex' && data.metadata && window.HinataDeviceBridge) {
+        window.HinataDeviceBridge.postMessage(JSON.stringify({
+          command: data.metadata.command,
+          arguments: data.metadata.arguments
+        }));
+      }
+
       // Refresh chain title in list
       loadChains();
     } catch (err) {
@@ -708,8 +848,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Load initial chains and chat history
-  loadChains();
+  // Verify token session and load config
+  if (jwtToken) {
+    if (authModal) {
+      authModal.classList.remove('active');
+      authModal.style.display = 'none';
+    }
+    initAfterAuth();
+  } else {
+    if (authModal) {
+      authModal.classList.add('active');
+      authModal.style.display = 'flex';
+    }
+  }
 
   // 3. DEEP SEARCH ENGINE
   const deepSearchInput = document.getElementById('deepSearchInput');
@@ -725,7 +876,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      const res = await authFetch(`/api/v1/chat/search?q=${encodeURIComponent(query)}`);
       const data = await res.json();
       let items = (data.results || []).map(r => ({
         category: r.category,
@@ -797,9 +948,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // 4. Memory Manager Render & Modal Handler
   async function loadMemoriesFromBackend() {
     try {
-      const res = await fetch('/api/memories');
+      const res = await authFetch('/api/v1/memory/');
       const data = await res.json();
-      if (Array.isArray(data.memories)) {
+      if (data && Array.isArray(data.memories)) {
         state.memories = data.memories;
         renderMemories();
       }
@@ -827,7 +978,7 @@ document.addEventListener('DOMContentLoaded', () => {
       grid.appendChild(card);
     });
   }
-  loadMemoriesFromBackend();
+  
 
   const btnAddMemoryModal = document.getElementById('btnAddMemoryModal');
   const memoryModal = document.getElementById('memoryModal');
@@ -867,15 +1018,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       const type = memoryTypeSelect ? memoryTypeSelect.value : 'fact';
+      const importanceSelect = document.getElementById('memoryImportanceSelect');
+      const importance = importanceSelect ? parseInt(importanceSelect.value) : 3;
 
       try {
-        const res = await fetch('/api/memories', {
+        const res = await authFetch('/api/v1/memory/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type, content })
+          body: JSON.stringify({ type, content, importance })
         });
         const data = await res.json();
-        if (data.status === 'success') {
+        if (data.id) {
           await loadMemoriesFromBackend();
           closeMemoryModal();
           showToast('New memory saved to database! 🧠', 'success');
@@ -922,9 +1075,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!container) return;
 
     try {
-      const res = await fetch('/api/providers');
+      const res = await authFetch('/api/v1/settings/providers');
       const data = await res.json();
-      if (data.status === 'success' && data.providers) {
+      if (data && data.providers) {
         state.activeProvider = data.active_provider;
         state.providers = data.providers;
         renderProvidersUI(data.providers, data.active_provider);
@@ -1057,13 +1210,13 @@ document.addEventListener('DOMContentLoaded', () => {
   async function updateProviderConfig(provKey, extra = {}) {
     try {
       const payload = { provider: provKey, ...extra };
-      const res = await fetch('/api/provider', {
+      const res = await authFetch('/api/v1/settings/providers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
       const data = await res.json();
-      if (data.status === 'success' && data.providers) {
+      if (data && data.providers) {
         state.activeProvider = data.active_provider;
         state.providers = data.providers;
         renderProvidersUI(data.providers, data.active_provider);
@@ -1078,7 +1231,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  loadProvidersFromBackend();
+  
 
   // 7. Settings Events Controller
   document.querySelectorAll('.theme-pill').forEach(pill => {

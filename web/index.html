@@ -102,6 +102,22 @@
         <!-- 1. CHAT VIEW -->
         <section class="view-panel active" id="view-chat">
           <div class="chat-wrapper glass-card">
+            <!-- Sleek Top Header Bar -->
+            <div class="chat-header-bar">
+              <div class="chat-header-info">
+                <span class="chat-header-avatar" id="headerAvatarEmoji">🌸</span>
+                <div class="chat-header-meta">
+                  <h3 id="headerCompanionName">Hinata Hyuga</h3>
+                  <span class="status-indicator-text"><span class="dot-online"></span>Online</span>
+                </div>
+              </div>
+              <div class="chat-header-actions">
+                <span class="status-badge" id="batteryStatusBadge" style="display: none;">🔋 --%</span>
+                <span class="status-badge" id="pairingStatusBadge">🔗 Paired Client</span>
+                <button class="btn btn-sm btn-outline btn-logout-action" id="btnLogout" style="font-size: 0.75rem; padding: 4px 10px;">Logout</button>
+              </div>
+            </div>
+
             <!-- Messages Stream -->
             <div class="messages-container" id="chatMessages">
               <div class="message assistant-message">
@@ -564,6 +580,34 @@
       <div class="modal-footer">
         <button class="btn btn-outline" id="btnCancelAddMemory">Cancel</button>
         <button class="btn btn-primary" id="btnSaveNewMemory">Save Memory</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Premium Auth Modal Backdrop (Glow & Glassmorphism) -->
+  <div class="modal-backdrop active" id="authModal" style="display: flex; align-items: center; justify-content: center; z-index: 9999;">
+    <div class="auth-card glass-card" style="width: 90%; max-width: 420px; padding: 32px; border-radius: 20px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15);">
+      <div class="auth-header" style="margin-bottom: 24px;">
+        <span style="font-size: 3rem;">🌸</span>
+        <h2 style="font-family: 'Outfit', sans-serif; font-weight: 800; color: white; margin-top: 12px; margin-bottom: 6px;">Welcome to Hinata</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Sign in or register to join your companion.</p>
+      </div>
+      
+      <div class="auth-tabs" style="display: flex; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
+        <button class="auth-tab-btn active" id="btnTabLogin" style="flex: 1; padding: 10px; background: none; border: none; color: white; font-weight: 600; cursor: pointer; border-bottom: 2px solid var(--pink-accent);">Login</button>
+        <button class="auth-tab-btn" id="btnTabRegister" style="flex: 1; padding: 10px; background: none; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer;">Register</button>
+      </div>
+
+      <div class="auth-form" id="authForm">
+        <div class="modal-field" style="text-align: left; margin-bottom: 16px;">
+          <label for="authUsername" style="color: white; font-size: 0.8rem; font-weight: 600;">Username</label>
+          <input type="text" id="authUsername" placeholder="Enter username..." class="custom-input" style="width: 100%;" />
+        </div>
+        <div class="modal-field" style="text-align: left; margin-bottom: 20px;">
+          <label for="authPassword" style="color: white; font-size: 0.8rem; font-weight: 600;">Password</label>
+          <input type="password" id="authPassword" placeholder="Enter password..." class="custom-input" style="width: 100%;" />
+        </div>
+        <button class="btn btn-primary" id="btnSubmitAuth" style="width: 100%; padding: 12px; font-weight: 700; border-radius: 12px; letter-spacing: 0.5px;">Sign In</button>
       </div>
     </div>
   </div>
