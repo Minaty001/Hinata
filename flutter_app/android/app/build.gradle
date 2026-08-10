@@ -72,7 +72,8 @@ android {
         release {
             // Only apply release signing if KEYSTORE_PATH is configured.
             // Falls back to debug signing locally to avoid build failures.
-            def hasKeystore = System.getenv("KEYSTORE_PATH") != null
+            def keystoreEnv = System.getenv("KEYSTORE_PATH")
+            def hasKeystore = keystoreEnv != null && !keystoreEnv.isEmpty()
             signingConfig = hasKeystore ? signingConfigs.release : signingConfigs.debug
             minifyEnabled = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
