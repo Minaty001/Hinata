@@ -16,50 +16,31 @@
     <path
         android:fillColor="#1a1a2e"
         android:pathData="M72,24c4,6 6,14 6,22c0,4 -0.5,8 -1.5,12c3,-2 5,-5 6,-9c2,-8 0,-18 -4,-25c-2,-4 -6,-7 -10,-8c2,2 3,5 3.5,8z"/>
-    <!-- Face -->
-    <ellipse
+    <!-- Face (ellipse 54,48 rx16 ry18) -->
+    <path
         android:fillColor="#FFE0BD"
-        android:cx="54"
-        android:cy="48"
-        android:rx="16"
-        android:ry="18"/>
-    <!-- Eyes -->
-    <ellipse
+        android:pathData="M38,48a16,18 0 1,0 32,0a16,18 0 1,0 -32,0z"/>
+    <!-- Eyes (ellipse 47,44 rx2.5 ry3) -->
+    <path
         android:fillColor="#1a1a2e"
-        android:cx="47"
-        android:cy="44"
-        android:rx="2.5"
-        android:ry="3"/>
-    <ellipse
+        android:pathData="M44.5,44a2.5,3 0 1,0 5,0a2.5,3 0 1,0 -5,0z"/>
+    <path
         android:fillColor="#1a1a2e"
-        android:cx="61"
-        android:cy="44"
-        android:rx="2.5"
-        android:ry="3"/>
-    <!-- Eye shine -->
-    <circle
+        android:pathData="M58.5,44a2.5,3 0 1,0 5,0a2.5,3 0 1,0 -5,0z"/>
+    <!-- Eye shine (circle 48,42.5 r1) -->
+    <path
         android:fillColor="#FFFFFF"
-        android:cx="48"
-        android:cy="42.5"
-        android:r="1"/>
-    <circle
+        android:pathData="M47,42.5a1,1 0 1,0 2,0a1,1 0 1,0 -2,0z"/>
+    <path
         android:fillColor="#FFFFFF"
-        android:cx="62"
-        android:cy="42.5"
-        android:r="1"/>
-    <!-- Blush -->
-    <ellipse
+        android:pathData="M61,42.5a1,1 0 1,0 2,0a1,1 0 1,0 -2,0z"/>
+    <!-- Blush (ellipse 42,52 rx3 ry1.5) -->
+    <path
         android:fillColor="#FFB0B0"
-        android:cx="42"
-        android:cy="52"
-        android:rx="3"
-        android:ry="1.5"/>
-    <ellipse
+        android:pathData="M39,52a3,1.5 0 1,0 6,0a3,1.5 0 1,0 -6,0z"/>
+    <path
         android:fillColor="#FFB0B0"
-        android:cx="66"
-        android:cy="52"
-        android:rx="3"
-        android:ry="1.5"/>
+        android:pathData="M63,52a3,1.5 0 1,0 6,0a3,1.5 0 1,0 -6,0z"/>
     <!-- Mouth - happy smile -->
     <path
         android:fillColor="#FF6B6B"
