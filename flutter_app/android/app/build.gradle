@@ -25,11 +25,15 @@ if (flutterVersionName == null) {
 android {
     namespace = "com.hinata.ai"
     compileSdk = 35
-    ndkVersion = flutter.ndkVersion
+    // Plugins (connectivity_plus, flutter_local_notifications, webview_flutter_android, ...)
+    // require NDK 27.0.12077973; newer NDKs are backward compatible.
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // flutter_local_notifications requires core library desugaring
+        coreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {
@@ -84,6 +88,7 @@ flutter {
 }
 
 dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
     implementation 'androidx.webkit:webkit:1.12.1'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'androidx.core:core-ktx:1.15.0'
