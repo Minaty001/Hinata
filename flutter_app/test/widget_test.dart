@@ -8,6 +8,11 @@ void main() {
   testWidgets('App loads with splash screen', (WidgetTester tester) async {
     await tester.pumpWidget(const HinataApp());
     expect(find.text('Hinata AI'), findsOneWidget);
+    // The splash schedules an 800ms navigation timer. Dispose the tree and
+    // advance the clock so that timer fires harmlessly (its callback checks
+    // `mounted`); otherwise the test framework fails with '!timersPending'.
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(milliseconds: 900));
   });
 
   group('Device Control MethodChannel Tests', () {
