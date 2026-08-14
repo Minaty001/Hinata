@@ -700,7 +700,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
     try {
-      const res = await authFetch('/api/v1/chat/', {
+      const res = await authFetch('/api/v1/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -837,12 +837,23 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
       let items = (data.results || []).map(r => ({
         category: r.category,
-        type: r.category === 'conversations' ? 'Chat Log' : (r.category === 'memory' ? 'Memory' : 'AI Model'),
+        type: r.category === 'conversations' ? 'Chat Log'
+          : r.category === 'sessions' ? 'Session Topic'
+          : r.category === 'memory' ? 'Memory'
+          : r.category === 'models' ? 'AI Model' : r.category,
         title: r.title,
         snippet: r.snippet
       }));
       if (currentSearchFilter !== 'all') {
-        items = items.filter(i => i.category === currentSearchFilter);
+        // Map UI filter chips to backend result categories
+        const filterMap = {
+          chat: ['conversations', 'sessions'],
+          memory: ['memory'],
+          personality: ['models'],  // legacy label; models are surfaced here
+          models: ['models']
+        };
+        const wanted = filterMap[currentSearchFilter] || [currentSearchFilter];
+        items = items.filter(i => wanted.includes(i.category));
       }
       renderSearchResults(items, query);
     } catch (e) {

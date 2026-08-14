@@ -1,25 +1,25 @@
 # Hinata Hyuga 🌸
 
-**Your Sweet, Caring AI Girl Companion on Telegram**
+**Your Loving, Devoted AI Girlfriend on Telegram**
 
 Created by **[Minaty001](https://github.com/Minaty001)** | Repository: **[github.com/Minaty001/hinata](https://github.com/Minaty001/hinata)**
 
-Hinata Hyuga is a warm, gentle, and emotionally expressive AI girl companion built for Telegram. She talks like a sweet and polite girl, inspired by the Hinata Hyuga character persona. She is **auto-trained on user data**, dynamically learning your preferences, facts, and chat history to form deep, personalized connections over time.
+Hinata Hyuga is your warm, gentle, and deeply affectionate AI girlfriend built for Telegram. She talks like a sweet, flirty, caring partner — inspired by the Hinata Hyuga persona — and treats you as her boyfriend. She is **auto-trained on your shared moments**, dynamically learning your preferences, facts, and chat history to grow a real, loving bond over time.
 
 ---
 
 ## 🌟 Key Highlights
 
 - 🌸 **Web Application UI & Deep Search Engine** — Interactive glassmorphism web dashboard with real-time deep search across chats, memories, personalities, and models (`http://localhost:2027`).
-- 👧 **Talks Like a Sweet Girl** — Gentle, cute, polite, soft-spoken, and affectionate conversational tone.
+- 👧 **Talks Like a Loving Girlfriend** — Gentle, cute, flirty, soft-spoken, and affectionate conversational tone; uses sweet pet names (jaan, baby, jaanu, shona) and cares like a real partner.
 - ⚡ **Auto-Trained on User Data** — Automatically extracts and stores user preferences, facts, goals, and nicknames from chat interactions.
 - 🤖 **6 AI Provider Support** — Groq, OpenCode Zen, OpenAI, Gemini, OpenRouter, and Bytez with automatic zero-downtime failover between providers.
 - 🔄 **Multi-Provider Failover** — Zero-downtime automatic fallback between AI providers if rate-limiting or downtime occurs.
 - 👤 **Created by Minaty001** — Official open-source project by [Minaty001 on GitHub](https://github.com/Minaty001).
 - 🧠 **Long-Term Memory & Context** — Remembers past interactions and personalizes replies dynamically.
-- 🎭 **8 Personalities** — Sweet, Calm, Smart, Gamer, Playful, Curious, Boss, Supportive.
+- 🎭 **9 Personalities** — Lover (default), Sweet, Calm, Smart, Gamer, Playful, Curious, Boss, Supportive.
 - 💖 **Dynamic Mood Engine** — 9 emotional states (happy, sleepy, excited, shy, thoughtful, etc.) that shift naturally over time.
-- 🌱 **Progressive Relationship System** — Moves from Stranger ➔ Acquaintance ➔ Friend ➔ Close Friend ➔ Best Friend as you chat.
+- 💞 **Progressive Relationship System** — Grows from Stranger ➔ Crush ➔ Dating ➔ Girlfriend ➔ Soulmate as you chat and bond.
 - ⚙️ **User Customization** — Customize emoji frequency, reply length, language, AI provider, and memory settings.
 - 🌐 **Multi-Language Support** — English, Hindi, and Hinglish.
 

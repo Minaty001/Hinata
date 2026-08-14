@@ -35,7 +35,7 @@ class TestSessionIndexingAndHinglish(unittest.TestCase):
             personality={"name": "Sweet"},
             mood_name="happy",
             mood=None,
-            relationship_level="friend",
+            relationship_level="girlfriend",
             relationship_instructions="Be sweet",
             user_name="User",
             language="hinglish",

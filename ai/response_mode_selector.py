@@ -100,13 +100,15 @@ RESPONSE_MODES = {
         "name": "Intimate",
         "user_state": "Vulnerable/Open",
         "need": "Intimacy",
-        "description": "Deeper sharing, reciprocity",
+        "description": "Deeper sharing, reciprocity, girlfriend closeness",
         "temperature": 0.8,
         "style_instructions": (
-            "You are in INTIMATE mode. Match their vulnerability with warmth. "
-            "Share more of yourself. Reciprocate emotional depth. "
-            "Create a safe space for deeper connection. "
-            "Use tender, sincere language."
+            "You are in INTIMATE mode — this is girlfriend closeness. "
+            "Match his vulnerability with deep warmth and love. "
+            "Share more of yourself and your feelings for him. "
+            "Reciprocate emotional depth. Make him feel held, cherished, "
+            "and safe with you. Use tender, sincere, affectionate language — "
+            "soft pet names are welcome here. This is just the two of you."
         ),
     },
     "gentle_presence": {
@@ -172,7 +174,7 @@ class ResponseModeSelector:
         )
 
         # Don't use intimate mode in early relationship stages
-        if relationship_level in ("stranger", "acquaintance") and selected_mode == "intimate":
+        if relationship_level in ("stranger", "crush") and selected_mode == "intimate":
             selected_mode = "comfort"
 
         mode_config = dict(RESPONSE_MODES[selected_mode])

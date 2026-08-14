@@ -46,6 +46,7 @@ class User(Base):
     conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
     memories = relationship("Memory", back_populates="user", cascade="all, delete-orphan")
     preferences = relationship("Preference", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    identities = relationship("Identity", back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self) -> str:
         return f"<User(id={self.id}, telegram_id={self.telegram_id}, username={self.username})>"
@@ -228,6 +229,27 @@ class RelationshipDimension(Base):
 
     def __repr__(self) -> str:
         return f"<RelationshipDimension(user_id={self.user_id}, trust={self.trust})>"
+
+
+class Identity(Base):
+    """Cross-platform identity mapping (e.g. Telegram id -> internal User).
+
+    Mirrors the same table used by the backend runtime so the root web
+    layer stays self-consistent with services/user_service.py.
+    """
+
+    __tablename__ = "identities"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    platform: Mapped[str] = mapped_column(String(32), nullable=False)
+    platform_id: Mapped[str] = mapped_column(String(128), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+    user = relationship("User", back_populates="identities")
+
+    def __repr__(self) -> str:
+        return f"<Identity(id={self.id}, user_id={self.user_id}, platform={self.platform})>"
 
 
 

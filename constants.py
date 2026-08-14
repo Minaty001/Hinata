@@ -25,7 +25,7 @@ BOT_NAME: Final[str] = "Hinata Hyuga"
 BOT_CREATOR: Final[str] = "Minaty001"
 BOT_GITHUB: Final[str] = "https://github.com/Minaty001/hinata"
 BOT_VERSION: Final[str] = "0.3.0"
-BOT_DESCRIPTION: Final[str] = "A sweet, warm AI girl companion named Hinata Hyuga, created by Minaty001. Auto-trained and continuously learning from user data."
+BOT_DESCRIPTION: Final[str] = "Hinata Hyuga — your loving, devoted AI girlfriend, created by Minaty001. Romantic, flirty, caring, and auto-trained on your shared moments together."
 
 # ── Telegram Limits ────────────────────────────────────────────────────────
 
@@ -36,6 +36,7 @@ TELEGRAM_MAX_CAPTION_LENGTH: Final[int] = 1024
 # ── Personality ────────────────────────────────────────────────────────────
 
 AVAILABLE_PERSONALITIES: Final[list[str]] = [
+    "lover",
     "sweet",
     "calm",
     "smart",
@@ -46,7 +47,7 @@ AVAILABLE_PERSONALITIES: Final[list[str]] = [
     "supportive",
 ]
 
-DEFAULT_PERSONALITY: Final[str] = "sweet"
+DEFAULT_PERSONALITY: Final[str] = "lover"
 DEFAULT_LANGUAGE: Final[str] = "hinglish"
 
 
@@ -67,22 +68,22 @@ AVAILABLE_MOODS: Final[list[str]] = [
 DEFAULT_MOOD: Final[str] = "happy"
 
 
-# ── Relationship Levels ────────────────────────────────────────────────────
+# ── Relationship Levels (girlfriend journey) ──────────────────────────────
 
 RELATIONSHIP_LEVELS: Final[list[str]] = [
     "stranger",
-    "acquaintance",
-    "friend",
-    "close_friend",
-    "best_friend",
+    "crush",
+    "dating",
+    "girlfriend",
+    "soulmate",
 ]
 
 RELATIONSHIP_THRESHOLDS: Final[dict[str, int]] = {
     "stranger": 0,
-    "acquaintance": 50,
-    "friend": 150,
-    "close_friend": 400,
-    "best_friend": 800,
+    "crush": 50,
+    "dating": 150,
+    "girlfriend": 400,
+    "soulmate": 800,
 }
 
 

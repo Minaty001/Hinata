@@ -1,6 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import re
-import warnings
 from pathlib import Path
 
 # Project root: /root/Hinata (backend/app/config.py -> parents[2])
@@ -44,11 +43,19 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     OWNER_TELEGRAM_ID: int = 0
 
-    model_config = SettingsConfigDict(env_file="/root/Hinata/.env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=str(PROJECT_ROOT / ".env"),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
     def model_post_init(self, __context):
         if self.APP_ENV == "production" and not self.JWT_SECRET:
-            warnings.warn("JWT_SECRET is not set in production!")
+            raise RuntimeError(
+                "JWT_SECRET must be set in production. Refusing to start with an "
+                "empty secret (tokens would be forgeable). Set JWT_SECRET to a "
+                "secure random value (e.g. `openssl rand -hex 32`)."
+            )
 
         database_url = self.DATABASE_URL
         if database_url == "sqlite+aiosqlite:///data/hinata.db" and self.SUPABASE_DB_URL:

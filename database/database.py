@@ -84,6 +84,9 @@ class AsyncSessionWrapper:
     async def refresh(self, instance: Any) -> None:
         await asyncio.to_thread(self._sync.refresh, instance)
 
+    async def flush(self, *args: Any, **kwargs: Any) -> None:
+        await asyncio.to_thread(self._sync.flush, *args, **kwargs)
+
     async def execute(self, statement: Any, *args: Any, **kwargs: Any) -> Any:
         return await asyncio.to_thread(self._sync.execute, statement, *args, **kwargs)
 
