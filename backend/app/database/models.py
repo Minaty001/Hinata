@@ -31,9 +31,6 @@ class User(Base):
     conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
     memories = relationship("Memory", back_populates="user", cascade="all, delete-orphan")
     preferences = relationship("Preference", back_populates="user", uselist=False, cascade="all, delete-orphan")
-    accounts = relationship("Account", back_populates="user", cascade="all, delete-orphan")
-    sessions = relationship("UserSession", back_populates="user", cascade="all, delete-orphan")
-    devices = relationship("Device", back_populates="user", cascade="all, delete-orphan")
     identities = relationship("Identity", back_populates="user", cascade="all, delete-orphan")
 
 class Chain(Base):
@@ -144,45 +141,6 @@ class RelationshipDimension(Base):
     respect: Mapped[float] = mapped_column(Float, default=0.1)
     dependency: Mapped[float] = mapped_column(Float, default=0.0)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
-
-class Account(Base):
-    __tablename__ = "accounts"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
-    username: Mapped[str] = mapped_column(String(50), unique=True, index=True)
-    password_hash: Mapped[str] = mapped_column(String(128))
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
-    user = relationship("User", back_populates="accounts")
-
-class UserSession(Base):
-    __tablename__ = "user_sessions"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
-    jti: Mapped[str] = mapped_column(String(64), unique=True)
-    source: Mapped[str] = mapped_column(String(32))
-    ip_address: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
-    user_agent: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    expires_at: Mapped[datetime] = mapped_column(DateTime)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
-    is_revoked: Mapped[bool] = mapped_column(Boolean, default=False)
-    user = relationship("User", back_populates="sessions")
-
-class Device(Base):
-    __tablename__ = "devices"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
-    device_name: Mapped[str] = mapped_column(String(64))
-    platform: Mapped[str] = mapped_column(String(32))
-    device_token_hash: Mapped[str] = mapped_column(String(128))
-    capabilities: Mapped[str] = mapped_column(Text)
-    last_seen: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
-    user = relationship("User", back_populates="devices")
-
 class Identity(Base):
     __tablename__ = "identities"
     __table_args__ = (UniqueConstraint("platform", "platform_id"),)
