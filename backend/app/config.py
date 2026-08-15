@@ -47,6 +47,8 @@ class Settings(BaseSettings):
         database_url = self.DATABASE_URL
         if database_url == "sqlite+aiosqlite:///data/hinata.db" and self.SUPABASE_DB_URL:
             database_url = self.SUPABASE_DB_URL
+        if database_url.startswith("sqlite://"):
+            database_url = "sqlite+aiosqlite://" + database_url[len("sqlite://"):]
         if database_url.startswith("postgres://"):
             database_url = "postgresql+asyncpg://" + database_url[len("postgres://"):]
         elif database_url.startswith("postgresql://"):
