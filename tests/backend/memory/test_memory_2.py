@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 # Backend imports
 from app.database.models import User, Memory
-from memory.memory_manager import (
+from app.memory.memory_manager import (
     save_memory,
     get_memories,
     extract_and_save_memories,

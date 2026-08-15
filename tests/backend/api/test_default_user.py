@@ -10,11 +10,6 @@ from httpx import AsyncClient
 pytestmark = pytest.mark.asyncio
 
 
-async def test_me_without_token_returns_local_user(client: AsyncClient):
-    res = await client.get("/api/v1/users/me")
-    assert res.status_code == 200
-    body = res.json()
-    assert body["username"] == "local"
 
 
 async def test_chat_without_token(client: AsyncClient):

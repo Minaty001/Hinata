@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from app.database.engine import get_session
 from app.database.models import User, Chain, Conversation
 from app.schemas.chat import ChatRequest, ChatResponse, ChainSchema, HistoryResponse, MessageSchema
-from app.core.security import get_current_user
+from app.core.user import get_current_user
 
 from app.core.brain import brain
 

@@ -26,13 +26,7 @@ class Settings(BaseSettings):
     APP_ENV: str = "development"
     DATABASE_URL: str = "sqlite+aiosqlite:///data/hinata.db"
     SUPABASE_DB_URL: str = ""
-    JWT_SECRET: str = ""
-    JWT_ACCESS_EXPIRE_MINUTES: int = 60
-    JWT_REFRESH_EXPIRE_DAYS: int = 30
-    ADMIN_USERNAME: str = "Admin"
-    ADMIN_INITIAL_PASSWORD: str = ""
     WEB_ORIGINS: str = "http://localhost:2027,http://localhost:8000,http://127.0.0.1:2027,http://127.0.0.1:8000"
-    BOT_TOKEN: str = ""
     GROQ_API_KEY: str = ""
     AI_PROVIDER: str = "groq"
     ENABLE_AI_FALLBACK: bool = True
@@ -41,7 +35,6 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str = ""
     OPENROUTER_API_KEY: str = ""
     LOG_LEVEL: str = "INFO"
-    OWNER_TELEGRAM_ID: int = 0
 
     model_config = SettingsConfigDict(
         env_file=str(PROJECT_ROOT / ".env"),
@@ -50,12 +43,6 @@ class Settings(BaseSettings):
     )
 
     def model_post_init(self, __context):
-        if self.APP_ENV == "production" and not self.JWT_SECRET:
-            raise RuntimeError(
-                "JWT_SECRET must be set in production. Refusing to start with an "
-                "empty secret (tokens would be forgeable). Set JWT_SECRET to a "
-                "secure random value (e.g. `openssl rand -hex 32`)."
-            )
 
         database_url = self.DATABASE_URL
         if database_url == "sqlite+aiosqlite:///data/hinata.db" and self.SUPABASE_DB_URL:

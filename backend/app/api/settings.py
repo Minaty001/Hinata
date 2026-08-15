@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel
 
-from app.core.security import get_current_user
+from app.core.user import get_current_user
 from app.database.engine import get_session
 from app.database.models import User, Setting
 from app.core.brain import brain

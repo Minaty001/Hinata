@@ -14,11 +14,7 @@ import uuid
 from typing import Optional
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-
-if getattr(sys.modules.get("app"), "__path__", None):
-    from app.database.models import Chain, Conversation, SessionIndex
-else:
-    from database.models import Chain, Conversation, SessionIndex
+from app.database.models import Chain, Conversation, SessionIndex
 
 logger = logging.getLogger(__name__)
 

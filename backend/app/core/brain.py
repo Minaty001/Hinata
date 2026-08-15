@@ -19,11 +19,14 @@ from typing import Any, Optional
 # Inject path references to support imports from both legacy and backend runtimes
 ROOT = Path(__file__).resolve().parents[3]
 BACKEND = ROOT / "backend"
+CORE = BACKEND / "app" / "core"
 
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 if str(BACKEND) not in sys.path:
     sys.path.insert(0, str(BACKEND))
+if str(CORE) not in sys.path:
+    sys.path.insert(0, str(CORE))
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -58,19 +61,19 @@ from ai.distress_detector import detect_distress
 from ai.response_cleaner import clean_response, split_long_message
 from ai.context_builder import build_conversation_context
 
-from memory.memory_manager import (
+from app.memory.memory_manager import (
     get_memories_summary,
     extract_and_save_memories,
     apply_memory_decay,
     search_semantic_memories,
 )
-from services.chat_service import save_message, get_conversation_history, get_or_create_chain, auto_index_session
-from services.user_service import get_user_preferences
+from app.services.chat_service import save_message, get_conversation_history, get_or_create_chain, auto_index_session
+from app.services.user_service import get_user_preferences
 
-from training.behavioral_tracker import BehavioralTracker
-from training.quality_scorer import QualityScorer
-from training.conversation_encoder import ConversationEncoder
-from training.model_router import ModelRouter
+from app.training.behavioral_tracker import BehavioralTracker
+from app.training.quality_scorer import QualityScorer
+from app.training.conversation_encoder import ConversationEncoder
+from app.training.model_router import ModelRouter
 
 logger = logging.getLogger(__name__)
 

@@ -24,7 +24,7 @@ from typing import Any
 
 import httpx
 
-from config import settings
+from app.config import settings
 from constants import (
     GROQ_MAX_TOKENS,
     GROQ_TEMPERATURE,

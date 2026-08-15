@@ -14,11 +14,7 @@ from typing import Optional
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-if getattr(sys.modules.get("app"), "__path__", None):
-    from app.database.models import Preference, User
-else:
-    from database.models import Preference, User
+from app.database.models import Preference, User
 
 logger = logging.getLogger(__name__)
 

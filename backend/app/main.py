@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 import logging
 import sys
@@ -11,8 +10,7 @@ sys.path.insert(0, str(ROOT))
 
 from app.database.engine import init_db
 from app.config import settings
-from app.core.security import ensure_default_user
-from app.api.users import router as users_router
+from app.core.user import ensure_default_user
 from app.api.chat import router as chat_router
 from app.api.memory import router as memory_router
 from app.api.settings import router as settings_router
@@ -45,7 +43,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(users_router, prefix="/api/v1/users", tags=["users"])
 app.include_router(chat_router, prefix="/api/v1/chat", tags=["chat"])
 app.include_router(memory_router, prefix="/api/v1/memory", tags=["memory"])
 app.include_router(settings_router, prefix="/api/v1/settings", tags=["settings"])
@@ -56,8 +53,3 @@ async def health():
     return {"status": "healthy"}
 
 app.include_router(productivity_router, prefix="/api/v1/productivity", tags=["productivity"])
-
-# Register the static site after API and health routes so the web client and
-# its API calls are served from the same public origin.
-if (ROOT / "web").exists():
-    app.mount("/", StaticFiles(directory=str(ROOT / "web"), html=True), name="web")

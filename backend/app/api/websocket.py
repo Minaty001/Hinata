@@ -13,7 +13,7 @@ from typing import Any
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.security import get_default_user
+from app.core.user import get_default_user
 from app.database.engine import get_session
 
 logger = logging.getLogger(__name__)

@@ -27,10 +27,11 @@ async def db_session() -> AsyncSession:
 
 
 async def _current_user_id(client: AsyncClient) -> int:
-    """Fetch the single local user's id from /api/v1/users/me (no auth)."""
-    me = await client.get("/api/v1/users/me")
-    assert me.status_code == 200
-    return me.json()["id"]
+    """Fetch the single local user's id from the database (no auth)."""
+    from app.core.user import get_default_user
+    async with TestSessionMaker() as session:
+        user = await get_default_user(session)
+        return user.id
 
 
 @pytest.mark.asyncio

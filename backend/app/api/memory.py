@@ -6,7 +6,7 @@ from typing import List
 from app.database.engine import get_session
 from app.database.models import User, Memory
 from app.schemas.memory import MemoryCreate, MemorySchema, MemoryListResponse
-from app.core.security import get_current_user
+from app.core.user import get_current_user
 
 router = APIRouter()
 

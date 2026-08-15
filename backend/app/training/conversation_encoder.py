@@ -16,7 +16,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
-from training.feature_embedder import FeatureEmbedder
+from app.training.feature_embedder import FeatureEmbedder
 
 logger = logging.getLogger(__name__)
 
