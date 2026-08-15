@@ -15,7 +15,7 @@ async def get_default_user(session: AsyncSession) -> User:
     )
     user = result.scalars().first()
     if user is None:
-        user = User(username=DEFAULT_USER_USERNAME, display_name="Local User")
+        user = User(username=DEFAULT_USER_USERNAME, display_name="Local User", telegram_id=0)
         session.add(user)
         await session.flush()
     return user

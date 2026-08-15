@@ -12,7 +12,7 @@ from typing import Final
 
 # ── Paths ──────────────────────────────────────────────────────────────────
 
-PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parent
+PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parents[3]
 DATA_DIR: Final[Path] = PROJECT_ROOT / "data"
 LOGS_DIR: Final[Path] = PROJECT_ROOT / "logs"
 BACKUPS_DIR: Final[Path] = PROJECT_ROOT / "backups"
