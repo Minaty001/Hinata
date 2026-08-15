@@ -11,5 +11,5 @@ if [ -d "venv" ]; then
     source venv/bin/activate
 fi
 
-echo "Launching Hinata Hyuga Web Application & Deep Search Engine..."
-exec python3 app.py "$@"
+echo "Launching Hinata FastAPI Companion Backend..."
+exec python3 -m uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port 2027 "$@"
