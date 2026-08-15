@@ -159,8 +159,40 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(WEB_DIR), **kwargs)
 
+    def _normalize_path(self) -> None:
+        """Translate FastAPI /api/v1/* routes to legacy HTTP server routes for compatibility."""
+        path = self.path
+        if not path.startswith("/api/v1/"):
+            return
+
+        # Strip /api/v1 prefix
+        subpath = path[len("/api/v1/"):]
+        
+        if subpath == "chat" or subpath.startswith("chat?"):
+            self.path = "/api/chat" + subpath[4:]
+        elif subpath == "chat/chains" or subpath.startswith("chat/chains?"):
+            self.path = "/api/chains" + subpath[11:]
+        elif subpath.startswith("chat/chains/"):
+            parts = subpath.split("/")
+            if len(parts) >= 4 and parts[3].startswith("history"):
+                chain_id = parts[2]
+                self.path = f"/api/history?chain_id={chain_id}"
+            else:
+                chain_id = parts[2]
+                self.path = f"/api/chains?chain_id={chain_id}"
+        elif subpath.startswith("chat/search"):
+            self.path = "/api/search" + subpath[11:]
+        elif subpath.startswith("memory"):
+            self.path = "/api/memories" + subpath[6:]
+        elif subpath.startswith("settings/providers"):
+            if self.command == "POST":
+                self.path = "/api/provider" + subpath[18:]
+            else:
+                self.path = "/api/providers" + subpath[18:]
+
     def do_GET(self) -> None:
         """Route GET requests to API handlers or static files."""
+        self._normalize_path()
         if self.path.startswith("/api/chains") or self.path.startswith("/api/sessions"):
             self._handle_api_get_chains()
         elif self.path.startswith("/api/session/index"):
@@ -180,6 +212,7 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
 
     def do_POST(self) -> None:
         """Route POST requests to REST API handlers."""
+        self._normalize_path()
         if self.path == "/api/chat":
             self._handle_api_chat()
         elif self.path.startswith("/api/chains") or self.path.startswith("/api/sessions"):
@@ -193,6 +226,7 @@ class HinataWebRequestHandler(SimpleHTTPRequestHandler):
 
     def do_DELETE(self) -> None:
         """Route DELETE requests."""
+        self._normalize_path()
         if self.path.startswith("/api/chains") or self.path.startswith("/api/sessions"):
             self._handle_api_delete_chain()
         else:
