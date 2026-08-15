@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import pytest
 from httpx import AsyncClient
-from tests.backend.conftest import create_test_account
 
 from app.reflex.classifier import ReflexClassifier, ReflexMatch
 
@@ -72,19 +71,10 @@ def test_reflex_classification_no_match():
 @pytest.mark.asyncio
 async def test_reflex_execution_integration(client: AsyncClient):
     """Verify that a reflex query returns a fast deterministic response from the API."""
-    await create_test_account("reflex_user")
-    login = await client.post(
-        "/api/v1/auth/login",
-        json={"username": "reflex_user", "password": "password123"},
-    )
-    assert login.status_code == 200
-    token = login.json()["access_token"]
-
     # Send a reflex query to the chat endpoint
     res = await client.post(
         "/api/v1/chat/",
         json={"message": "flashlight off"},
-        headers={"Authorization": f"Bearer {token}"},
     )
     assert res.status_code == 200
     body = res.json()

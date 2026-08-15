@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # Backend imports
 from app.database.models import Task, Event, Goal, User
 from app.runtime.registry import AddTaskTool, AddEventTool, AddGoalTool
-from tests.backend.conftest import TestSessionMaker, create_test_account
+from tests.backend.conftest import TestSessionMaker
 
 
 @pytest_asyncio.fixture
@@ -26,27 +26,20 @@ async def db_session() -> AsyncSession:
         yield session
 
 
-async def _login(client: AsyncClient, username: str) -> tuple[str, int]:
-    await create_test_account(username)
-    login = await client.post("/api/v1/auth/login", json={"username": username, "password": "password123"})
-    assert login.status_code == 200
-    token = login.json()["access_token"]
-    
-    # Retrieve user ID
-    me = await client.get("/api/v1/users/me", headers={"Authorization": f"Bearer {token}"})
+async def _current_user_id(client: AsyncClient) -> int:
+    """Fetch the single local user's id from /api/v1/users/me (no auth)."""
+    me = await client.get("/api/v1/users/me")
     assert me.status_code == 200
-    return token, me.json()["id"]
+    return me.json()["id"]
 
 
 @pytest.mark.asyncio
 async def test_tasks_crud(client: AsyncClient):
-    token, user_id = await _login(client, "prod_user_1")
-    headers = {"Authorization": f"Bearer {token}"}
+    user_id = await _current_user_id(client)
 
     # 1. Create Task
     create_res = await client.post(
         "/api/v1/productivity/tasks",
-        headers=headers,
         json={
             "title": "Buy milk",
             "description": "2% fat milk from supermarket",
@@ -57,7 +50,7 @@ async def test_tasks_crud(client: AsyncClient):
     task_id = create_res.json()["id"]
 
     # 2. List Tasks
-    list_res = await client.get("/api/v1/productivity/tasks", headers=headers)
+    list_res = await client.get("/api/v1/productivity/tasks")
     assert list_res.status_code == 200
     tasks = list_res.json()
     assert len(tasks) == 1
@@ -66,30 +59,27 @@ async def test_tasks_crud(client: AsyncClient):
     # 3. Update Task
     update_res = await client.put(
         f"/api/v1/productivity/tasks/{task_id}",
-        headers=headers,
         json={"status": "completed"}
     )
     assert update_res.status_code == 200
     assert update_res.json()["status"] == "completed"
 
     # 4. Delete Task
-    del_res = await client.delete(f"/api/v1/productivity/tasks/{task_id}", headers=headers)
+    del_res = await client.delete(f"/api/v1/productivity/tasks/{task_id}")
     assert del_res.status_code == 204
 
     # 5. List empty
-    list_empty = await client.get("/api/v1/productivity/tasks", headers=headers)
+    list_empty = await client.get("/api/v1/productivity/tasks")
     assert len(list_empty.json()) == 0
 
 
 @pytest.mark.asyncio
 async def test_events_crud(client: AsyncClient):
-    token, user_id = await _login(client, "prod_user_2")
-    headers = {"Authorization": f"Bearer {token}"}
+    user_id = await _current_user_id(client)
 
     # 1. Create Event
     create_res = await client.post(
         "/api/v1/productivity/events",
-        headers=headers,
         json={
             "title": "Doctor Appointment",
             "start_time": "2026-08-20T10:00:00",
@@ -100,24 +90,22 @@ async def test_events_crud(client: AsyncClient):
     event_id = create_res.json()["id"]
 
     # 2. List Events
-    list_res = await client.get("/api/v1/productivity/events", headers=headers)
+    list_res = await client.get("/api/v1/productivity/events")
     assert len(list_res.json()) == 1
     assert list_res.json()[0]["location"] == "City Clinic"
 
     # 3. Delete Event
-    del_res = await client.delete(f"/api/v1/productivity/events/{event_id}", headers=headers)
+    del_res = await client.delete(f"/api/v1/productivity/events/{event_id}")
     assert del_res.status_code == 204
 
 
 @pytest.mark.asyncio
 async def test_goals_crud(client: AsyncClient):
-    token, user_id = await _login(client, "prod_user_3")
-    headers = {"Authorization": f"Bearer {token}"}
+    user_id = await _current_user_id(client)
 
     # 1. Create Goal
     create_res = await client.post(
         "/api/v1/productivity/goals",
-        headers=headers,
         json={
             "title": "Run 50km",
             "target_value": 50.0,
@@ -128,28 +116,27 @@ async def test_goals_crud(client: AsyncClient):
     goal_id = create_res.json()["id"]
 
     # 2. List Goals
-    list_res = await client.get("/api/v1/productivity/goals", headers=headers)
+    list_res = await client.get("/api/v1/productivity/goals")
     assert len(list_res.json()) == 1
     assert list_res.json()[0]["target_value"] == 50.0
 
     # 3. Update Goal progress
     update_res = await client.put(
         f"/api/v1/productivity/goals/{goal_id}",
-        headers=headers,
         json={"current_value": 15.5}
     )
     assert update_res.status_code == 200
     assert update_res.json()["current_value"] == 15.5
 
     # 4. Delete Goal
-    del_res = await client.delete(f"/api/v1/productivity/goals/{goal_id}", headers=headers)
+    del_res = await client.delete(f"/api/v1/productivity/goals/{goal_id}")
     assert del_res.status_code == 204
 
 
 @pytest.mark.asyncio
 async def test_productivity_runtime_tools(client: AsyncClient, db_session: AsyncSession):
     # Setup mock companion user profile
-    token, user_id = await _login(client, "prod_user_tools")
+    user_id = await _current_user_id(client)
     
     # 1. Run AddTaskTool execution
     from unittest.mock import patch

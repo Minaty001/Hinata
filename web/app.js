@@ -3,82 +3,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // --- 🌸 HINATA AUTHENTICATION & NATIVE CONTROL STATE 🌸 ---
-  let jwtToken = localStorage.getItem('hinata_token') || '';
-
-  // Auth DOM elements
-  const authModal = document.getElementById('authModal');
-  const btnSubmitAuth = document.getElementById('btnSubmitAuth');
-  const authUsernameInput = document.getElementById('authUsername');
-  const authPasswordInput = document.getElementById('authPassword');
-  const btnLogout = document.getElementById('btnLogout');
-
-  // Handle Authentication submit
-  if (btnSubmitAuth) {
-    btnSubmitAuth.addEventListener('click', async () => {
-      const username = authUsernameInput.value.trim();
-      const password = authPasswordInput.value.trim();
-
-      if (!username || !password) {
-        showToast('Please fill in both username and password.', 'error');
-        return;
-      }
-
-      try {
-        const res = await fetch('/api/v1/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
-        });
-
-        const data = await res.json();
-        if (!res.ok) {
-          showToast(data.detail || 'Authentication failed. Please check credentials.', 'error');
-          return;
-        }
-
-        jwtToken = data.access_token;
-        localStorage.setItem('hinata_token', jwtToken);
-        authModal.classList.remove('active');
-        authModal.style.display = 'none';
-        showToast('Welcome back, companion! 🌸', 'success');
-        initAfterAuth();
-      } catch (err) {
-        console.error(err);
-        showToast('Failed to connect to backend server.', 'error');
-      }
-    });
-  }
-
-  // Logout Trigger
-  if (btnLogout) {
-    btnLogout.addEventListener('click', () => {
-      localStorage.removeItem('hinata_token');
-      localStorage.removeItem('hinata_active_chain_id');
-      window.location.reload();
-    });
-  }
-
-  // Authenticated Fetch wrapper
-  async function authFetch(url, options = {}) {
-    options.headers = options.headers || {};
-    if (jwtToken) {
-      options.headers['Authorization'] = `Bearer ${jwtToken}`;
-    }
-    const res = await fetch(url, options);
-    if (res.status === 401) {
-      jwtToken = '';
-      localStorage.removeItem('hinata_token');
-      if (authModal) {
-        authModal.classList.add('active');
-        authModal.style.display = 'flex';
-      }
-      throw new Error('Unauthorized session expired');
-    }
-    return res;
-  }
-
-  // Load backend configurations after successful login session
+  // Load backend configurations directly on startup
   function initAfterAuth() {
     loadChains();
     loadMemoriesFromBackend();
@@ -548,7 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadChains() {
     try {
-      const res = await authFetch('/api/v1/chat/chains');
+      const res = await fetch('/api/v1/chat/chains');
       const chains = await res.json();
       if (Array.isArray(chains)) {
         renderChains(chains);
@@ -612,7 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function createChain() {
     try {
-      const res = await authFetch('/api/v1/chat/chains', {
+      const res = await fetch('/api/v1/chat/chains', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: 'New Conversation' })
@@ -630,7 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function deleteChain(chainId) {
     try {
-      const res = await authFetch(`/api/v1/chat/chains/${encodeURIComponent(chainId)}`, { method: 'DELETE' });
+      const res = await fetch(`/api/v1/chat/chains/${encodeURIComponent(chainId)}`, { method: 'DELETE' });
       if (res.ok) {
         if (state.activeChainId === chainId) {
           state.activeChainId = null;
@@ -657,7 +582,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     try {
-      const res = await authFetch(`/api/v1/chat/chains/${encodeURIComponent(chainId)}/history`);
+      const res = await fetch(`/api/v1/chat/chains/${encodeURIComponent(chainId)}/history`);
       const data = await res.json();
       chatMessages.innerHTML = '';
 
@@ -700,7 +625,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
     try {
-      const res = await authFetch('/api/v1/chat', {
+      const res = await fetch('/api/v1/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -805,19 +730,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Verify token session and load config
-  if (jwtToken) {
-    if (authModal) {
-      authModal.classList.remove('active');
-      authModal.style.display = 'none';
-    }
-    initAfterAuth();
-  } else {
-    if (authModal) {
-      authModal.classList.add('active');
-      authModal.style.display = 'flex';
-    }
-  }
+  // Load backend configurations and chat data on startup (no auth required)
+  initAfterAuth();
 
   // 3. DEEP SEARCH ENGINE
   const deepSearchInput = document.getElementById('deepSearchInput');
@@ -833,7 +747,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     try {
-      const res = await authFetch(`/api/v1/chat/search?q=${encodeURIComponent(query)}`);
+      const res = await fetch(`/api/v1/chat/search?q=${encodeURIComponent(query)}`);
       const data = await res.json();
       let items = (data.results || []).map(r => ({
         category: r.category,
@@ -916,7 +830,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 4. Memory Manager Render & Modal Handler
   async function loadMemoriesFromBackend() {
     try {
-      const res = await authFetch('/api/v1/memory/');
+      const res = await fetch('/api/v1/memory/');
       const data = await res.json();
       if (data && Array.isArray(data.memories)) {
         state.memories = data.memories;
@@ -990,7 +904,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const importance = importanceSelect ? parseInt(importanceSelect.value) : 3;
 
       try {
-        const res = await authFetch('/api/v1/memory/', {
+        const res = await fetch('/api/v1/memory/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ type, content, importance })
@@ -1043,7 +957,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!container) return;
 
     try {
-      const res = await authFetch('/api/v1/settings/providers');
+      const res = await fetch('/api/v1/settings/providers');
       const data = await res.json();
       if (data && data.providers) {
         state.activeProvider = data.active_provider;
@@ -1178,7 +1092,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function updateProviderConfig(provKey, extra = {}) {
     try {
       const payload = { provider: provKey, ...extra };
-      const res = await authFetch('/api/v1/settings/providers', {
+      const res = await fetch('/api/v1/settings/providers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

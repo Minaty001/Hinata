@@ -10,21 +10,10 @@ import base64
 from unittest.mock import AsyncMock, patch, MagicMock
 import pytest
 from httpx import AsyncClient
-from tests.backend.conftest import create_test_account
-
-
-async def _login(client: AsyncClient, username: str) -> str:
-    await create_test_account(username)
-    response = await client.post("/api/v1/auth/login", json={"username": username, "password": "password123"})
-    assert response.status_code == 200
-    return response.json()["access_token"]
 
 
 @pytest.mark.asyncio
 async def test_transcribe_audio(client: AsyncClient):
-    token = await _login(client, "voice_user_1")
-    headers = {"Authorization": f"Bearer {token}"}
-    
     # Setup mock audio bytes
     audio_bytes = b"RIFFmockaudiobytesdata"
     
@@ -33,7 +22,6 @@ async def test_transcribe_audio(client: AsyncClient):
         
         response = await client.post(
             "/api/v1/voice/transcribe",
-            headers=headers,
             files={"file": ("test.wav", audio_bytes, "audio/wav")}
         )
         
@@ -45,9 +33,6 @@ async def test_transcribe_audio(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_synthesize_text(client: AsyncClient):
-    token = await _login(client, "voice_user_2")
-    headers = {"Authorization": f"Bearer {token}"}
-    
     text_to_speak = "I will keep you company forever"
     
     with patch("app.api.voice.synthesizer.synthesize", new_callable=AsyncMock) as mock_synthesize:
@@ -57,7 +42,6 @@ async def test_synthesize_text(client: AsyncClient):
         
         response = await client.post(
             "/api/v1/voice/synthesize",
-            headers=headers,
             json={"text": text_to_speak}
         )
         
@@ -69,9 +53,6 @@ async def test_synthesize_text(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_voice_chat_integration(client: AsyncClient):
-    token = await _login(client, "voice_user_3")
-    headers = {"Authorization": f"Bearer {token}"}
-    
     audio_bytes = b"RIFFmockaudiobytesdata"
     
     with patch("app.api.voice.transcriber.transcribe", new_callable=AsyncMock) as mock_transcribe, \
@@ -92,7 +73,6 @@ async def test_voice_chat_integration(client: AsyncClient):
         
         response = await client.post(
             "/api/v1/voice/chat",
-            headers=headers,
             files={"file": ("test.wav", audio_bytes, "audio/wav")}
         )
         

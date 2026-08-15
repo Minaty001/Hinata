@@ -22,13 +22,10 @@ backend_path = Path(__file__).resolve().parents[2] / "backend"
 sys.path.insert(0, str(backend_path))
 
 os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
-os.environ.setdefault("JWT_SECRET", "test_secret_key_32_chars_minimum_here")
 
 from app.main import app
 from app.database.engine import get_session, Base
-from app.database.models import Account, User
-from app.core.security import hash_password
-
+from app.database.models import User
 
 # ── Test database setup ────────────────────────────────────────────────────
 
@@ -36,26 +33,6 @@ TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
 test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
 TestSessionMaker = async_sessionmaker(test_engine, expire_on_commit=False)
-
-
-async def create_test_account(username: str, password: str = "password123") -> User:
-    """Seed a private account for authenticated endpoint tests."""
-    async with TestSessionMaker() as session:
-        user = User(username=username, display_name=username)
-        session.add(user)
-        await session.flush()
-        session.add(
-            Account(
-                user_id=user.id,
-                username=username,
-                password_hash=hash_password(password),
-            )
-        )
-        await session.commit()
-        await session.refresh(user)
-        return user
-
-
 async def override_get_session():
     async with TestSessionMaker() as session:
         yield session
@@ -86,6 +63,22 @@ async def override_db():
     app.dependency_overrides[get_session] = override_get_session
     yield
     app.dependency_overrides.clear()
+
+
+@pytest_asyncio.fixture(autouse=True)
+async def clean_db():
+    """Clear user-related tables before each test to ensure isolation."""
+    from sqlalchemy import delete
+    from app.database.models import User, Memory, Conversation, Task, Event, Goal
+    async with TestSessionMaker() as session:
+        await session.execute(delete(Memory))
+        await session.execute(delete(Conversation))
+        await session.execute(delete(Task))
+        await session.execute(delete(Event))
+        await session.execute(delete(Goal))
+        await session.execute(delete(User))
+        await session.commit()
+
 
 
 @pytest_asyncio.fixture

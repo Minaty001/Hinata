@@ -8,21 +8,20 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Optional
+from typing import Any
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, status
-from sqlalchemy import select
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.security import decode_token
-from app.database.engine import AsyncSessionMaker
-from app.database.models import User, UserSession
+from app.core.security import get_default_user
+from app.database.engine import get_session
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
 class WebSocketConnectionManager:
-    """Manages active WebSocket connections keyed by authenticated user ID."""
+    """Manages active WebSocket connections keyed by the default user ID."""
 
     def __init__(self) -> None:
         # Map user_id -> set of active WebSocket instances
@@ -68,45 +67,12 @@ manager = WebSocketConnectionManager()
 
 
 @router.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket, token: Optional[str] = None):
-    """Duplex WebSocket endpoint with JWT session verification."""
-    # Read token from query parameters if not passed in header (common for browser WebSockets)
-    if not token:
-        token = websocket.query_params.get("token")
+async def websocket_endpoint(websocket: WebSocket, db_session: AsyncSession = Depends(get_session)):
+    """Duplex WebSocket endpoint — always connects as the local default user."""
+    user = await get_default_user(db_session)
+    await db_session.commit()
+    user_id = user.id
 
-    if not token:
-        logger.warning("WebSocket connection rejected: Missing authorization token")
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
-        return
-
-    # Authenticate token and load user session
-    try:
-        payload = decode_token(token)
-        user_id = int(payload.get("sub", 0))
-        jti = payload.get("jti")
-        
-        if not user_id or not jti or payload.get("type") != "access":
-            logger.warning("WebSocket connection rejected: Invalid token claims")
-            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
-            return
-
-        # Check session state in DB
-        async with AsyncSessionMaker() as db_session:
-            stmt = select(UserSession).where(UserSession.jti == jti)
-            result = await db_session.execute(stmt)
-            user_session = result.scalars().first()
-            
-            if not user_session or user_session.is_revoked:
-                logger.warning("WebSocket connection rejected: Session is revoked or missing")
-                await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
-                return
-
-    except Exception as exc:
-        logger.warning("WebSocket authentication failed: %s", exc)
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
-        return
-
-    # Successfully authenticated
     await manager.connect(user_id, websocket)
     try:
         while True:
@@ -115,7 +81,7 @@ async def websocket_endpoint(websocket: WebSocket, token: Optional[str] = None):
             try:
                 data = json.loads(data_str)
                 logger.debug("Received WebSocket data from user_id=%d: %s", user_id, data)
-                
+
                 # Echo check or keepalive ping-pong
                 if data.get("type") == "ping":
                     await websocket.send_text(json.dumps({"type": "pong"}))
